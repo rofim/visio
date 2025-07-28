@@ -1,0 +1,28 @@
+version: 0.2
+
+# env:
+#   variables:
+#     BUILD_ENV: "staging|preprod|production"
+#     S3_BUCKET: ""
+#     CLOUDFRONT_DISTRIB: ""
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 20
+    commands:
+      # Install node dependancies.
+      - npm ci
+  build:
+    commands:
+      - echo Build started on `date`
+      - npm run build:${BUILD_ENV}
+      - echo Build completed on `date`
+  post_build:
+    commands:
+      - echo Deployment started on `date`
+      # Copy dist folder to S3 bucket, As of Angular 6, builds are stored inside an app folder in distribution and not at the root of the dist folder
+      - aws s3 sync build/ s3://${S3_BUCKET}/ --delete
+      # Invalidate files on CloudFront
+      - aws cloudfront create-invalidation --distribution-id ${CLOUDFRONT_DISTRIB} --paths '/*'
+      - echo Deployment completed on `date`
