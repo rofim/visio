@@ -11,6 +11,8 @@ const parseSession = (rawJwt: string | null) => {
     room: string;
     token: string;
     sessionId: string;
+    slug: string;
+    type: string;
   }>(rawJwt);
 };
 
@@ -18,6 +20,7 @@ export const initRofimSession = () => {
   const queryParams = new URLSearchParams(window.location.search);
   const token = queryParams.get('t');
   const patientId = queryParams.get('patientId');
+  const slug = queryParams.get('slug');
   const language = queryParams.get('lng');
 
   if (!token && !getStorageItem('token')) {
@@ -35,10 +38,17 @@ export const initRofimSession = () => {
     if (rofimSession?.username) {
       setStorageItem(STORAGE_KEYS.USERNAME, rofimSession.username);
     }
+    if (rofimSession?.type) {
+      setStorageItem('type', rofimSession.type);
+    }
   }
 
   if (patientId) {
     setStorageItem('patientId', patientId);
+  }
+
+  if (slug) {
+    setStorageItem('slug', slug);
   }
 
   if (language) {
@@ -48,10 +58,14 @@ export const initRofimSession = () => {
 
 export const getRofimSession = () => {
   const token = getStorageItem('token');
-  const rofimSession = parseSession(token);
-
-  return {
-    ...rofimSession,
-    patientId: getStorageItem('patientId'),
-  };
+  const slug = getStorageItem('slug');
+  const patientId = getStorageItem('patientId');
+  const parsedSession = parseSession(token);
+  return parsedSession
+    ? {
+        ...parsedSession,
+        slug: slug || null,
+        patientId: patientId || null,
+      }
+    : null;
 };

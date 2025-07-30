@@ -26,8 +26,9 @@
     "src/helpers",
     "./.eslintrc.cjs",
     "**/*.spec.ts",
-    "**/*.spec.tsx"
-, "tailwind.rofim.config.js"  ],
+    "**/*.spec.tsx", 
+    "tailwind.rofim.config.js"
+  ],
   "exclude": ["./node_modules", "./vite.config.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

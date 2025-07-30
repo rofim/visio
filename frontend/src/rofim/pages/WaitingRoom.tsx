@@ -11,6 +11,7 @@ import useIsSmallViewport from '../../hooks/useIsSmallViewport';
 import { getRofimSession } from '../utils/session';
 import Button from '../components/Button';
 import RofimApiService, { WaitingRoomStatus } from '../api/rofimApi';
+import useSessionContext from '../../hooks/useSessionContext';
 
 /**
  * WaitingRoom Component
@@ -38,12 +39,21 @@ const WaitingRoom = (): ReactElement => {
   const username = getStorageItem(STORAGE_KEYS.USERNAME) ?? '';
   const isSmallViewport = useIsSmallViewport();
 
-  const room = getRofimSession()?.room;
-  const patientId = getRofimSession()?.patientId;
+  const { subscriberWrappers, joinRoom } = useSessionContext();
+  const rofimSession = getRofimSession();
+  const room = rofimSession?.room;
+  const patientId = rofimSession?.patientId;
+  const hasParticipants = subscriberWrappers.length > 0;
 
   useEffect(() => {
+    // Je dois joinRoom pour pouvoir avoir le useSessionContext partagé entre mes composants
+    if (joinRoom && room) {
+      joinRoom(room);
+    }
+
     if (patientId) {
       RofimApiService.updateTeleconsultationStatus(WaitingRoomStatus.CheckingEquipment);
+      console.log('updateTeleconsultationStatus');
     }
   }, [patientId]);
 
@@ -95,6 +105,19 @@ const WaitingRoom = (): ReactElement => {
     setOpenVideoInput(false);
   };
 
+  const handleJoinRoom = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    if (patientId !== 'null' && patientId !== null && !hasParticipants) {
+      navigate('/waiting-doctor');
+    } else {
+      navigate(`/room/${room}`, {
+        state: {
+          hasAccess: true,
+        },
+      });
+    }
+  };
+
   return (
     <div className="flex size-full flex-col bg-white" data-testid="waitingRoom">
       <div className="flex w-full">
@@ -116,17 +139,7 @@ const WaitingRoom = (): ReactElement => {
                     openAudioOutput={openAudioOutput}
                     anchorEl={anchorEl}
                   />
-                  <Button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      navigate(`/room/${room}`, {
-                        state: {
-                          hasAccess: true,
-                        },
-                      });
-                    }}
-                    disabled={!username}
-                  >
+                  <Button onClick={handleJoinRoom} disabled={!username}>
                     {t('button.join')}
                   </Button>
                 </>
