@@ -175,7 +175,7 @@ const Toolbar = ({
               captionsState={captionsState}
             />
           )}
-          <ExitButton handleLeave={handleLeave} closeTabOnExit={true} />
+          <ExitButton handleLeave={handleLeave} />
         </div>
       </div>
 
