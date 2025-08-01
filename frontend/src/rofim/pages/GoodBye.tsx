@@ -27,7 +27,7 @@ const GoodBye = (): ReactElement => {
     closeWindow();
   }, []);
 
-  return <></>;
+  return <div>GoodBye</div>;
 };
 
 export default GoodBye;
