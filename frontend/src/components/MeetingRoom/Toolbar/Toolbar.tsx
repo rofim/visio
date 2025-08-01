@@ -158,7 +158,7 @@ const Toolbar = ({
       className="absolute bottom-0 left-0 flex h-[80px] w-full flex-row items-center justify-between bg-darkGray-100 p-4"
     >
       <div ref={timeRoomNameRef} className={displayTimeRoomNameClass}>
-        {displayTimeRoomName && <TimeRoomNameMeetingRoom />}
+        {displayTimeRoomName && <TimeRoomNameMeetingRoom showRoomName={false} />}
       </div>
       <div className="flex flex-1 justify-center">
         <div ref={mediaControlsRef} className="flex flex-row">
@@ -175,7 +175,7 @@ const Toolbar = ({
               captionsState={captionsState}
             />
           )}
-          <ExitButton handleLeave={handleLeave} />
+          <ExitButton handleLeave={handleLeave} closeTabOnExit={true} />
         </div>
       </div>
 

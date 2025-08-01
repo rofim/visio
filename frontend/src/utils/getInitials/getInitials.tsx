@@ -8,8 +8,11 @@ const getInitialFromName = (name: string): string => {
  * @returns {string} The initials for the given username.
  */
 export default (username: string): string => {
+  // Nettoyer le nom en supprimant les préfixes Dr. et Pr.
+  const cleanUsername = username.replace(/^(Dr\.|Pr\.)\s*/i, '').trim();
+
   // Matches any names, including hyphenated names.
-  const names = username.match(/(\w+(-\w+)?)/gm);
+  const names = cleanUsername.match(/(\w+(-\w+)?)/gm);
   let lastInitial = '';
 
   if (!names) {
