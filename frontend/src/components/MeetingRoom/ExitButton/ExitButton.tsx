@@ -27,14 +27,11 @@ const ExitButton = ({ handleLeave, closeTabOnExit = false }: ExitButtonProps): R
     handleLeave();
 
     if (closeTabOnExit) {
-      // Fermer l'onglet directement
       window.close();
-      // Fallback si window.close() ne fonctionne pas
       if (!window.closed) {
         window.location.href = 'about:blank';
       }
     } else {
-      // Comportement par défaut : naviguer vers /goodbye
       navigate('/goodbye', { state: { roomName } });
     }
   };
