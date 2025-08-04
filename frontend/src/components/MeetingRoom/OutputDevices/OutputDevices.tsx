@@ -65,7 +65,9 @@ const OutputDevices = ({
         }}
       >
         <VolumeUpIcon sx={{ fontSize: 24, mr: 2 }} />
-        <Typography data-testid="output-device-title">Speakers</Typography>
+        <Typography data-testid="output-device-title">
+          {t('devices.audio.speakers.full')}
+        </Typography>
       </Box>
       <MenuList data-testid="output-devices">
         {availableDevices?.map((device: AudioOutputDevice) => {

@@ -129,7 +129,7 @@ const FeedbackForm = ({
           color="textPrimary"
           sx={getStyleTypography()}
         >
-          Tell us your name
+          {t('feedbackForm.field.name.label')}
         </Typography>
         <TextField
           fullWidth
