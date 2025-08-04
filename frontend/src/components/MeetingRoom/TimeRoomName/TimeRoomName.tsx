@@ -1,6 +1,5 @@
 import { ReactElement } from 'react';
 import useDateTime from '../../../hooks/useDateTime';
-import useRoomName from '../../../hooks/useRoomName';
 
 /**
  *  TimeRoomName Component
@@ -10,13 +9,8 @@ import useRoomName from '../../../hooks/useRoomName';
  */
 const TimeRoomName = (): ReactElement => {
   const { time } = useDateTime();
-  const roomName = useRoomName();
 
-  return (
-    <div className="ml-3 mt-1 truncate font-normal text-white">
-      {time} | {roomName}
-    </div>
-  );
+  return <div className="ml-3 mt-1 truncate font-normal text-white">{time}</div>;
 };
 
 export default TimeRoomName;
