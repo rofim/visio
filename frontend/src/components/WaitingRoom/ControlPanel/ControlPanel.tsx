@@ -66,6 +66,7 @@ const ControlPanel = ({
     textTransform: 'none', // ensures that the text is not upper case
     border: 'none',
     boxShadow: 'none',
+    whiteSpace: 'nowrap',
     '&:hover': {
       border: 'none',
       boxShadow: 'none',
