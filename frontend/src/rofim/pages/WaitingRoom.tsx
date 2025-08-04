@@ -1,6 +1,7 @@
 import { useState, useEffect, MouseEvent, ReactElement, TouchEvent } from 'react';
 import { Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import usePreviewPublisherContext from '../../hooks/usePreviewPublisherContext';
 import ControlPanel from '../../components/WaitingRoom/ControlPanel';
 import VideoContainer from '../../components/WaitingRoom/VideoContainer';
@@ -25,6 +26,7 @@ import { getRofimSession } from '../utils/session';
  * @returns {ReactElement} - The waiting room.
  */
 const WaitingRoom = (): ReactElement => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { initLocalPublisher, publisher, accessStatus, destroyPublisher } =
     usePreviewPublisherContext();
@@ -118,7 +120,6 @@ const WaitingRoom = (): ReactElement => {
                     variant="contained"
                     color="primary"
                     sx={{
-                      width: '117px',
                       borderRadius: '24px',
                       color: 'white',
                       textTransform: 'none',
@@ -128,7 +129,7 @@ const WaitingRoom = (): ReactElement => {
                     disabled={!username}
                     type="submit"
                   >
-                    Join
+                    {t('button.join')}
                   </Button>
                 </>
               )}

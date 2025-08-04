@@ -72,6 +72,7 @@ export type PublisherContextType = {
  */
 const usePublisher = (): PublisherContextType => {
   const { t } = useTranslation();
+
   const [publisherVideoElement, setPublisherVideoElement] = useState<
     HTMLVideoElement | HTMLObjectElement
   >();
