@@ -31,6 +31,7 @@ export default defineConfig(({ mode }) => {
 
   return mergeConfig(vitestConfig, {
     server: {
+      port: 3001,
       host: true,
       allowedHosts: ['*', env.VITE_TUNNEL_DOMAIN],
     },
