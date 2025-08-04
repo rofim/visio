@@ -2,6 +2,7 @@ import { Box, Tooltip } from '@mui/material';
 import BlurOff from '@mui/icons-material/BlurOff';
 import { hasMediaProcessorSupport } from '@vonage/client-sdk-video';
 import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
 import usePreviewPublisherContext from '../../../hooks/usePreviewPublisherContext';
 import BlurIcon from '../../Icons/Blur';
 import VideoContainerButton from '../VideoContainerButton';
@@ -13,8 +14,9 @@ import VideoContainerButton from '../VideoContainerButton';
  * @returns {ReactElement | false} - The BlurButton component.
  */
 const BlurButton = (): ReactElement | false => {
+  const { t } = useTranslation();
   const { toggleBlur, hasBlur } = usePreviewPublisherContext();
-  const title = `Turn background blur ${hasBlur ? 'off' : 'on'}`;
+  const title = t('devices.video.blur.state', { state: hasBlur ? 'off' : 'on' });
 
   return (
     hasMediaProcessorSupport() && (
@@ -32,7 +34,7 @@ const BlurButton = (): ReactElement | false => {
           transition: 'transform 0.2s ease-in-out',
         }}
       >
-        <Tooltip title={title} aria-label="toggle background blur">
+        <Tooltip title={title} aria-label={t('devices.video.blur.ariaLabel')}>
           <VideoContainerButton
             onClick={toggleBlur}
             sx={{

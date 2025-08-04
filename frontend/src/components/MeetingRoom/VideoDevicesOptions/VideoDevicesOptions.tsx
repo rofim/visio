@@ -4,6 +4,7 @@ import { useState, useEffect, ReactElement } from 'react';
 import Grow from '@mui/material/Grow';
 import ToggleOffIcon from '@mui/icons-material/ToggleOff';
 import ToggleOnIcon from '@mui/icons-material/ToggleOn';
+import { useTranslation } from 'react-i18next';
 import usePublisherContext from '../../../hooks/usePublisherContext';
 import { setStorageItem, STORAGE_KEYS } from '../../../utils/storage';
 
@@ -20,6 +21,7 @@ export type VideoDevicesOptionsProps = {
  * @returns {ReactElement} The video devices options component.
  */
 const VideoDevicesOptions = ({ customLightBlueColor }: VideoDevicesOptionsProps): ReactElement => {
+  const { t } = useTranslation();
   const { publisher } = usePublisherContext();
   const [isToggled, setIsToggled] = useState(false);
 
@@ -61,9 +63,9 @@ const VideoDevicesOptions = ({ customLightBlueColor }: VideoDevicesOptionsProps)
       >
         <BlurOnIcon sx={{ fontSize: 24, mr: 2 }} />
         <Typography data-testid="blur-text" sx={{ mr: 2 }}>
-          Blur your background
+          {t('devices.video.blur.label')}
         </Typography>
-        <IconButton disableRipple aria-label="Toggle background blur">
+        <IconButton disableRipple aria-label={t('devices.video.blur.ariaLabel')}>
           <Grow in={!isToggled} timeout={300}>
             <ToggleOffIcon
               data-testid="toggle-off-icon"

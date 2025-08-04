@@ -7,13 +7,15 @@ import OT, {
   ExceptionEvent,
   PublisherProperties,
 } from '@vonage/client-sdk-video';
+import { useTranslation } from 'react-i18next';
 import usePublisherQuality, { NetworkQuality } from '../usePublisherQuality/usePublisherQuality';
 import usePublisherOptions from '../usePublisherOptions';
 import useSessionContext from '../../../hooks/useSessionContext';
-import { PUBLISHING_BLOCKED_CAPTION } from '../../../utils/constants';
-import getAccessDeniedError, {
-  PublishingErrorType,
-} from '../../../utils/getAccessDeniedError/getAccessDeniedError';
+
+type PublishingErrorType = {
+  header: string;
+  caption: string;
+} | null;
 
 type PublisherStreamCreatedEvent = Event<'streamCreated', Publisher> & {
   stream: Stream;
@@ -69,6 +71,7 @@ export type PublisherContextType = {
  * @returns {PublisherContextType} the publisher context
  */
 const usePublisher = (): PublisherContextType => {
+  const { t } = useTranslation();
   const [publisherVideoElement, setPublisherVideoElement] = useState<
     HTMLVideoElement | HTMLObjectElement
   >();
@@ -93,10 +96,13 @@ const usePublisher = (): PublisherContextType => {
   useEffect(() => {
     if (deviceAccess?.microphone === false || deviceAccess?.camera === false) {
       const device = deviceAccess.camera ? 'Microphone' : 'Camera';
-      const accessDeniedError = getAccessDeniedError(device);
+      const accessDeniedError = {
+        header: t('publishingErrors.accessDenied.title', { device }),
+        caption: t('publishingErrors.accessDenied.message', { device: device.toLowerCase() }),
+      };
       setPublishingError(accessDeniedError);
     }
-  }, [deviceAccess]);
+  }, [deviceAccess, t]);
 
   useEffect(() => {
     if (!publisherOptions) {
@@ -212,8 +218,8 @@ const usePublisher = (): PublisherContextType => {
 
     if (publishAttempt === 3) {
       const publishingBlocked: PublishingErrorType = {
-        header: 'Difficulties joining room',
-        caption: PUBLISHING_BLOCKED_CAPTION,
+        header: t('publishingErrors.blocked.title'),
+        caption: t('publishingErrors.blocked.message'),
       };
       setPublishingError(publishingBlocked);
       setIsPublishingToSession(false);

@@ -6,4 +6,5 @@ Videocam
 issuetype
 Autolinker
 NOSONAR
+supportedLngs
 Rofim
