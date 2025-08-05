@@ -1,6 +1,10 @@
 import ReactDOM from 'react-dom/client';
+import '@fontsource/inter';
+
 import App from './App.js';
 import './i18n.js';
+import './css/global.css';
+
 /**
  * The root HTML element where the React application is rendered.
  * This element must exist in the DOM for the application to mount correctly.

@@ -77,7 +77,7 @@
   },
   "settings": {
     "tailwindcss": {
-      "config": "./frontend/tailwind.config.js"
+      "config": "./frontend/tailwind.rofim.config.js"
     }
   }
 }
