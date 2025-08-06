@@ -1,9 +1,6 @@
 name: Start AWS pipeline
 
 on:
-  push:
-    branches:
-      - develop
   workflow_dispatch:
     inputs:
       environment:
