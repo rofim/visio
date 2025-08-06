@@ -17,8 +17,8 @@ on:
 
 jobs:
   deploy:
-    name: Start AWS pipeline
-    runs-on: [rofim-tiny]
+    name: Start AWS pipeline for visio on ${{ inputs.environment || 'staging' }}}
+    runs-on: codebuild-runner-tiny-${{ github.run_id }}-${{ github.run_attempt }}
     # Deployment environment information in GitHub also used by JIRA to update the ticket status
     environment: ${{ github.ref_name == 'develop' && 'staging' || inputs.environment }}
     # Runtime environment variable used in deployment
@@ -69,7 +69,7 @@ jobs:
         id: start-pipeline
         run: |
           commit_id=$(git rev-parse "${{ steps.branch_tag_name.outputs.branch_or_tag }}")
-          pipelineExecutionId=$(aws codepipeline start-pipeline-execution --name rofim-$ENVIRONMENT-$APP --source-revisions actionName=Source,revisionType=COMMIT_ID,revisionValue=$commit_id |jq .pipelineExecutionId)
+          pipelineExecutionId=$(aws codepipeline start-pipeline-execution --name rofim-$ENVIRONMENT-$APP --source-revisions actionName=Source,revisionType=COMMIT_ID,revisionValue=$commit_id |jq -r .pipelineExecutionId)
           echo "pipelineExecutionId=$pipelineExecutionId" >> $GITHUB_OUTPUT
 
       - name: Check AWS pipeline
