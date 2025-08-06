@@ -74,7 +74,7 @@ jobs:
 
       - name: Check AWS pipeline
         run: |
-          echo ${{ steps.deploy.outputs.pipelineExecutionId }}
+          echo ${{ steps.start-pipeline.outputs.pipelineExecutionId }}
           i=0
           max=80
           while true; do
@@ -84,7 +84,7 @@ jobs:
               echo "Waiting for too long, ... Exiting"
               exit 1
             fi
-            status=$(aws codepipeline get-pipeline-execution --pipeline-name rofim-${{ inputs.environment }}-${{ inputs.app }} --pipeline-execution-id ${{ steps.deploy.outputs.pipelineExecutionId }} | jq .pipelineExecution.status -r)
+            status=$(aws codepipeline get-pipeline-execution --pipeline-name rofim-$ENVIRONMENT-$APP --pipeline-execution-id ${{ steps.start-pipeline.outputs.pipelineExecutionId }} |jq .pipelineExecution.status -r)
             echo "[$i/$max] Current status is $status"
             if [[ "$status" == "Succeeded" ]]; then
               break
