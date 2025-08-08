@@ -48,5 +48,10 @@ export const initRofimSession = () => {
 
 export const getRofimSession = () => {
   const token = getStorageItem('token');
-  return parseSession(token);
+  const rofimSession = parseSession(token);
+
+  return {
+    ...rofimSession,
+    patientId: getStorageItem('patientId'),
+  };
 };

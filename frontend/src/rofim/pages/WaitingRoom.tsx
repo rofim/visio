@@ -10,6 +10,7 @@ import { getStorageItem, STORAGE_KEYS } from '../../utils/storage';
 import useIsSmallViewport from '../../hooks/useIsSmallViewport';
 import { getRofimSession } from '../utils/session';
 import Button from '../components/Button';
+import RofimApiService, { WaitingRoomStatus } from '../api/rofimApi';
 
 /**
  * WaitingRoom Component
@@ -38,6 +39,13 @@ const WaitingRoom = (): ReactElement => {
   const isSmallViewport = useIsSmallViewport();
 
   const room = getRofimSession()?.room;
+  const patientId = getRofimSession()?.patientId;
+
+  useEffect(() => {
+    if (patientId) {
+      RofimApiService.updateTeleconsultationStatus(WaitingRoomStatus.CheckingEquipment);
+    }
+  }, [patientId]);
 
   useEffect(() => {
     if (!publisher) {

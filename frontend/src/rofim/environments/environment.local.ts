@@ -5,6 +5,7 @@ const environment: IEnvironment = {
     defaultLanguage: 'fr',
     supportedLanguages: ['de', 'en', 'es', 'fr', 'it', 'pt'],
   },
+  apiUrl: 'http://localhost:3000',
 };
 
 export default environment;
