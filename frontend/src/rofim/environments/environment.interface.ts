@@ -3,4 +3,5 @@ export interface IEnvironment {
     defaultLanguage: string;
     supportedLanguages: string[];
   };
+  apiUrl: string;
 }
