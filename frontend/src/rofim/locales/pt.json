@@ -1,3 +1,5 @@
 {
-  "button.join": "Participar na videochamada"
+  "button.join": "Participar na videochamada",
+  "pip.ariaLabel": "ativar imagem na imagem",
+  "pip.tooltip": "Ativar o modo imagem na imagem"
 }

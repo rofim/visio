@@ -165,7 +165,9 @@ const Toolbar = ({
           <DeviceControlButton deviceType="audio" />
           <DeviceControlButton deviceType="video" />
         </div>
-        {toolbarButtons.map(displayCenterToolbarButtons)}
+        <div id="center-toolbar-buttons" className="flex">
+          {toolbarButtons.map(displayCenterToolbarButtons)}
+        </div>
         <div ref={overflowAndExitRef} className="flex flex-row">
           {shouldShowOverflowButton && (
             <ToolbarOverflowButton
