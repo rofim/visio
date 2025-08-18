@@ -1,3 +1,5 @@
 {
-  "button.join": "An Videoanruf teilnehmen"
+  "button.join": "An Videoanruf teilnehmen",
+  "pip.ariaLabel": "bild-in-bild aktivieren",
+  "pip.tooltip": "Bild-in-Bild-Modus aktivieren"
 }

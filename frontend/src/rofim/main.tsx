@@ -1,5 +1,4 @@
 import ReactDOM from 'react-dom/client';
-import '@fontsource/inter';
 
 import App from './App.js';
 import './i18n.js';

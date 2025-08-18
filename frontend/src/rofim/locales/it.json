@@ -1,3 +1,5 @@
 {
-  "button.join": "Partecipa alla videochiamata"
+  "button.join": "Partecipa alla videochiamata",
+  "pip.ariaLabel": "attiva picture-in-picture",
+  "pip.tooltip": "Attiva la modalità picture-in-picture"
 }

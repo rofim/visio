@@ -1,3 +1,5 @@
 {
-  "button.join": "Join the video call"
+  "button.join": "Join the video call",
+  "pip.ariaLabel": "activate picture-in-picture",
+  "pip.tooltip": "Activate Picture-in-Picture mode"
 }
