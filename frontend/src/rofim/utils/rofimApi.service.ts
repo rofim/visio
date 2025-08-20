@@ -1,4 +1,5 @@
-import { environment } from '../environment';
+/* eslint-disable @cspell/spellchecker */
+import environment from '../environments';
 import { getRofimSession } from './session';
 
 export enum WaitingRoomStatus {
@@ -10,31 +11,32 @@ export enum WaitingRoomStatus {
   CheckingEquipment = 'checking-equipment',
 }
 
-class RofimApiService {
-  /**
-   * Update the teleconsultation status
-   * @param type - The new status
-   * @returns Promise<Response> - The response from the API
-   */
-  async updateTeleconsultationStatus(type: WaitingRoomStatus): Promise<Response> {
-    const session = getRofimSession();
-    const patientId = session?.patientId;
-    const sessionId = session?.sessionId;
+/**
+ * Update the teleconsultation status
+ * @param {WaitingRoomStatus} type - The new status
+ * @returns Promise<Response> - The response from the API
+ */
 
-    const response = await fetch(
-      `${environment.apiUrl}/services/visio/session/${sessionId}/waitingRoomStatus/${type}/for/${patientId}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
+const updateTeleconsultationStatus = async (type: WaitingRoomStatus): Promise<Response> => {
+  const session = getRofimSession();
+  const patientId = session?.patientId;
+  const sessionId = session?.sessionId;
 
-    if (!response.ok) {
-      throw new Error(`Erreur API: ${response.status} ${response.statusText}`);
+  const response = await fetch(
+    `${environment.apiUrl}/services/visio/session/${sessionId}/waitingRoomStatus/${type}/for/${patientId}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
     }
+  );
 
-    return response;
+  if (!response.ok) {
+    throw new Error(`Erreur API: ${response.status} ${response.statusText}`);
   }
-}
 
-export default new RofimApiService();
+  return response;
+};
+
+export default {
+  updateTeleconsultationStatus,
+};

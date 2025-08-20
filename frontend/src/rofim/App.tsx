@@ -13,53 +13,40 @@ import RoomContext from '../Context/RoomContext';
 import RofimInit from './context/RofimContext';
 import ErrorPage from './pages/ErrorPage';
 import GoodBye from './pages/GoodBye';
-import { WebSocketProvider } from './components/WebSocketProvider';
 
 const App = () => {
   return (
     <Router>
       <RofimInit>
-        <WebSocketProvider>
-          {/* <SessionProvider> */}
-          <Routes>
-            <Route element={<RoomContext />}>
-              <Route
-                path="/"
-                element={
-                  <SessionProvider>
-                    <PreviewPublisherProvider>
-                      <WaitingRoom />
-                    </PreviewPublisherProvider>
-                  </SessionProvider>
-                }
-              />
-              <Route
-                path="/waiting-doctor"
-                element={
-                  <SessionProvider>
-                    <WaitingDoctor />
-                  </SessionProvider>
-                }
-              />
-              <Route
-                path="/room/:roomName"
-                element={
-                  <SessionProvider>
-                    <RedirectToWaitingRoom>
-                      <PublisherProvider>
-                        <Room />
-                      </PublisherProvider>
-                    </RedirectToWaitingRoom>
-                  </SessionProvider>
-                }
-              />
-            </Route>
-            <Route path="*" element={<Navigate to="/" replace />} />
-            <Route path="/goodbye" element={<GoodBye />} />
-            <Route path="/unsupported-browser" element={<UnsupportedBrowserPage />} />
-            <Route path="/error" element={<ErrorPage />} />
-          </Routes>
-        </WebSocketProvider>
+        <Routes>
+          <Route element={<RoomContext />}>
+            <Route
+              path="/"
+              element={
+                <PreviewPublisherProvider>
+                  <WaitingRoom />
+                </PreviewPublisherProvider>
+              }
+            />
+            <Route path="/waiting-doctor" element={<WaitingDoctor />} />
+            <Route
+              path="/room/:roomName"
+              element={
+                <SessionProvider>
+                  <RedirectToWaitingRoom>
+                    <PublisherProvider>
+                      <Room />
+                    </PublisherProvider>
+                  </RedirectToWaitingRoom>
+                </SessionProvider>
+              }
+            />
+          </Route>
+          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="/goodbye" element={<GoodBye />} />
+          <Route path="/unsupported-browser" element={<UnsupportedBrowserPage />} />
+          <Route path="/error" element={<ErrorPage />} />
+        </Routes>
       </RofimInit>
     </Router>
   );

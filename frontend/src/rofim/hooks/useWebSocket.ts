@@ -1,61 +1,65 @@
-import { useEffect, useCallback } from 'react';
-import WebSocketService from '../utils/websocket.service';
+import { useEffect, useState } from 'react';
+import { io, Socket } from 'socket.io-client';
 import { getRofimSession } from '../utils/session';
+import environment from '../environments';
 
-type WebSocketCallbacks = {
-  onDoctorAddDelay?: (event: any) => void;
-};
+const useWebSocket = () => {
+  const [isConnected, setIsConnected] = useState(false);
+  const [showDoctorDelay, setShowDoctorDelay] = useState(false);
+  const [doctorDelayInMinute, setDoctorDelayInMinute] = useState<number>(0);
+  const [startTime, setStartTime] = useState<string>('');
 
-// Variable globale pour stocker l'instance WebSocket
-let globalWebSocket: WebSocketService | null = null;
-let globalCallbacks: WebSocketCallbacks = {};
+  const onConnectionError = (error: Error) => {
+    console.error('Socket.IO connection error:', error);
+  };
 
-const useWebSocket = (callbacks: WebSocketCallbacks = {}) => {
-  const session = getRofimSession();
-  const slug = session?.slug;
-  const type = session?.type;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const onMessage = (event: any) => {
+    if (event.channel === 'teleconsultation:doctor:add-delay') {
+      setDoctorDelayInMinute(event.data.doctorDelayInMinute);
+      setStartTime(event.data.startTime);
+      setShowDoctorDelay(true);
+    }
+  };
 
-  // Fonction pour mettre à jour les callbacks globaux
-  const updateCallbacks = useCallback((newCallbacks: WebSocketCallbacks) => {
-    globalCallbacks = { ...globalCallbacks, ...newCallbacks };
-  }, []);
+  const onConnect = () => {
+    setIsConnected(true);
+  };
 
   useEffect(() => {
-    if (!type) {
-      return;
-    }
+    let socket: Socket | null = null;
+    const rofimSession = getRofimSession();
 
-    if (!globalWebSocket) {
-      globalWebSocket = new WebSocketService({ id: slug || '', type });
-
-      globalWebSocket.connect({
-        onDoctorAddDelay: (event) => {
-          if (globalCallbacks.onDoctorAddDelay) {
-            globalCallbacks.onDoctorAddDelay(event);
-          }
+    if (!isConnected && rofimSession?.slug && rofimSession.type) {
+      socket = io(environment.wsUrl, {
+        path: '/ws',
+        transports: ['websocket', 'polling'],
+        autoConnect: false,
+        query: {
+          id: rofimSession.slug,
+          type: rofimSession.type,
         },
       });
-    }
 
-    // Mettre à jour les callbacks avec ceux du composant actuel
-    updateCallbacks(callbacks);
+      socket.on('connect', onConnect);
+      socket.on('connect_error', onConnectionError);
+      socket.on('message', onMessage);
+      socket.connect();
+    }
 
     return () => {
-      // On ne déconnecte pas ici pour permettre la réutilisation
-      // La déconnexion se fera au niveau de l'application
+      socket?.off('connect', onConnect);
+      socket?.off('connect_error', onConnectionError);
+      socket?.off('message', onMessage);
     };
-  }, [type, callbacks, updateCallbacks]);
+  }, [isConnected]);
 
-  // Fonction pour déconnecter manuellement si nécessaire
-  const disconnect = useCallback(() => {
-    if (globalWebSocket) {
-      globalWebSocket.disconnect();
-      globalWebSocket = null;
-      globalCallbacks = {};
-    }
-  }, []);
-
-  return { disconnect };
+  return {
+    isConnected,
+    showDoctorDelay,
+    doctorDelayInMinute,
+    startTime,
+  };
 };
 
 export default useWebSocket;

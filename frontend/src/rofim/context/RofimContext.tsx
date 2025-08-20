@@ -1,10 +1,13 @@
 import { PropsWithChildren, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { initRofimSession } from '../utils/session';
+import useWebSocket from '../hooks/useWebSocket';
 
 const RofimInit = ({ children }: PropsWithChildren) => {
   const [isInit, setIsInit] = useState(false);
   const navigate = useNavigate();
+  const { isConnected } = useWebSocket();
+
   useEffect(() => {
     try {
       initRofimSession();
@@ -18,7 +21,7 @@ const RofimInit = ({ children }: PropsWithChildren) => {
 
   // To avoid blinking page when no token set
   // and accessing waiting-room page, which start camera
-  return isInit ? children : null;
+  return isInit && isConnected ? children : null;
 };
 
 export default RofimInit;

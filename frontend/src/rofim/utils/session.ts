@@ -38,9 +38,6 @@ export const initRofimSession = () => {
     if (rofimSession?.username) {
       setStorageItem(STORAGE_KEYS.USERNAME, rofimSession.username);
     }
-    if (rofimSession?.type) {
-      setStorageItem('type', rofimSession.type);
-    }
   }
 
   if (patientId) {
@@ -58,14 +55,14 @@ export const initRofimSession = () => {
 
 export const getRofimSession = () => {
   const token = getStorageItem('token');
-  const slug = getStorageItem('slug');
-  const patientId = getStorageItem('patientId');
+  const patientId = getStorageItem('patientId') || null;
+  const slug = getStorageItem('slug') || null;
   const parsedSession = parseSession(token);
   return parsedSession
     ? {
         ...parsedSession,
-        slug: slug || null,
-        patientId: patientId || null,
+        patientId,
+        slug,
       }
     : null;
 };
