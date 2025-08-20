@@ -5,9 +5,11 @@ import environment from '../environments';
 
 const useWebSocket = () => {
   const [isConnected, setIsConnected] = useState(false);
-  const [showDoctorDelay, setShowDoctorDelay] = useState(false);
-  const [doctorDelayInMinute, setDoctorDelayInMinute] = useState<number>(0);
-  const [startTime, setStartTime] = useState<string>('');
+  const [showDoctorDelay, setShowDoctorDelay] = useState(true);
+  const [doctorDelayInMinute, setDoctorDelayInMinute] = useState<number>(10);
+  const [startTime, setStartTime] = useState<number>(
+    new Date('2025-08-20T09:32:26.387Z').getTime()
+  );
 
   const onConnectionError = (error: Error) => {
     console.error('Socket.IO connection error:', error);
@@ -17,7 +19,7 @@ const useWebSocket = () => {
   const onMessage = (event: any) => {
     if (event.channel === 'teleconsultation:doctor:add-delay') {
       setDoctorDelayInMinute(event.data.doctorDelayInMinute);
-      setStartTime(event.data.startTime);
+      setStartTime(new Date(event.data.startTime).getTime());
       setShowDoctorDelay(true);
     }
   };

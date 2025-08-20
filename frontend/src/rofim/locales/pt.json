@@ -1,5 +1,11 @@
 {
   "button.join": "Participar na videochamada",
   "pip.ariaLabel": "ativar imagem na imagem",
-  "pip.tooltip": "Ativar o modo imagem na imagem"
+  "pip.tooltip": "Ativar o modo imagem na imagem",
+  "waitingRoom.title": "Por favor, aguarde",
+  "waitingRoom.message": "O seu médico chegará em breve",
+  "waitingRoom.redirection": "Será automaticamente redirecionado para a videoconferência assim que ele se ligar.",
+  "waitingRoom.pleaseWait": "Por favor, mantenha-se ligado e deixe esta janela aberta.",
+  "waitingRoom.doctorDelayed.title": "Consulta atrasada",
+  "waitingRoom.doctorDelayed.message": "O seu médico informa que a consulta está atrasada <b>{{doctorDelayInMinute}} min</b><br>(hora prevista: <b>{{startTime}}</b>)</br>"
 }

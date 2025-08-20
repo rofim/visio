@@ -1,5 +1,11 @@
 {
   "button.join": "An Videoanruf teilnehmen",
   "pip.ariaLabel": "bild-in-bild aktivieren",
-  "pip.tooltip": "Bild-in-Bild-Modus aktivieren"
+  "pip.tooltip": "Bild-in-Bild-Modus aktivieren",
+  "waitingRoom.title": "Bitte warten",
+  "waitingRoom.message": "Ihr Arzt wird in Kürze eintreffen",
+  "waitingRoom.redirection": "Sie werden automatisch zur Videosprechstunde weitergeleitet, sobald er sich verbindet.",
+  "waitingRoom.pleaseWait": "Bitte bleiben Sie verbunden und lassen Sie dieses Fenster geöffnet.",
+  "waitingRoom.doctorDelayed.title": "Termin verspätet",
+  "waitingRoom.doctorDelayed.message": "Ihr Arzt teilt Ihnen mit, dass sich der Termin um <b>{{doctorDelayInMinute}} Min</b> verzögert<br>(voraussichtliche Uhrzeit: <b>{{startTime}}</b>)<br/>"
 }

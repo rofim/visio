@@ -42,7 +42,7 @@ const WaitingRoom = (): ReactElement => {
   const patientId = rofimSession?.patientId;
 
   // TODO
-  const hasParticipants = true;
+  const hasParticipants = false;
 
   useEffect(() => {
     if (patientId) {
@@ -100,7 +100,13 @@ const WaitingRoom = (): ReactElement => {
 
   const handleJoinRoom = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    if (patientId !== 'null' && patientId !== null && !hasParticipants) {
+    console.log({
+      patientId,
+      hasParticipants,
+    });
+    if (patientId && !hasParticipants) {
+      console.log('azeazeaze');
+
       navigate('/waiting-doctor');
     } else {
       navigate(`/room/${room}`, {
