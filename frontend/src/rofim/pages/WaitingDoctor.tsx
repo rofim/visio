@@ -2,42 +2,51 @@
 
 import { ReactElement, useEffect } from 'react';
 import WarningIcon from '@mui/icons-material/Warning';
+import LocalPhoneIcon from '@mui/icons-material/LocalPhone';
 import { useNavigate } from 'react-router-dom';
 import { Trans, useTranslation } from 'react-i18next';
+import { useAtom } from 'jotai';
 import { getRofimSession } from '../utils/session';
-import rofimApiService, { WaitingRoomStatus } from '../utils/rofimApi.service';
-import useWebSocket from '../hooks/useWebSocket';
+import rofimApiService, { WaitingRoomStatus } from '../api/rofimApi';
 import { getFormattedTime } from '../../utils/dateTime';
+import { canJoinVisioAtom, doctorDelayAtom, tcStartTimeAtom } from '../atoms/webSocketAtoms';
 
-const WaitingDoctor = (): ReactElement => {
+const WaitingRoom = (): ReactElement => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const { doctorDelayInMinute, showDoctorDelay, startTime } = useWebSocket();
+  const [doctorDelayInMinute, setDoctorDelayInMinute] = useAtom(doctorDelayAtom);
+  const [startTime, setStartTime] = useAtom(tcStartTimeAtom);
+  const [canJoinVisio] = useAtom(canJoinVisioAtom);
 
   const session = getRofimSession();
   const room = session?.room;
   const patientId = session?.patientId;
-
-  // TODO
-  const participantCount = 0;
-  const hasParticipants = participantCount > 0;
+  const waitingRoom = session?.waitingRoom;
 
   useEffect(() => {
-    if (patientId) {
-      rofimApiService.updateTeleconsultationStatus(WaitingRoomStatus.Wait);
-    }
-  }, [patientId]);
+    if (patientId && waitingRoom) {
+      const updateTCStatus = async () => {
+        const tc = await rofimApiService.updateTeleconsultationStatus(WaitingRoomStatus.Wait);
+        if (tc.doctorDelayInMinute && tc.startTime) {
+          setDoctorDelayInMinute(tc.doctorDelayInMinute);
+          setStartTime(new Date(tc.startTime).getTime());
+        }
 
-  // Redirection réactive vers la room dès qu'un participant rejoint (le docteur est le premier participant)
-  useEffect(() => {
-    if (hasParticipants && room) {
-      navigate(`/room/${room}`, {
-        state: {
-          hasAccess: true,
-        },
-      });
+        // Redirection vers la room s'il y a déjà un participant (le docteur est le premier participant)
+        const hasParticipantCount = await rofimApiService.countParticipants();
+        if (hasParticipantCount) {
+          navigate(`/room/${room}`);
+        }
+      };
+      updateTCStatus();
     }
-  }, [hasParticipants, room, navigate]);
+  }, [waitingRoom, patientId, setDoctorDelayInMinute, setStartTime, room, navigate]);
+
+  useEffect(() => {
+    if (canJoinVisio || !waitingRoom) {
+      navigate(`/room/${room}`);
+    }
+  }, [canJoinVisio, waitingRoom, room, navigate]);
 
   return (
     <div className="flex size-full flex-col bg-[#F5F6F8]" data-testid="waitingDoctor">
@@ -46,44 +55,51 @@ const WaitingDoctor = (): ReactElement => {
           {t('waitingRoom.title')}
         </h1>
         <div className="w-full max-w-4xl rounded-lg bg-white p-14 shadow-sm">
-          {showDoctorDelay && (
-            <div className="mb-4 flex items-start rounded border border-[#FEF08A] bg-[#FEFCE8] p-4 shadow-md">
-              <div className="flex-1">
-                <div className="flex items-start gap-2">
-                  <WarningIcon sx={{ color: '#CA8A04', fontSize: 20 }} />
-                  <strong>{t('waitingRoom.doctorDelayed.title')}</strong>
-                </div>
-                <div className="mt-2 w-full">
-                  <p>
-                    <Trans
-                      i18nKey="waitingRoom.doctorDelayed.message"
-                      values={{
-                        doctorDelayInMinute,
-                        startTime: getFormattedTime(i18n.language, startTime),
-                      }}
-                      components={{ b: <b />, br: <br /> }}
-                    />
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
           <div className="flex flex-col items-center space-y-6">
-            <img src="public/images/medecin.png" alt="doctor" className="size-[120px]" />
+            <img src="images/medecin.png" alt="doctor" className="size-[120px]" />
 
             <h2 className="text-center text-2xl font-bold text-primary">
               {t('waitingRoom.message')}
             </h2>
 
-            <div className="space-y-3 text-center">
-              <p className="text-xl leading-relaxed text-grey-b">{t('waitingRoom.redirection')}</p>
-              <p className="text-xl leading-relaxed text-grey-b">{t('waitingRoom.pleaseWait')}</p>
+            <div className="text-center text-xl text-grey-b">
+              <p>{t('waitingRoom.redirection')}</p>
+              <p>{t('waitingRoom.pleaseWait')}</p>
             </div>
+
+            {!!doctorDelayInMinute && startTime && (
+              <div className="mb-4 flex rounded bg-[#fff1cf] p-4 shadow-md">
+                <div className="flex-1">
+                  <div className="flex gap-4">
+                    <WarningIcon sx={{ color: '#efc100', fontSize: 20 }} />
+                    <div className="w-full text-left">
+                      <strong>{t('waitingRoom.doctorDelayed.title')}</strong>
+                      <p>
+                        <Trans
+                          i18nKey="waitingRoom.doctorDelayed.message"
+                          values={{
+                            doctorDelayInMinute,
+                            startTime: getFormattedTime(
+                              i18n.language,
+                              startTime + doctorDelayInMinute * 60 * 1000
+                            ),
+                          }}
+                        />
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
+        <p className="w-full max-w-4xl p-16 text-left text-xl">
+          <LocalPhoneIcon sx={{ fontSize: 20, display: 'inline' }} className="mr-1" />
+          {t('waitingRoom.disclaimer')}
+        </p>
       </div>
     </div>
   );
 };
 
-export default WaitingDoctor;
+export default WaitingRoom;

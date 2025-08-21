@@ -1,15 +1,28 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { io, Socket } from 'socket.io-client';
+import { useAtom } from 'jotai';
 import { getRofimSession } from '../utils/session';
 import environment from '../environments';
+import {
+  canJoinVisioAtom,
+  doctorDelayAtom,
+  socketConnectionStatusAtom,
+  tcStartTimeAtom,
+} from '../atoms/webSocketAtoms';
 
 const useWebSocket = () => {
-  const [isConnected, setIsConnected] = useState(false);
-  const [showDoctorDelay, setShowDoctorDelay] = useState(true);
-  const [doctorDelayInMinute, setDoctorDelayInMinute] = useState<number>(10);
-  const [startTime, setStartTime] = useState<number>(
-    new Date('2025-08-20T09:32:26.387Z').getTime()
-  );
+  let socket: Socket | null = null;
+  const rofimSession = getRofimSession();
+  const shouldInitSocket =
+    rofimSession?.patientId &&
+    rofimSession.waitingRoom &&
+    rofimSession?.type === 'teleconsultation';
+
+  const [isSocketInit, setIsSocketInit] = useState(false);
+  const [, setSocketConnectionReady] = useAtom(socketConnectionStatusAtom);
+  const [, setDoctorDelayInMinute] = useAtom(doctorDelayAtom);
+  const [, setStartTime] = useAtom(tcStartTimeAtom);
+  const [, setCanJoinVisio] = useAtom(canJoinVisioAtom);
 
   const onConnectionError = (error: Error) => {
     console.error('Socket.IO connection error:', error);
@@ -18,21 +31,27 @@ const useWebSocket = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onMessage = (event: any) => {
     if (event.channel === 'teleconsultation:doctor:add-delay') {
-      setDoctorDelayInMinute(event.data.doctorDelayInMinute);
-      setStartTime(new Date(event.data.startTime).getTime());
-      setShowDoctorDelay(true);
+      setDoctorDelayInMinute(event.content.doctorDelayInMinute);
+      setStartTime(new Date(event.content.startTime).getTime());
+    }
+
+    if (event.channel === 'teleconsultation:doctor:visio-live') {
+      setCanJoinVisio(true);
     }
   };
 
   const onConnect = () => {
-    setIsConnected(true);
+    setSocketConnectionReady(true);
   };
 
-  useEffect(() => {
-    let socket: Socket | null = null;
-    const rofimSession = getRofimSession();
+  const initSocket = () => {
+    // bypass socket connection
+    if (!shouldInitSocket) {
+      setSocketConnectionReady(true);
+      return;
+    }
 
-    if (!isConnected && rofimSession?.slug && rofimSession.type) {
+    if (!isSocketInit && rofimSession?.slug && rofimSession.type) {
       socket = io(environment.wsUrl, {
         path: '/ws',
         transports: ['websocket', 'polling'],
@@ -42,25 +61,18 @@ const useWebSocket = () => {
           type: rofimSession.type,
         },
       });
-
       socket.on('connect', onConnect);
       socket.on('connect_error', onConnectionError);
       socket.on('message', onMessage);
       socket.connect();
+      setIsSocketInit(true);
     }
-
-    return () => {
-      socket?.off('connect', onConnect);
-      socket?.off('connect_error', onConnectionError);
-      socket?.off('message', onMessage);
-    };
-  }, [isConnected]);
+  };
 
   return {
-    isConnected,
-    showDoctorDelay,
-    doctorDelayInMinute,
-    startTime,
+    shouldInitSocket,
+    initSocket,
+    setIsSocketInit,
   };
 };
 

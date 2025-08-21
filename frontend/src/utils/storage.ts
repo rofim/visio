@@ -13,3 +13,7 @@ export const setStorageItem = (key: string, value: string) => {
 export const getStorageItem = (key: string): string | null => {
   return window.localStorage.getItem(key);
 };
+
+export const resetStorage = () => {
+  window.localStorage.clear();
+};

@@ -6,6 +6,7 @@
   "waitingRoom.message": "Your doctor will arrive shortly",
   "waitingRoom.redirection": "You will be automatically redirected to the video consultation as soon as they connect.",
   "waitingRoom.pleaseWait": "Please stay connected and keep this window open.",
+  "waitingRoom.disclaimer": "If after 30 minutes the connection has still not been established, please do not hesitate to contact their office.",
   "waitingRoom.doctorDelayed.title": "Appointment delayed",
-  "waitingRoom.doctorDelayed.message": "Your doctor informs you that the appointment is delayed by <b>{{doctorDelayInMinute}} min</b><br>(estimated time: <b>{{startTime}}</b>)</br>"
+  "waitingRoom.doctorDelayed.message": "Your doctor informs you that the appointment is delayed by {{doctorDelayInMinute}} min (estimated time: {{startTime}})"
 }

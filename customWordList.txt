@@ -9,3 +9,4 @@ NOSONAR
 supportedLngs
 Rofim
 preprod
+visio

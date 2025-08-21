@@ -13,7 +13,7 @@ import Button from '../components/Button';
 import RofimApiService, { WaitingRoomStatus } from '../api/rofimApi';
 
 /**
- * WaitingRoom Component
+ * WaitingRoom Component from vonage
  *
  * This component renders the waiting room page of the application, including:
  * - A banner containing a company logo, a date-time widget, and a navigable button to a GitHub repo.
@@ -26,7 +26,7 @@ import RofimApiService, { WaitingRoomStatus } from '../api/rofimApi';
  * - The meeting room name and a button to join the room.
  * @returns {ReactElement} - The waiting room.
  */
-const WaitingRoom = (): ReactElement => {
+const EquipmentsTestRoom = (): ReactElement => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { initLocalPublisher, publisher, accessStatus, destroyPublisher } =
@@ -40,9 +40,7 @@ const WaitingRoom = (): ReactElement => {
   const rofimSession = getRofimSession();
   const room = rofimSession?.room;
   const patientId = rofimSession?.patientId;
-
-  // TODO
-  const hasParticipants = false;
+  const waitingRoom = rofimSession?.waitingRoom;
 
   useEffect(() => {
     if (patientId) {
@@ -98,23 +96,17 @@ const WaitingRoom = (): ReactElement => {
     setOpenVideoInput(false);
   };
 
-  const handleJoinRoom = (e: MouseEvent<HTMLButtonElement>) => {
+  const handleJoinRoom = async (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    console.log({
-      patientId,
-      hasParticipants,
-    });
-    if (patientId && !hasParticipants) {
-      console.log('azeazeaze');
-
-      navigate('/waiting-doctor');
-    } else {
-      navigate(`/room/${room}`, {
-        state: {
-          hasAccess: true,
-        },
-      });
+    if (patientId && waitingRoom) {
+      // Start visio if there is someone in the room (doctor enter first)
+      const hasParticipantCount = await RofimApiService.countParticipants();
+      if (!hasParticipantCount) {
+        return navigate('/waiting-room');
+      }
     }
+
+    return navigate(`/room/${room}`);
   };
 
   return (
@@ -154,4 +146,4 @@ const WaitingRoom = (): ReactElement => {
   );
 };
 
-export default WaitingRoom;
+export default EquipmentsTestRoom;
