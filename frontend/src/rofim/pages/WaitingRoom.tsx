@@ -1,5 +1,4 @@
 import { useState, useEffect, MouseEvent, ReactElement, TouchEvent } from 'react';
-import { Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import usePreviewPublisherContext from '../../hooks/usePreviewPublisherContext';
@@ -10,6 +9,8 @@ import DeviceAccessAlert from '../../components/DeviceAccessAlert';
 import { getStorageItem, STORAGE_KEYS } from '../../utils/storage';
 import useIsSmallViewport from '../../hooks/useIsSmallViewport';
 import { getRofimSession } from '../utils/session';
+import Button from '../components/Button';
+import RofimApiService, { WaitingRoomStatus } from '../api/rofimApi';
 
 /**
  * WaitingRoom Component
@@ -38,6 +39,13 @@ const WaitingRoom = (): ReactElement => {
   const isSmallViewport = useIsSmallViewport();
 
   const room = getRofimSession()?.room;
+  const patientId = getRofimSession()?.patientId;
+
+  useEffect(() => {
+    if (patientId) {
+      RofimApiService.updateTeleconsultationStatus(WaitingRoomStatus.CheckingEquipment);
+    }
+  }, [patientId]);
 
   useEffect(() => {
     if (!publisher) {
@@ -117,17 +125,7 @@ const WaitingRoom = (): ReactElement => {
                         },
                       });
                     }}
-                    variant="contained"
-                    color="primary"
-                    sx={{
-                      borderRadius: '24px',
-                      color: 'white',
-                      textTransform: 'none',
-                      fontSize: '14px',
-                      height: '48px',
-                    }}
                     disabled={!username}
-                    type="submit"
                   >
                     {t('button.join')}
                   </Button>

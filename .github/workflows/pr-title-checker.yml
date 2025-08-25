@@ -6,7 +6,7 @@ on:
 jobs:
   check-pr-title:
     name: Validate PR Title conventions
-    runs-on: ubuntu-latest
+    runs-on: codebuild-runner-tiny-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - uses: actions/checkout@v4
       - name: Check PR Title
@@ -15,7 +15,7 @@ jobs:
           script: |
             const title = context.payload.pull_request.title;
 
-            const NORMAL_PR_PATTERN = /^\[(feat|fix|chore|docs|refactor|perf|test|build|ci|revert)\]:\s+((?:rofano|scrum)-\d+)\s+-\s+.+$/;
+            const NORMAL_PR_PATTERN = /^\[(feat|fix|chore|docs|refactor|perf|test|build|ci|revert)\]:\s+((?:rofano|scrum|devops)-\d+)\s+-\s+.+$/;
             const RELEASE_PR_PATTERN = /^(MEP|MEPP)\s+\d{2}-\d{2}-\d{4}\s+-\s+V\d+\.\d+\.\d+$/;
 
             const isNormalTitle = NORMAL_PR_PATTERN.test(title);
@@ -36,6 +36,7 @@ jobs:
               1. Pour les PR classiques: 
               - [type]: rofano-XXX - description
               - [type]: scrum-XXX - description
+              - [type]: devops-XXX - description
               Liste des types possibles : 
               - feat
               - fix

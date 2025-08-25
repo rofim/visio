@@ -39,12 +39,11 @@ const VoiceIndicatorIcon = ({
   return (
     <Box sx={{ ...sx }} key={20} display="flex" flexDirection="column" gap={2} alignItems="center">
       <div
-        className="flex items-center justify-center gap-[8%]"
+        className="flex items-center justify-center gap-[8%] bg-primary"
         style={{
           height: size,
           width: size,
           borderRadius: '50%',
-          backgroundColor: 'rgba(26,115,232,.9)',
         }}
       >
         {barHeights.map((height, i) => (

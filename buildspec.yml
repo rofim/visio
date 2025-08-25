@@ -11,7 +11,7 @@ phases:
   build:
     commands:
       - echo Build started on `date`
-      - yarn build
+      - yarn build:${BUILD_ENV}
       - echo Build completed on `date`
 
   post_build:

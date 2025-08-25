@@ -1,0 +1,40 @@
+.avatar-canvas {
+  width: 640px;
+  height: 360px;
+  z-index: -1000;
+  position: relative;
+
+  .subscriber {
+    margin: 0px !important;
+    position: absolute !important;
+    top: 0px !important;
+    left: 0px !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .MuiAvatar-circular {
+    font-size: 100px;
+    width: 200px;
+    height: 200px;
+  }
+
+  div .text-sm {
+    font-size: 20px;
+  }
+
+  /* Replace outlines by borders so canvas can capture active speacker visual */
+  .outline,
+  .outline-2 {
+    @apply border-4 outline-none;
+  }
+
+  .outline-sky-500 {
+    @apply border-sky-500;
+  }
+
+  /* Replace border radius to match PiP Window */
+  .rounded-xl {
+    border-radius: 16px;
+  }
+}

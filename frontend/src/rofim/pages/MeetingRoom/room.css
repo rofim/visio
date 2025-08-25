@@ -3,3 +3,7 @@ button[data-testid='archiving-button'],
 button[data-testid='emoji-grid-button'] {
   display: none;
 }
+div[data-testid='right-panel'] > div:nth-of-type(2) {
+  /* cache le lien de partage de la visio scrum-2872 */
+  display: none;
+}
