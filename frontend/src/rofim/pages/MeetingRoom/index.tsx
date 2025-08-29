@@ -5,13 +5,20 @@ import { getRofimSession } from '../../utils/session';
 import './room.css';
 
 const Room = () => {
-  const patientId = getRofimSession()?.patientId;
+  const rofimSession = getRofimSession();
+  const patientId = rofimSession?.patientId;
+  const type = rofimSession?.type;
 
   useEffect(() => {
-    if (patientId) {
-      RofimApiService.updateTeleconsultationStatus(WaitingRoomStatus.Progress);
+    if (type === 'teleconsultation') {
+      if (patientId) {
+        RofimApiService.updateTeleconsultationStatus(WaitingRoomStatus.Progress);
+      } else {
+        // this is for the doctor
+        RofimApiService.doctorJoinVisio();
+      }
     }
-  }, [patientId]);
+  }, [patientId, type]);
 
   return <VonageRoom />;
 };

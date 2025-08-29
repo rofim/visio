@@ -13,7 +13,7 @@ import Button from '../components/Button';
 import RofimApiService, { WaitingRoomStatus } from '../api/rofimApi';
 
 /**
- * WaitingRoom Component
+ * WaitingRoom Component from vonage
  *
  * This component renders the waiting room page of the application, including:
  * - A banner containing a company logo, a date-time widget, and a navigable button to a GitHub repo.
@@ -26,7 +26,7 @@ import RofimApiService, { WaitingRoomStatus } from '../api/rofimApi';
  * - The meeting room name and a button to join the room.
  * @returns {ReactElement} - The waiting room.
  */
-const WaitingRoom = (): ReactElement => {
+const EquipmentsTestRoom = (): ReactElement => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { initLocalPublisher, publisher, accessStatus, destroyPublisher } =
@@ -37,9 +37,10 @@ const WaitingRoom = (): ReactElement => {
   const [openAudioOutput, setOpenAudioOutput] = useState<boolean>(false);
   const username = getStorageItem(STORAGE_KEYS.USERNAME) ?? '';
   const isSmallViewport = useIsSmallViewport();
-
-  const room = getRofimSession()?.room;
-  const patientId = getRofimSession()?.patientId;
+  const rofimSession = getRofimSession();
+  const room = rofimSession?.room;
+  const patientId = rofimSession?.patientId;
+  const waitingRoom = rofimSession?.waitingRoom;
 
   useEffect(() => {
     if (patientId) {
@@ -95,6 +96,19 @@ const WaitingRoom = (): ReactElement => {
     setOpenVideoInput(false);
   };
 
+  const handleJoinRoom = async (e: MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    if (patientId && waitingRoom) {
+      // Start visio if there is someone in the room (doctor enter first)
+      const hasParticipantCount = await RofimApiService.countParticipants();
+      if (!hasParticipantCount) {
+        return navigate('/waiting-room');
+      }
+    }
+
+    return navigate(`/room/${room}`);
+  };
+
   return (
     <div className="flex size-full flex-col bg-white" data-testid="waitingRoom">
       <div className="flex w-full">
@@ -116,17 +130,7 @@ const WaitingRoom = (): ReactElement => {
                     openAudioOutput={openAudioOutput}
                     anchorEl={anchorEl}
                   />
-                  <Button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      navigate(`/room/${room}`, {
-                        state: {
-                          hasAccess: true,
-                        },
-                      });
-                    }}
-                    disabled={!username}
-                  >
+                  <Button onClick={handleJoinRoom} disabled={!username}>
                     {t('button.join')}
                   </Button>
                 </>
@@ -142,4 +146,4 @@ const WaitingRoom = (): ReactElement => {
   );
 };
 
-export default WaitingRoom;
+export default EquipmentsTestRoom;

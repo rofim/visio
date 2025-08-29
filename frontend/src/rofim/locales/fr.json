@@ -1,5 +1,13 @@
 {
     "button.join": "Rejoindre la visio",
     "pip.ariaLabel": "activer picture in picture",
-    "pip.tooltip": "Activer le mode Picture-in-Picture"
+    "pip.tooltip": "Activer le mode Picture-in-Picture",
+    "waitingRoom.title": "Veuillez patienter",
+    "waitingRoom.message": "Votre médecin va bientôt arriver",
+    "waitingRoom.redirection": "Vous serez automatiquement redirigé vers la visioconférence dès qu'il se connectera.",
+    "waitingRoom.pleaseWait": "Merci de rester connecté et de garder cette fenêtre ouverte.",
+    "waitingRoom.disclaimer": "Si au bout de 30 min, la connexion n'a toujours pas eu lieu, n'hésitez pas à contacter son secrétariat",
+    "waitingRoom.doctorDelayed.title": "Rendez-vous retardé",
+    "waitingRoom.doctorDelayed.message": "Votre médecin vous informe que le rendez-vous est retardé de {{doctorDelayInMinute}} min (heure estimée : {{startTime}})"
+    
 }
