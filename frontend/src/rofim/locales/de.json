@@ -8,6 +8,6 @@
   "waitingRoom.disclaimer": "Wenn nach 30 Minuten noch keine Verbindung hergestellt wurde, zögern Sie bitte nicht, das Sekretariat zu kontaktieren.",
   "waitingRoom.doctorDelayed.title": "Termin verspätet",
   "waitingRoom.doctorDelayed.message": "Ihr Arzt teilt Ihnen mit, dass sich der Termin um {{doctorDelayInMinute}} Min verzögert (voraussichtliche Uhrzeit: {{startTime}})",
-  "pip.state.on": "Bild-in-Bild-Modus aktivieren",
-  "pip.state.off": "Bild-in-Bild-Modus deaktivieren"
+  "pip.state.on": "PIP modus aktivieren",
+  "pip.state.off": "PIP modus deaktivieren"
 }

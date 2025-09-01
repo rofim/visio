@@ -8,6 +8,6 @@
   "waitingRoom.disclaimer": "If after 30 minutes the connection has still not been established, please do not hesitate to contact their office.",
   "waitingRoom.doctorDelayed.title": "Appointment delayed",
   "waitingRoom.doctorDelayed.message": "Your doctor informs you that the appointment is delayed by {{doctorDelayInMinute}} min (estimated time: {{startTime}})",
-  "pip.state.on": "Activate Picture-in-Picture mode",
-  "pip.state.off": "Desactivate Picture-in-Picture mode"
+  "pip.state.on": "Activate PIP mode",
+  "pip.state.off": "Desactivate PIP mode"
 }

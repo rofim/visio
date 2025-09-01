@@ -8,6 +8,6 @@
   "waitingRoom.disclaimer": "Si después de 30 minutos la conexión aún no se ha establecido, no dude en ponerse en contacto con su secretaría.",
   "waitingRoom.doctorDelayed.title": "Cita retrasada",
   "waitingRoom.doctorDelayed.message": "Su médico le informa que la cita se retrasa {{doctorDelayInMinute}} min (hora estimada: {{startTime}})",
-  "pip.state.on": "Activar el modo imagen en imagen",
-  "pip.state.off": "Desactivar el modo imagen en imagen"
+  "pip.state.on": "Activar el modo PIP",
+  "pip.state.off": "Desactivar el modo PIP"
 }
