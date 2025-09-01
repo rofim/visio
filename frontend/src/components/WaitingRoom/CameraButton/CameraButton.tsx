@@ -15,7 +15,9 @@ import VideoContainerButton from '../VideoContainerButton';
 const CameraButton = (): ReactElement => {
   const { t } = useTranslation();
   const { isVideoEnabled, toggleVideo } = usePreviewPublisherContext();
-  const title = t('devices.video.camera.state', { state: isVideoEnabled ? 'off' : 'on' });
+  const title = isVideoEnabled
+    ? t('devices.video.camera.state.off')
+    : t('devices.video.camera.state.on');
 
   return (
     <Box
