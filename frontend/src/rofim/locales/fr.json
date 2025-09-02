@@ -8,6 +8,6 @@
     "waitingRoom.disclaimer": "Si au bout de 30 min, la connexion n'a toujours pas eu lieu, n'hésitez pas à contacter son secrétariat",
     "waitingRoom.doctorDelayed.title": "Rendez-vous retardé",
     "waitingRoom.doctorDelayed.message": "Votre médecin vous informe que le rendez-vous est retardé de {{doctorDelayInMinute}} min (heure estimée : {{startTime}})",
-    "pip.state.on": "Activer le mode Picture-in-Picture",
-    "pip.state.off": "Désactiver le mode Picture-in-Picture"
+    "pip.state.on": "Activer le mode PIP",
+    "pip.state.off": "Désactiver le mode PIP"
 }
