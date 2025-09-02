@@ -37,7 +37,7 @@ jobs:
         run: yarn build
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v2
+        uses: SonarSource/sonarqube-scan-action@v5
         env:
           GITHUB_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
           SONAR_TOKEN: ${{ secrets.FRONTEND_SONAR_TOKEN }}
