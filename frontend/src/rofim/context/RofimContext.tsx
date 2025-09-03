@@ -7,7 +7,7 @@ import useWebSocket from '../hooks/useWebSocket';
 
 const RofimInit = ({ children }: PropsWithChildren) => {
   const [isSocketConnectionReady] = useAtom(socketConnectionStatusAtom);
-  const { initSocket, setIsSocketInit } = useWebSocket();
+  const { initSocket } = useWebSocket();
   const [isInit, setIsInit] = useState(false);
   const navigate = useNavigate();
 
@@ -21,7 +21,7 @@ const RofimInit = ({ children }: PropsWithChildren) => {
     }
 
     setIsInit(true);
-  }, [navigate, initSocket, setIsSocketInit]);
+  }, [navigate, initSocket]);
 
   // To avoid blinking page when no token set
   // and accessing waiting-room page, which start camera

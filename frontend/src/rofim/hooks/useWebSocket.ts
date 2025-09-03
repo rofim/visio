@@ -12,11 +12,6 @@ import {
 
 const useWebSocket = () => {
   let socket: Socket | null = null;
-  const rofimSession = getRofimSession();
-  const shouldInitSocket =
-    rofimSession?.patientId &&
-    rofimSession.waitingRoom &&
-    rofimSession?.type === 'teleconsultation';
 
   const [isSocketInit, setIsSocketInit] = useState(false);
   const [, setSocketConnectionReady] = useAtom(socketConnectionStatusAtom);
@@ -45,6 +40,14 @@ const useWebSocket = () => {
   };
 
   const initSocket = () => {
+    // Init socket only for TC patient with waitingRoom active
+    const rofimSession = getRofimSession();
+
+    const shouldInitSocket =
+      rofimSession?.patientId &&
+      rofimSession.waitingRoom &&
+      rofimSession?.type === 'teleconsultation';
+
     // bypass socket connection
     if (!shouldInitSocket) {
       setSocketConnectionReady(true);
@@ -70,9 +73,7 @@ const useWebSocket = () => {
   };
 
   return {
-    shouldInitSocket,
     initSocket,
-    setIsSocketInit,
   };
 };
 
