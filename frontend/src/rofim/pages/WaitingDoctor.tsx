@@ -50,23 +50,12 @@ const WaitingRoom = (): ReactElement => {
 
   return (
     <div className="flex size-full flex-col bg-[#F5F6F8]" data-testid="waitingDoctor">
-      <div className="flex min-h-screen w-full flex-col items-center justify-center p-4">
+      <div className="flex w-full flex-col items-center justify-center p-4">
         <h1 className="mb-8 text-center text-[32px] font-bold text-black">
           {t('waitingRoom.title')}
         </h1>
         <div className="w-full max-w-4xl rounded-lg bg-white p-14 shadow-sm">
           <div className="flex flex-col items-center space-y-6">
-            <img src="images/medecin.png" alt="doctor" className="size-[120px]" />
-
-            <h2 className="text-center text-2xl font-bold text-primary">
-              {t('waitingRoom.message')}
-            </h2>
-
-            <div className="text-center text-xl text-grey-b">
-              <p>{t('waitingRoom.redirection')}</p>
-              <p>{t('waitingRoom.pleaseWait')}</p>
-            </div>
-
             {!!doctorDelayInMinute && startTime && (
               <div className="mb-4 flex rounded bg-[#fff1cf] p-4 shadow-md">
                 <div className="flex-1">
@@ -91,6 +80,17 @@ const WaitingRoom = (): ReactElement => {
                 </div>
               </div>
             )}
+
+            <img src="images/medecin.png" alt="doctor" className="size-[120px]" />
+
+            <h2 className="text-center text-2xl font-bold text-primary">
+              {t('waitingRoom.message')}
+            </h2>
+
+            <div className="text-center text-xl text-grey-b">
+              <p>{t('waitingRoom.redirection')}</p>
+              <p>{t('waitingRoom.pleaseWait')}</p>
+            </div>
           </div>
         </div>
         <p className="w-full max-w-4xl p-16 text-left text-xl">
