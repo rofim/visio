@@ -73,7 +73,7 @@ const AudioIndicator = ({
 
   return (
     <div className={indicatorStyle} data-testid="audio-indicator">
-      <Tooltip title={hasAudio ? t('participants.mute.tooltip') : ''}>
+      <Tooltip title={hasAudio ? t('participants.mute.tooltip', { participantName }) : ''}>
         <IconButton
           disableRipple={!hasAudio}
           disableFocusRipple={!hasAudio}

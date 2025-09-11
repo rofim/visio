@@ -15,6 +15,7 @@ import EmojiGridButton from '../EmojiGridButton';
 import isReportIssueEnabled from '../../../utils/isReportIssueEnabled';
 import useToolbarButtons from '../../../hooks/useToolbarButtons';
 import DeviceControlButton from '../DeviceControlButton';
+import PictureInPictureButton from '../../../rofim/components/PictureInPictureButton';
 
 export type CaptionsState = {
   isUserCaptionsEnabled: boolean;
@@ -92,6 +93,7 @@ const Toolbar = ({
       key="LayoutButton"
       isPinningPresent={isPinningPresent}
     />,
+    'documentPictureInPicture' in window && <PictureInPictureButton key="PictureInPictureButton" />,
     <EmojiGridButton
       isEmojiGridOpen={openEmojiGridDesktop}
       setIsEmojiGridOpen={setOpenEmojiGridDesktop}

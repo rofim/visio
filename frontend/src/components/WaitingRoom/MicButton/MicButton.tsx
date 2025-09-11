@@ -15,7 +15,9 @@ import VideoContainerButton from '../VideoContainerButton';
 const MicButton = (): ReactElement => {
   const { t } = useTranslation();
   const { isAudioEnabled, toggleAudio } = usePreviewPublisherContext();
-  const title = t('devices.audio.microphone.state', { state: isAudioEnabled ? 'off' : 'on' });
+  const title = isAudioEnabled
+    ? t('devices.audio.microphone.state.off')
+    : t('devices.audio.microphone.state.on');
 
   return (
     <Box

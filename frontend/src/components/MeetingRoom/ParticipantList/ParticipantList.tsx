@@ -65,7 +65,10 @@ const ParticipantList = ({ handleClose, isOpen }: ParticipantListProps): ReactEl
     isOpen && (
       <>
         <RightPanelTitle title={t('participants.title')} handleClose={handleClose} />
-        <div className="flex h-[64px] flex-row items-center justify-between pl-6">
+        <div
+          className="flex h-[64px] flex-row items-center justify-between pl-6"
+          data-testid="meetingUrlHeader"
+        >
           <div className="text-left">
             <span className="text-darkGray text-sm font-bold tracking-normal">
               {t('chat.meetingUrl')}

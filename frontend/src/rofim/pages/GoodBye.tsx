@@ -14,7 +14,6 @@ const GoodBye = (): ReactElement => {
 
         setTimeout(() => {
           if (!window.closed) {
-            console.log('Window.close() failed, using fallback');
             window.location.href = 'about:blank';
           }
         }, 100);
