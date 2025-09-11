@@ -2,11 +2,11 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import '../css/App.css';
 import './css/index.css';
 import Room from './pages/MeetingRoom/index';
-import WaitingRoom from './pages/WaitingRoom';
+import EquipmentsTestRoom from './pages/EquipmentsTestRoom';
+import WaitingRoom from './pages/WaitingDoctor';
 import SessionProvider from '../Context/SessionProvider/session';
 import { PreviewPublisherProvider } from '../Context/PreviewPublisherProvider';
 import { PublisherProvider } from '../Context/PublisherProvider';
-import RedirectToWaitingRoom from '../components/RedirectToWaitingRoom';
 import UnsupportedBrowserPage from './pages/UnsupportedBrowserPage';
 import RoomContext from '../Context/RoomContext';
 import RofimInit from './context/RofimContext';
@@ -23,19 +23,18 @@ const App = () => {
               path="/"
               element={
                 <PreviewPublisherProvider>
-                  <WaitingRoom />
+                  <EquipmentsTestRoom />
                 </PreviewPublisherProvider>
               }
             />
+            <Route path="/waiting-room" element={<WaitingRoom />} />
             <Route
               path="/room/:roomName"
               element={
                 <SessionProvider>
-                  <RedirectToWaitingRoom>
-                    <PublisherProvider>
-                      <Room />
-                    </PublisherProvider>
-                  </RedirectToWaitingRoom>
+                  <PublisherProvider>
+                    <Room />
+                  </PublisherProvider>
                 </SessionProvider>
               }
             />

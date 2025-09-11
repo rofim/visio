@@ -1,5 +1,13 @@
 {
   "button.join": "Join the video call",
   "pip.ariaLabel": "activate picture-in-picture",
-  "pip.tooltip": "Activate Picture-in-Picture mode"
+  "waitingRoom.title": "Please wait",
+  "waitingRoom.message": "Your doctor will arrive shortly",
+  "waitingRoom.redirection": "You will be automatically redirected to the video consultation as soon as they connect.",
+  "waitingRoom.pleaseWait": "Please stay connected and keep this window open.",
+  "waitingRoom.disclaimer": "If after 30 minutes the connection has still not been established, please do not hesitate to contact their office.",
+  "waitingRoom.doctorDelayed.title": "Appointment delayed",
+  "waitingRoom.doctorDelayed.message": "Your doctor informs you that the appointment is delayed by {{doctorDelayInMinute}} min (estimated time: {{startTime}})",
+  "pip.state.on": "Activate PIP mode",
+  "pip.state.off": "Desactivate PIP mode"
 }

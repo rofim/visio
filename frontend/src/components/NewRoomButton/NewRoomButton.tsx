@@ -19,6 +19,7 @@ const NewRoomButton = ({ handleNewRoom }: NewRoomButtonProps): ReactElement => {
   const { t } = useTranslation();
   return (
     <Button
+      data-testid="new-room-button"
       variant="contained"
       className="mt-2 h-14"
       startIcon={<VideoCall />}

@@ -33,6 +33,7 @@ const EmojiGridMobile = ({
         }}
       >
         <Box
+          data-testid="emoji-grid-mobile"
           sx={{
             position: 'fixed',
             bottom: '146px',

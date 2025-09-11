@@ -16,7 +16,7 @@ import VideoContainerButton from '../VideoContainerButton';
 const BlurButton = (): ReactElement | false => {
   const { t } = useTranslation();
   const { toggleBlur, hasBlur } = usePreviewPublisherContext();
-  const title = t('devices.video.blur.state', { state: hasBlur ? 'off' : 'on' });
+  const title = hasBlur ? t('devices.video.blur.state.off') : t('devices.video.blur.state.on');
 
   return (
     hasMediaProcessorSupport() && (
