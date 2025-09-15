@@ -223,6 +223,9 @@ const usePreviewPublisher = (): PreviewPublisherContextType => {
     if (publisherRef.current) {
       return;
     }
+    // We reset user preferences as we want to start with both devices enabled
+    setStorageItem(STORAGE_KEYS.AUDIO_SOURCE_ENABLED, JSON.stringify(true));
+    setStorageItem(STORAGE_KEYS.VIDEO_SOURCE_ENABLED, JSON.stringify(true));
 
     const videoFilter: VideoFilter | undefined =
       initialLocalBlurRef.current && hasMediaProcessorSupport()
@@ -275,6 +278,7 @@ const usePreviewPublisher = (): PreviewPublisherContextType => {
       return;
     }
     publisherRef.current.publishVideo(!isVideoEnabled);
+    setStorageItem(STORAGE_KEYS.VIDEO_SOURCE_ENABLED, JSON.stringify(!isVideoEnabled));
     setIsVideoEnabled(!isVideoEnabled);
     if (setUser) {
       setUser((prevUser: UserType) => ({
@@ -299,6 +303,7 @@ const usePreviewPublisher = (): PreviewPublisherContextType => {
     }
     publisherRef.current.publishAudio(!isAudioEnabled);
     setIsAudioEnabled(!isAudioEnabled);
+    setStorageItem(STORAGE_KEYS.AUDIO_SOURCE_ENABLED, JSON.stringify(!isAudioEnabled));
     if (setUser) {
       setUser((prevUser: UserType) => ({
         ...prevUser,
