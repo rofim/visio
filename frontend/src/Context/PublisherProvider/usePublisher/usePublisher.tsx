@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import usePublisherQuality, { NetworkQuality } from '../usePublisherQuality/usePublisherQuality';
 import usePublisherOptions from '../usePublisherOptions';
 import useSessionContext from '../../../hooks/useSessionContext';
+import { setStorageItem, STORAGE_KEYS } from '../../../utils/storage';
 
 type PublishingErrorType = {
   header: string;
@@ -272,6 +273,7 @@ const usePublisher = (): PublisherContextType => {
     }
     publisherRef.current.publishVideo(!isVideoEnabled);
     setIsVideoEnabled(!isVideoEnabled);
+    setStorageItem(STORAGE_KEYS.VIDEO_SOURCE_ENABLED, JSON.stringify(!isVideoEnabled));
   };
 
   /**
@@ -286,6 +288,7 @@ const usePublisher = (): PublisherContextType => {
     }
     publisherRef.current.publishAudio(!isAudioEnabled);
     setIsAudioEnabled(!isAudioEnabled);
+    setStorageItem(STORAGE_KEYS.AUDIO_SOURCE_ENABLED, JSON.stringify(!isAudioEnabled));
     setIsForceMuted(false);
   };
 

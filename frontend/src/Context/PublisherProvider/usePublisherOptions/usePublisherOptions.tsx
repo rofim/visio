@@ -8,6 +8,7 @@ import {
 import useUserContext from '../../../hooks/useUserContext';
 import getInitials from '../../../utils/getInitials';
 import DeviceStore from '../../../utils/DeviceStore';
+import { getStorageItem, STORAGE_KEYS } from '../../../utils/storage';
 
 /**
  * React hook to get PublisherProperties combining default options and options set in UserContext
@@ -49,8 +50,10 @@ const usePublisherOptions = (): PublisherProperties | null => {
         initials,
         insertDefaultUI: false,
         name,
-        publishAudio: !!publishAudio,
-        publishVideo: !!publishVideo,
+        publishAudio:
+          !!publishAudio && getStorageItem(STORAGE_KEYS.AUDIO_SOURCE_ENABLED) !== 'false',
+        publishVideo:
+          !!publishVideo && getStorageItem(STORAGE_KEYS.VIDEO_SOURCE_ENABLED) !== 'false',
         resolution: '1280x720',
         audioFilter,
         videoFilter,
