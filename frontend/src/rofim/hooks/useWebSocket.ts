@@ -6,14 +6,16 @@ import environment from '../environments';
 import {
   canJoinVisioAtom,
   doctorDelayAtom,
+  isSocketConnectedAtom,
   socketConnectionStatusAtom,
   tcStartTimeAtom,
 } from '../atoms/webSocketAtoms';
 
-const useWebSocket = () => {
-  let socket: Socket | null = null;
+let socket: Socket | null = null;
 
+const useWebSocket = () => {
   const [isSocketInit, setIsSocketInit] = useState(false);
+  const [isSocketConnected, setIsSocketConnected] = useAtom(isSocketConnectedAtom);
   const [, setSocketConnectionReady] = useAtom(socketConnectionStatusAtom);
   const [, setDoctorDelayInMinute] = useAtom(doctorDelayAtom);
   const [, setStartTime] = useAtom(tcStartTimeAtom);
@@ -37,6 +39,11 @@ const useWebSocket = () => {
 
   const onConnect = () => {
     setSocketConnectionReady(true);
+    setIsSocketConnected(true);
+  };
+
+  const onDisconnect = () => {
+    setIsSocketConnected(false);
   };
 
   const initSocket = () => {
@@ -64,16 +71,21 @@ const useWebSocket = () => {
           type: rofimSession.type,
         },
       });
+
       socket.on('connect', onConnect);
+      socket.on('disconnect', onDisconnect);
       socket.on('connect_error', onConnectionError);
       socket.on('message', onMessage);
+
       socket.connect();
+
       setIsSocketInit(true);
     }
   };
 
   return {
     initSocket,
+    isSocketConnected,
   };
 };
 

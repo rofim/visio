@@ -1,6 +1,8 @@
 {
     "button.join": "Rejoindre la visio",
     "pip.ariaLabel": "activer picture in picture",
+    "pip.state.on": "Activer le mode PIP",
+    "pip.state.off": "Désactiver le mode PIP",
     "waitingRoom.title": "Veuillez patienter",
     "waitingRoom.message": "Votre médecin va bientôt arriver",
     "waitingRoom.redirection": "Vous serez automatiquement redirigé vers la visioconférence dès qu'il se connectera.",
@@ -8,6 +10,6 @@
     "waitingRoom.disclaimer": "Si au bout de 30 min, la connexion n'a toujours pas eu lieu, n'hésitez pas à contacter son secrétariat",
     "waitingRoom.doctorDelayed.title": "Rendez-vous retardé",
     "waitingRoom.doctorDelayed.message": "Votre médecin vous informe que le rendez-vous est retardé de {{doctorDelayInMinute}} min (heure estimée : {{startTime}})",
-    "pip.state.on": "Activer le mode PIP",
-    "pip.state.off": "Désactiver le mode PIP"
+    "waitingRoom.connectionLost": "Connexion perdue. Nous tentons de vous reconnecter… Ne fermez pas cette page."
 }
+
