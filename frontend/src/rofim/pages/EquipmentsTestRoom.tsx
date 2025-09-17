@@ -1,3 +1,4 @@
+/* eslint-disable @cspell/spellchecker */
 import { useState, useEffect, MouseEvent, ReactElement, TouchEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -11,6 +12,8 @@ import useIsSmallViewport from '../../hooks/useIsSmallViewport';
 import { getRofimSession } from '../utils/session';
 import Button from '../components/Button';
 import RofimApiService, { WaitingRoomStatus } from '../api/rofimApi';
+import useNetworkStatus from '../hooks/useNetworkStatus';
+import useWebSocket from '../hooks/useWebSocket';
 
 /**
  * WaitingRoom Component from vonage
@@ -35,6 +38,9 @@ const EquipmentsTestRoom = (): ReactElement => {
   const [openAudioInput, setOpenAudioInput] = useState<boolean>(false);
   const [openVideoInput, setOpenVideoInput] = useState<boolean>(false);
   const [openAudioOutput, setOpenAudioOutput] = useState<boolean>(false);
+  const isOnline = useNetworkStatus();
+  const { isSocketConnected } = useWebSocket();
+
   const username = getStorageItem(STORAGE_KEYS.USERNAME) ?? '';
   const isSmallViewport = useIsSmallViewport();
   const rofimSession = getRofimSession();
@@ -43,10 +49,14 @@ const EquipmentsTestRoom = (): ReactElement => {
   const waitingRoom = rofimSession?.waitingRoom;
 
   useEffect(() => {
-    if (patientId) {
-      RofimApiService.updateTeleconsultationStatus(WaitingRoomStatus.CheckingEquipment);
+    if (patientId && isOnline && isSocketConnected) {
+      // TODO: a refacto quand on aura plus vonageV1
+      // Pour laisser le temps au WS de se reconnecter avant d'appeler l'API
+      setTimeout(() => {
+        RofimApiService.updateTeleconsultationStatus(WaitingRoomStatus.CheckingEquipment);
+      }, 1000);
     }
-  }, [patientId]);
+  }, [patientId, isOnline, isSocketConnected]);
 
   useEffect(() => {
     if (!publisher) {
