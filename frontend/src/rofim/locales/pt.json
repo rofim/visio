@@ -1,6 +1,8 @@
 {
   "button.join": "Participar na videochamada",
   "pip.ariaLabel": "ativar imagem na imagem",
+  "pip.state.on": "Ativar o modo PIP",
+  "pip.state.off": "Desativar o modo PIP",
   "waitingRoom.title": "Por favor, aguarde",
   "waitingRoom.message": "O seu médico chegará em breve",
   "waitingRoom.redirection": "Será automaticamente redirecionado para a videoconferência assim que ele se ligar.",
@@ -8,6 +10,5 @@
   "waitingRoom.disclaimer": "Se após 30 minutos a ligação ainda não tiver ocorrido, não hesite em contactar o seu secretariado.",
   "waitingRoom.doctorDelayed.title": "Consulta atrasada",
   "waitingRoom.doctorDelayed.message": "O seu médico informa que a consulta está atrasada {{doctorDelayInMinute}} min (hora prevista: {{startTime}})",
-  "pip.state.on": "Ativar o modo PIP",
-  "pip.state.off": "Desativar o modo PIP"
+  "waitingRoom.connectionLost": "Ligação perdida. Estamos a tentar reconectá-lo… Não feche esta página."
 }
