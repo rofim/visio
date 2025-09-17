@@ -81,6 +81,7 @@ Dans un premier temps il nécéssaire de créer un nouveau remote avec Git pour 
 ```bash
 git remote add vonage git@github.com:Vonage/vonage-video-react-app.git
 ```
+Vonage nous demander également de [signer nos commits](https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification#ssh-commit-signature-verification)
 
 #### Mettre à jours l'app
 
