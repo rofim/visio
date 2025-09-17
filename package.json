@@ -14,7 +14,7 @@
   },
   "scripts": {
     "build": "yarn workspace frontend build",
-    "build:prod": "yarn workspace frontend build:prod",
+    "build:production": "yarn workspace frontend build:production",
     "build:preprod": "yarn workspace frontend build:preprod",
     "build:staging": "yarn workspace frontend build:staging",
     "deploy-vcr": "vcr deploy",
