@@ -15,7 +15,7 @@ on:
 jobs:
   deploy:
     name: Start AWS pipeline for visio on ${{ inputs.environment || 'staging' }}}
-    runs-on: codebuild-runner-tiny-${{ github.run_id }}-${{ github.run_attempt }}
+    runs-on: ubuntu-latest
     # Deployment environment information in GitHub also used by JIRA to update the ticket status
     environment: ${{ github.ref_name == 'develop' && 'staging' || inputs.environment }}
     # Runtime environment variable used in deployment
