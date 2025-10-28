@@ -6,7 +6,7 @@ import usePreviewPublisherContext from '../../hooks/usePreviewPublisherContext';
 import ControlPanel from '../../components/WaitingRoom/ControlPanel';
 import VideoContainer from '../../components/WaitingRoom/VideoContainer';
 import { DEVICE_ACCESS_STATUS } from '../../utils/constants';
-import DeviceAccessAlert from '../../components/DeviceAccessAlert';
+import DeviceAccessAlert from '../components/DeviceAccessAlert';
 import { getStorageItem, STORAGE_KEYS } from '../../utils/storage';
 import useIsSmallViewport from '../../hooks/useIsSmallViewport';
 import { getRofimSession } from '../utils/session';
