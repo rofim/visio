@@ -45,7 +45,7 @@ export default defineConfig(({ mode }) => {
         'process.env.CI': process.env.CI,
         preventAssignment: true,
       }),
-       ...(isDevelopment
+      ...(isDevelopment
         ? [
             checker({
               typescript: true,
