@@ -16,6 +16,7 @@ import initMatomo from './matomo';
 
 const App = () => {
   React.useEffect(() => {
+    initMatomo();
     // Initialisation au chargement de la page
     document.addEventListener('DOMContentLoaded', initMatomo);
   }, []);
