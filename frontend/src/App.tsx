@@ -15,8 +15,8 @@ import RoomContext from './Context/RoomContext';
 import initMatomo from './matomo';
 
 const App = () => {
+  initMatomo();
   React.useEffect(() => {
-    initMatomo();
     // Initialisation au chargement de la page
     document.addEventListener('DOMContentLoaded', initMatomo);
   }, []);
