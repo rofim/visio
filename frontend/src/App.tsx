@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import React from 'react';
 import './css/App.css';
 import './css/index.css';
 import Room from './pages/MeetingRoom/index';
@@ -11,8 +12,13 @@ import { PublisherProvider } from './Context/PublisherProvider';
 import RedirectToWaitingRoom from './components/RedirectToWaitingRoom';
 import UnsupportedBrowserPage from './pages/UnsupportedBrowserPage';
 import RoomContext from './Context/RoomContext';
+import initMatomo from './matomo';
 
 const App = () => {
+  React.useEffect(() => {
+    // Initialisation au chargement de la page
+    document.addEventListener('DOMContentLoaded', initMatomo);
+  }, []);
   return (
     <Router>
       <Routes>
