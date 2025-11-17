@@ -47,33 +47,32 @@ function getEnvironment(): 'staging' | 'preprod' | 'prod' {
 }
 
 const App = () => {
-  React.useEffect(() => {
-    console.log('--- INIT MATOMO ---');
-    const env = getEnvironment();
-    console.log('ENV - ', env);
-    const config = matomoConfig[env];
-    console.log('CONFIG - ', config);
-    if (!config) return;
+  console.log('--- INIT MATOMO ---');
+  const env = getEnvironment();
+  console.log('ENV - ', env);
+  const config = matomoConfig[env];
+  console.log('CONFIG - ', config);
+  if (!config) return;
 
-    const _paq = (window as any)._paq = (window as any)._paq || [];
-    _paq.push(['trackPageView']);
-    _paq.push(['enableLinkTracking']);
+  const _paq = (window as any)._paq = (window as any)._paq || [];
+  _paq.push(['trackPageView']);
+  _paq.push(['enableLinkTracking']);
 
-    // Configuration cross-domain
-    _paq.push(['setCookieDomain', config.cookieDomain]);
-    _paq.push(['setDomains', config.domains]);
-    _paq.push(['setCrossDomainLinkingTimeout', 30]);
+  // Configuration cross-domain
+  _paq.push(['setCookieDomain', config.cookieDomain]);
+  _paq.push(['setDomains', config.domains]);
+  _paq.push(['setCrossDomainLinkingTimeout', 30]);
 
-    const u = config.url;
-    _paq.push(['setTrackerUrl', u + 'matomo.php']);
-    _paq.push(['setSiteId', config.siteId]);
-    const d = document;
-    const g = d.createElement('script');
-    const s = d.getElementsByTagName('script')[0];
-    g.async = true;
-    g.src = u + 'matomo.js';
-    s.parentNode?.insertBefore(g, s);
-  }, []);
+  const u = config.url;
+  _paq.push(['setTrackerUrl', u + 'matomo.php']);
+  _paq.push(['setSiteId', config.siteId]);
+  const d = document;
+  const g = d.createElement('script');
+  const s = d.getElementsByTagName('script')[0];
+  g.async = true;
+  g.src = u + 'matomo.js';
+  s.parentNode?.insertBefore(g, s);
+
   return (
     <Router>
       <Routes>
