@@ -41,8 +41,6 @@ export default function initMatomo(): void {
   if (!config) return;
 
   const _paq = (window as any)._paq = (window as any)._paq || [];
-  _paq.push(['trackPageView']);
-  _paq.push(['enableLinkTracking']);
 
   // Configuration cross-domain
   _paq.push(['setCookieDomain', config.cookieDomain]);
@@ -52,6 +50,8 @@ export default function initMatomo(): void {
   const u = config.url;
   _paq.push(['setTrackerUrl', u + 'matomo.php']);
   _paq.push(['setSiteId', config.siteId]);
+  _paq.push(['trackPageView']);
+  _paq.push(['enableLinkTracking']);
   const d = document;
   const g = d.createElement('script');
   const s = d.getElementsByTagName('script')[0];
