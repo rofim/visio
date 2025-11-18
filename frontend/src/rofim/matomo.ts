@@ -36,11 +36,8 @@ function getEnvironment(): 'staging' | 'preprod' | 'prod' {
  * Init Matomo
  */
 export default function initMatomo(): void {
-  console.log('--- INIT MATOMO ---');
   const env = getEnvironment();
-  console.log('ENV - ', env);
   const config = matomoConfig[env];
-  console.log('CONFIG - ', config);
   if (!config) return;
 
   const _paq = (window as any)._paq = (window as any)._paq || [];
