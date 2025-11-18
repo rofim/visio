@@ -1,9 +1,7 @@
 import ReactDOM from 'react-dom/client';
 import App from './App.jsx';
-import initMatomo from './matomo.js';
 import './i18n.js';
 
-initMatomo();
 /**
  * The root HTML element where the React application is rendered.
  * This element must exist in the DOM for the application to mount correctly.
