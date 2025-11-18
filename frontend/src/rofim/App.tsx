@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import '../css/App.css';
 import './css/index.css';
+import React from 'react';
 import Room from './pages/MeetingRoom/index';
 import EquipmentsTestRoom from './pages/EquipmentsTestRoom';
 import WaitingRoom from './pages/WaitingDoctor';
@@ -12,8 +13,12 @@ import RoomContext from '../Context/RoomContext';
 import RofimInit from './context/RofimContext';
 import ErrorPage from './pages/ErrorPage';
 import GoodBye from './pages/GoodBye';
+import initMatomo from './matomo';
 
 const App = () => {
+  React.useEffect(() => {
+    initMatomo();
+  });
   return (
     <Router>
       <RofimInit>
