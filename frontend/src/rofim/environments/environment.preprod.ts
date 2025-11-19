@@ -1,3 +1,4 @@
+/* eslint-disable @cspell/spellchecker */
 import { IEnvironment } from './environment.interface';
 
 const environment: IEnvironment = {
@@ -8,6 +9,12 @@ const environment: IEnvironment = {
   i18n: {
     defaultLanguage: 'fr',
     supportedLanguages: ['de', 'en', 'es', 'fr', 'it', 'pt'],
+  },
+  matomo: {
+    url: '//matomo.preprod.rofim.doctor/',
+    siteId: '1',
+    cookieDomain: '*.preprod.rofim.doctor',
+    domains: ['*.preprod.rofim.doctor'],
   },
 };
 
