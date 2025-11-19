@@ -1,3 +1,4 @@
+/* eslint-disable @cspell/spellchecker */
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import '../css/App.css';
 import './css/index.css';
