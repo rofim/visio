@@ -10,6 +10,7 @@ import VideoTile from '../MeetingRoom/VideoTile';
 import PinButton from '../MeetingRoom/PinButton';
 import useSessionContext from '../../hooks/useSessionContext';
 import isMouseEventInsideBox from '../../utils/isMouseEventInsideBox';
+import getInitials from '../../utils/getInitials';
 
 export type SubscriberProps = {
   subscriberWrapper: SubscriberWrapper;
@@ -82,9 +83,24 @@ const Subscriber = ({
     }, 0);
   };
 
+  console.log('subscriberWrapper', subscriberWrapper.subscriber?.stream);
+  let initials = subscriberWrapper.subscriber?.stream?.initials;
+  let username = subscriberWrapper.subscriber?.stream?.name ?? '';
+  // Call SIP dans ce cas
+  if (
+    subscriberWrapper.subscriber?.stream?.name &&
+    subscriberWrapper.subscriber?.stream?.name ===
+      subscriberWrapper.subscriber?.stream?.connection?.data
+  ) {
+  } else {
+    try {
+      const sipData = JSON.parse(subscriberWrapper.subscriber?.stream?.connection?.data || '');
+      username = sipData?.name || username;
+      initials = getInitials(username);
+    } catch (error) {}
+  }
+
   const hasVideo = subscriberWrapper.subscriber?.stream?.hasVideo;
-  const initials = subscriberWrapper.subscriber?.stream?.initials;
-  const username = subscriberWrapper.subscriber?.stream?.name ?? '';
   const hasAudio = subscriberWrapper.subscriber.stream?.hasAudio;
   const audioIndicatorStyle =
     'rounded-xl absolute top-3 right-3 bg-darkGray-55 h-6 w-6 items-center justify-center flex m-auto';
