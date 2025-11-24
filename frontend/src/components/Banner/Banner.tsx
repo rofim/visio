@@ -1,4 +1,8 @@
 import { ReactElement } from 'react';
+import { AppBar, Toolbar } from '@mui/material';
+import Box from '@ui/Box';
+import Stack from '@ui/Stack';
+import useCustomTheme from '@Context/Theme';
 import BannerDateTime from '../BannerDateTime';
 import BannerLinks from '../BannerLinks';
 import BannerLogo from '../BannerLogo';
@@ -11,16 +15,33 @@ import BannerLanguage from '../BannerLanguage';
  * @returns {ReactElement} - the banner component.
  */
 const Banner = (): ReactElement => {
-  return (
-    <div className="flex w-full flex-row justify-between">
-      <BannerLogo />
+  const theme = useCustomTheme();
 
-      <div className="flex px-4">
-        <BannerDateTime />
-        <BannerLanguage />
-        <BannerLinks />
-      </div>
-    </div>
+  return (
+    <AppBar position="static">
+      <Toolbar sx={{ alignItems: 'stretch' }}>
+        <Box sx={{ flex: 1, bgcolor: theme.colors.surface }}>
+          <BannerLogo />
+        </Box>
+
+        <Box sx={{ flex: 1, bgcolor: { xs: theme.colors.surface, md: theme.colors.background } }}>
+          <Stack
+            direction="row"
+            spacing={2}
+            alignItems="center"
+            justifyContent="flex-end"
+            sx={{
+              height: '100%',
+              bgcolor: { xs: theme.colors.surface, md: theme.colors.background },
+            }}
+          >
+            <BannerDateTime />
+            <BannerLanguage />
+            <BannerLinks />
+          </Stack>
+        </Box>
+      </Toolbar>
+    </AppBar>
   );
 };
 

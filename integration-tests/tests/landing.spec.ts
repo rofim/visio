@@ -5,14 +5,12 @@ test.beforeEach(async ({ page }) => {
   await page.goto(baseURL);
 });
 
-test('should navigate to waiting room then publish in room via Enter room name textbox', async ({
+test('should navigate to waiting room then publish in room via room name textbox', async ({
   page,
 }) => {
-  await expect(page.locator('button:text("Join")')).toHaveAttribute('disabled', '');
+  await page.getByRole('textbox', { name: /Room name/i }).fill('some-room');
 
-  await page.getByPlaceholder('Enter room name').fill('some-room');
-
-  await page.locator('button:text("Join")').click();
+  await page.locator('button:text("Join waiting room")').click();
 
   await expect(page).toHaveURL(`${baseURL}waiting-room/some-room`);
 
@@ -30,7 +28,7 @@ test('should navigate to waiting room then publish in room via Enter room name t
 test('should navigate to waiting room then publish in room via Create room button', async ({
   page,
 }) => {
-  await page.getByRole('button', { name: 'Create room' }).click();
+  await page.getByRole('button', { name: 'Create a new room' }).click();
 
   await expect(page.url()).toContain('waiting-room/');
 
@@ -47,17 +45,17 @@ test('should navigate to waiting room then publish in room via Create room butto
   await page.waitForSelector('.publisher', { state: 'visible' });
 });
 
-test('GitHub Logo Redirect to Vera GitHub URL in New Tab', async ({ page, context }) => {
+test('GitHub Logo Redirect to Vonage GitHub URL in New Tab', async ({ page, context }) => {
   const [newPage] = await Promise.all([
     context.waitForEvent('page'),
-    page.getByRole('button', { name: 'Visit our GitHub Repo' }).click(), // Opens a new tab
+    page.getByRole('link', { name: 'Visit our GitHub Repo' }).click(), // Opens a new tab
   ]);
   await newPage.waitForLoadState();
   await expect(newPage).toHaveURL('https://github.com/Vonage/vonage-video-react-app/');
 });
 
 test('User should be able to navigate to the next page using enter key', async ({ page }) => {
-  await page.getByPlaceholder('Enter room name').fill('some-room');
+  await page.getByRole('textbox', { name: /Room name/i }).fill('some-room');
 
   await page.keyboard.press('Enter');
 
