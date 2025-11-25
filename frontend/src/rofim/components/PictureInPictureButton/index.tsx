@@ -7,7 +7,7 @@ import './index.css';
 
 const PictureInPictureButton = ({ className }: { className?: string }) => {
   const { t } = useTranslation();
-  const { isPipActive, togglePip, isPipAvailable } = usePictureInPicture();
+  const { isPipActive, togglePip } = usePictureInPicture();
   const title = isPipActive ? t('pip.state.off') : t('pip.state.on');
   // Check if Picture-in-Picture is supported in browser
   if (!('documentPictureInPicture' in window)) {
@@ -27,8 +27,6 @@ const PictureInPictureButton = ({ className }: { className?: string }) => {
         data-testid="pip-button"
         sx={{
           marginTop: '4px',
-          opacity: isPipAvailable ? 1 : 0.5,
-          cursor: isPipAvailable ? 'pointer' : 'not-allowed',
         }}
       />
     </Tooltip>
