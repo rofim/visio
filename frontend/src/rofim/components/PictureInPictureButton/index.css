@@ -4,7 +4,8 @@
   z-index: -1000;
   position: relative;
 
-  .subscriber {
+  .subscriber,
+  .publisher {
     margin: 0px !important;
     position: absolute !important;
     top: 0px !important;
