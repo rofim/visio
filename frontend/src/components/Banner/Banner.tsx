@@ -1,10 +1,8 @@
 import { ReactElement } from 'react';
-import { AppBar, Toolbar } from '@mui/material';
 import Box from '@ui/Box';
 import Stack from '@ui/Stack';
 import useCustomTheme from '@Context/Theme';
-import BannerDateTime from '../BannerDateTime';
-import BannerLinks from '../BannerLinks';
+import Header from '@ui/Header';
 import BannerLogo from '../BannerLogo';
 import BannerLanguage from '../BannerLanguage';
 
@@ -18,30 +16,27 @@ const Banner = (): ReactElement => {
   const theme = useCustomTheme();
 
   return (
-    <AppBar position="static">
-      <Toolbar sx={{ alignItems: 'stretch' }}>
-        <Box sx={{ flex: 1, bgcolor: theme.colors.surface }}>
-          <BannerLogo />
-        </Box>
+    <Header appBarProps={{ position: 'static' }} toolbarProps={{ sx: { alignItems: 'stretch' } }}>
+      <Box sx={{ flex: 1, bgcolor: theme.colors.surface }}>
+        <BannerLogo />
+      </Box>
 
-        <Box sx={{ flex: 1, bgcolor: { xs: theme.colors.surface, md: theme.colors.background } }}>
-          <Stack
-            direction="row"
-            spacing={2}
-            alignItems="center"
-            justifyContent="flex-end"
-            sx={{
-              height: '100%',
-              bgcolor: { xs: theme.colors.surface, md: theme.colors.background },
-            }}
-          >
-            <BannerDateTime />
-            <BannerLanguage />
-            <BannerLinks />
-          </Stack>
-        </Box>
-      </Toolbar>
-    </AppBar>
+      <Box sx={{ flex: 1, bgcolor: { xs: theme.colors.surface, md: theme.colors.background } }}>
+        <Stack
+          direction="row"
+          spacing={2}
+          alignItems="center"
+          justifyContent="flex-end"
+          sx={{
+            height: '100%',
+            bgcolor: { xs: theme.colors.surface, md: theme.colors.background },
+            mr: 4,
+          }}
+        >
+          <BannerLanguage />
+        </Stack>
+      </Box>
+    </Header>
   );
 };
 

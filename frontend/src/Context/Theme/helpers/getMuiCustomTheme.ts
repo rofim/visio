@@ -154,6 +154,16 @@ const getMuiCustomTheme = ({ tokens }: { tokens: ThemeTokens }) => {
           },
         },
       },
+      MuiList: {
+        styleOverrides: {
+          root: {
+            backgroundColor: colors.onSecondary,
+            color: colors.textSecondary,
+            fontSize: tokens.typography.typeScale.desktop['body-base'].fontSize.value,
+            lineHeight: tokens.typography.typeScale.desktop['body-base'].lineHeight.value,
+          },
+        },
+      },
       MuiTypography: {
         styleOverrides: {
           h1: createResponsiveTypography(tokens, 'headline', 'headline'),

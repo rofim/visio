@@ -1,21 +1,15 @@
 import { ReactElement } from 'react';
-import { Select, MenuItem, FormControl, SelectChangeEvent, Box } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import Box from '@ui/Box';
+import MenuItem from '@ui/MenuItem';
+import FormControl from '@ui/FormControl';
+import Select from '@ui/Select';
+import { SelectChangeEvent } from '@ui/SelectChangeEvent';
 import useCustomTheme from '@Context/Theme';
+import { LanguageOption, LanguageSelectorProps } from './LanguageSelector.types';
 import useIsSmallViewport from '../../hooks/useIsSmallViewport';
 import VividIcon from '../VividIcon/VividIcon';
-import env, { type Lang } from '../../env';
-
-type LanguageOption = {
-  code: Lang;
-  name: string;
-  flag: string;
-};
-
-type LanguageSelectorProps = {
-  showFlag?: boolean;
-  className?: string;
-};
+import env from '../../env';
 
 const languageOptions: LanguageOption[] = [
   { code: 'en', name: 'English', flag: 'flag-united-kingdom' },
@@ -31,10 +25,9 @@ const languageOptions: LanguageOption[] = [
  * The available languages are determined by the VITE_I18N_SUPPORTED_LANGUAGES environment variable.
  * @param {LanguageSelectorProps} props - The props for the component.
  * @property {boolean} showFlag - Whether to display the country flag alongside the language name.
- * @property {string} className - Additional CSS classes to apply to the component.
  * @returns {ReactElement} The rendered LanguageSelector component.
  */
-const LanguageSelector = ({ showFlag = true, className }: LanguageSelectorProps): ReactElement => {
+const LanguageSelector = ({ showFlag = true }: LanguageSelectorProps): ReactElement => {
   const { i18n } = useTranslation();
   const theme = useCustomTheme();
   const isSmallViewport = useIsSmallViewport();
@@ -51,7 +44,7 @@ const LanguageSelector = ({ showFlag = true, className }: LanguageSelectorProps)
   const currentLanguage = i18n.language || 'en';
 
   return (
-    <FormControl variant="outlined" size="small" className={className}>
+    <FormControl variant="outlined" size="small">
       <Select
         value={currentLanguage}
         onChange={handleLanguageChange}
@@ -75,7 +68,7 @@ const LanguageSelector = ({ showFlag = true, className }: LanguageSelectorProps)
 
           return (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              {showFlag && <VividIcon name={selectedOption.flag} customSize={-3} />}
+              {showFlag && <VividIcon name={selectedOption.flag} customSize={-2} />}
               {!isSmallViewport && <span>{selectedOption.name}</span>}
             </Box>
           );
@@ -89,7 +82,7 @@ const LanguageSelector = ({ showFlag = true, className }: LanguageSelectorProps)
             data-testid={`language-option-${option.code}`}
           >
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              {showFlag && <VividIcon name={option.flag} customSize={-5} />}
+              {showFlag && <VividIcon name={option.flag} customSize={-2} />}
               <span>{option.name}</span>
             </Box>
           </MenuItem>
