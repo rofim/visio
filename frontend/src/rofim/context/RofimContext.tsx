@@ -7,7 +7,7 @@ import useWebSocket from '../hooks/useWebSocket';
 
 const RofimInit = ({ children }: PropsWithChildren) => {
   const [isSocketConnectionReady] = useAtom(socketConnectionStatusAtom);
-  const { initSocket } = useWebSocket();
+  const { initSocket } = useWebSocket(true);
   const [isInit, setIsInit] = useState(false);
   const navigate = useNavigate();
 

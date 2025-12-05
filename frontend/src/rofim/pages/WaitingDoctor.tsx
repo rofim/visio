@@ -29,8 +29,8 @@ const WaitingRoom = (): ReactElement => {
   const waitingRoom = session?.waitingRoom;
 
   useEffect(() => {
-    setConnectionLost(!isOnline);
-  }, [isOnline]);
+    setConnectionLost(!isOnline || !isSocketConnected);
+  }, [isOnline, isSocketConnected]);
 
   useEffect(() => {
     if (patientId && waitingRoom && isOnline && isSocketConnected) {
