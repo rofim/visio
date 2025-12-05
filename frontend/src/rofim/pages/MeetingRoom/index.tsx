@@ -3,11 +3,13 @@ import VonageRoom from '../../../pages/MeetingRoom';
 import RofimApiService, { WaitingRoomStatus } from '../../api/rofimApi';
 import { getRofimSession } from '../../utils/session';
 import './room.css';
+import useWebSocket from '../../hooks/useWebSocket';
 
 const Room = () => {
   const rofimSession = getRofimSession();
   const patientId = rofimSession?.patientId;
   const type = rofimSession?.type;
+  const { isSocketConnected } = useWebSocket();
 
   useEffect(() => {
     if (type === 'teleconsultation') {
@@ -18,7 +20,7 @@ const Room = () => {
         RofimApiService.doctorJoinVisio();
       }
     }
-  }, [patientId, type]);
+  }, [patientId, type, isSocketConnected]);
 
   return <VonageRoom />;
 };
