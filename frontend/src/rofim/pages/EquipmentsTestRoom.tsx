@@ -2,6 +2,7 @@
 import { useState, useEffect, MouseEvent, ReactElement, TouchEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { CircularProgress } from '@mui/material';
 import usePreviewPublisherContext from '../../hooks/usePreviewPublisherContext';
 import ControlPanel from '../../components/WaitingRoom/ControlPanel';
 import VideoContainer from '../../components/WaitingRoom/VideoContainer';
@@ -40,6 +41,7 @@ const EquipmentsTestRoom = (): ReactElement => {
   const [openAudioOutput, setOpenAudioOutput] = useState<boolean>(false);
   const isOnline = useNetworkStatus();
   const { isSocketConnected } = useWebSocket();
+  const [isLoading, setIsLoading] = useState(false);
 
   const username = getStorageItem(STORAGE_KEYS.USERNAME) ?? '';
   const isSmallViewport = useIsSmallViewport();
@@ -109,10 +111,18 @@ const EquipmentsTestRoom = (): ReactElement => {
   const handleJoinRoom = async (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     if (patientId && waitingRoom) {
-      // Start visio if there is someone in the room (doctor enter first)
-      const hasParticipantCount = await RofimApiService.countParticipants();
-      if (!hasParticipantCount) {
+      try {
+        // Start visio if there is someone in the room (doctor enter first)
+        setIsLoading(true);
+        const hasParticipantCount = await RofimApiService.countParticipants();
+        if (!hasParticipantCount) {
+          return navigate('/waiting-room');
+        }
+      } catch (error) {
+        console.error('Error checking participant count:', error);
         return navigate('/waiting-room');
+      } finally {
+        setIsLoading(false);
       }
     }
 
@@ -140,8 +150,18 @@ const EquipmentsTestRoom = (): ReactElement => {
                     openAudioOutput={openAudioOutput}
                     anchorEl={anchorEl}
                   />
-                  <Button onClick={handleJoinRoom} disabled={!username}>
+                  <Button onClick={handleJoinRoom} disabled={!username && isLoading}>
                     {t('button.join')}
+                    {isLoading && (
+                      <CircularProgress
+                        className="ml-3"
+                        sx={{
+                          position: 'relative',
+                        }}
+                        size={25}
+                        data-testid="CircularProgress"
+                      />
+                    )}
                   </Button>
                 </>
               )}
