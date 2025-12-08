@@ -19,7 +19,8 @@ import initMatomo from './matomo';
 const App = () => {
   React.useEffect(() => {
     initMatomo();
-  });
+  }, []);
+
   return (
     <Router>
       <RofimInit>
