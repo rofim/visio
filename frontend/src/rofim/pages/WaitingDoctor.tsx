@@ -33,7 +33,7 @@ const WaitingRoom = (): ReactElement => {
   }, [isOnline, isSocketConnected]);
 
   useEffect(() => {
-    if (patientId && waitingRoom && isOnline && isSocketConnected) {
+    if (patientId && waitingRoom && isOnline) {
       const updateTCStatus = async () => {
         const tc = await rofimApiService.updateTeleconsultationStatus(WaitingRoomStatus.Wait);
         if (tc.doctorDelayInMinute && tc.startTime) {
@@ -49,10 +49,12 @@ const WaitingRoom = (): ReactElement => {
       };
       // TODO: a refacto quand on aura plus vonageV1
       // Pour laisser le temps au WS de se reconnecter avant d'appeler l'API
-      setTimeout(() => {
+      const timeout = setTimeout(() => {
         updateTCStatus();
-      }, 1000);
+      }, 5000);
+      return () => clearTimeout(timeout);
     }
+    return () => {};
   }, [
     waitingRoom,
     patientId,

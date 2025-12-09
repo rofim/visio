@@ -54,10 +54,12 @@ const EquipmentsTestRoom = (): ReactElement => {
     if (patientId && isOnline && isSocketConnected) {
       // TODO: a refacto quand on aura plus vonageV1
       // Pour laisser le temps au WS de se reconnecter avant d'appeler l'API
-      setTimeout(() => {
+      const timeout = setTimeout(() => {
         RofimApiService.updateTeleconsultationStatus(WaitingRoomStatus.CheckingEquipment);
-      }, 1000);
+      }, 5000);
+      return () => timeout && clearTimeout(timeout);
     }
+    return () => {};
   }, [patientId, isOnline, isSocketConnected]);
 
   useEffect(() => {
