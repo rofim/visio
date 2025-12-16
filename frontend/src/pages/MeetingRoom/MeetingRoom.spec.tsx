@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it, Mock, vi } from 'vitest';
 import { render as renderBase, screen } from '@testing-library/react';
 import { Publisher, Subscriber } from '@vonage/client-sdk-video';
 import { EventEmitter } from 'stream';
-import * as mui from '@mui/material';
 import { ReactElement } from 'react';
 import UserProvider, { UserContextType } from '@Context/user';
 import SessionProvider, { SessionContextType } from '@Context/SessionProvider/session';
@@ -27,6 +26,7 @@ import useToolbarButtons, {
 import usePublisherOptions from '@Context/PublisherProvider/usePublisherOptions';
 import { makeAppConfigProviderWrapper } from '@test/providers';
 import composeProviders from '@utils/composeProviders';
+import useMediaQuery from '@ui/useMediaQuery';
 import MeetingRoom from './MeetingRoom';
 import type { Box } from 'opentok-layout-js';
 
@@ -51,13 +51,9 @@ vi.mock('react-router-dom', async () => {
     useLocation: () => mockedLocation,
   };
 });
-vi.mock('@mui/material', async () => {
-  const actual = await vi.importActual<typeof mui>('@mui/material');
-  return {
-    ...actual,
-    useMediaQuery: vi.fn(),
-  };
-});
+vi.mock('@ui/useMediaQuery', () => ({
+  default: vi.fn(),
+}));
 
 vi.mock('@hooks/useDevices.tsx');
 vi.mock('@hooks/usePublisherContext.tsx');
@@ -176,7 +172,7 @@ describe('MeetingRoom', () => {
       screenshareVideoElement: undefined,
       screensharingPublisher: null,
     });
-    (mui.useMediaQuery as Mock).mockReturnValue(false);
+    (useMediaQuery as Mock).mockReturnValue(false);
     mockUseToolbarButtons.mockImplementation(
       ({ numberOfToolbarButtons }: UseToolbarButtonsProps) => {
         const renderedToolbarButtons: UseToolbarButtons = {
@@ -196,7 +192,7 @@ describe('MeetingRoom', () => {
   });
 
   it('renders the small viewport header bar if it is on a small tab or device', () => {
-    (mui.useMediaQuery as Mock).mockReturnValue(true);
+    (useMediaQuery as Mock).mockReturnValue(true);
     render(<MeetingRoom />);
     expect(screen.getByTestId('smallViewportHeader')).not.toBeNull();
   });

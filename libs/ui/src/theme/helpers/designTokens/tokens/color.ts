@@ -163,21 +163,23 @@ const lightColors: ThemeTokens['colors'] = {
     type: 'color',
     description: 'Text or icon color used on surface elements.',
   },
+
   'alert-background': {
     value: colorVariables.alert[50],
     type: 'color',
     description: 'Background color for alert messages and notifications.',
-  },
-  'alert-background-hover': {
-    value: colorVariables.alert[100],
-    type: 'color',
-    description: 'Hover background color for alert messages and notifications.',
   },
   'alert-text': {
     value: colorVariables.alert[600],
     type: 'color',
     description: 'Text color for alert messages and notifications.',
   },
+  'alert-background-hover': {
+    value: colorVariables.alert[100],
+    type: 'color',
+    description: 'Hover background color for alert messages and notifications.',
+  },
+
   error: {
     value: colorVariables.alert[500],
     type: 'color',

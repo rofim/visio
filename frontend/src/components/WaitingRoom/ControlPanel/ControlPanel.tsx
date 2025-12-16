@@ -5,14 +5,12 @@ import useDevices from '@hooks/useDevices';
 import useAudioOutputContext from '@hooks/useAudioOutputContext';
 import useIsSmallViewport from '@hooks/useIsSmallViewport';
 import Box from '@ui/Box';
-import { SxProps } from '@ui/SxProps';
+import type { SxProps } from '@ui/SxProps';
 import useTheme from '@ui/theme';
 import VividIcon from '@components/VividIcon';
 import ButtonBase from '@ui/ButtonBase';
 import MenuDevicesWaitingRoom from '../MenuDevices';
 import MenuMoreOptions from '../MenuMoreOptions/MenuMoreOptions';
-import useAppConfig from '@Context/AppConfig/hooks/useAppConfig';
-import { hasMediaProcessorSupport } from '@vonage/client-sdk-video';
 
 const textSx: SxProps = {
   flex: '1 1 0',
@@ -64,11 +62,6 @@ const ControlPanel = ({
   openAudioOutput,
   anchorEl,
 }: ControlPanelProps): ReactElement | false => {
-  const allowBackgroundEffects = useAppConfig(
-    ({ videoSettings }) => videoSettings.allowBackgroundEffects
-  );
-  const shouldDisplayMenuMoreOptions = hasMediaProcessorSupport() && allowBackgroundEffects;
-
   const [openMoreOptions, setOpenMoreOptions] = useState(false);
   const [moreOptionsAnchorEl, setMoreOptionsAnchorEl] = useState<HTMLElement | null>(null);
   const handleCloseMoreOptions = () => {
@@ -142,6 +135,30 @@ const ControlPanel = ({
         />
 
         <ButtonBase
+          onClick={handleVideoInputOpen}
+          sx={buttonSx}
+          aria-controls={openVideoInput ? 'basic-menu' : undefined}
+          aria-haspopup="true"
+          aria-expanded={openVideoInput ? 'true' : undefined}
+          aria-label={t('devices.video.camera.ariaLabel')}
+        >
+          <VividIcon name="video-line" customSize={-6} />
+          <Box component="span" sx={textSx}>
+            {t('button.camera')}
+          </Box>
+          <VividIcon name="chevron-down-line" customSize={-6} />
+        </ButtonBase>
+        <MenuDevicesWaitingRoom
+          devices={allMediaDevices.videoInputDevices}
+          open={openVideoInput}
+          onClose={handleClose}
+          anchorEl={anchorEl}
+          localSource={localVideoSource}
+          deviceChangeHandler={changeVideoSource}
+          deviceType="videoInput"
+        />
+
+        <ButtonBase
           onClick={handleAudioOutputOpen}
           sx={buttonSx}
           aria-controls={openAudioOutput ? 'basic-menu' : undefined}
@@ -165,41 +182,14 @@ const ControlPanel = ({
           deviceType="audioOutput"
         />
 
-        <ButtonBase
-          onClick={handleVideoInputOpen}
-          sx={buttonSx}
-          aria-controls={openVideoInput ? 'basic-menu' : undefined}
-          aria-haspopup="true"
-          aria-expanded={openVideoInput ? 'true' : undefined}
-          aria-label={t('devices.video.camera.ariaLabel')}
-        >
-          <VividIcon name="video-line" customSize={-6} />
-          <Box component="span" sx={textSx}>
-            {t('button.camera')}
-          </Box>
-          <VividIcon name="chevron-down-line" customSize={-6} />
+        <ButtonBase onClick={handleOpenMoreOptions} sx={buttonSx}>
+          <VividIcon name="more-vertical-solid" customSize={-5} />
         </ButtonBase>
-        <MenuDevicesWaitingRoom
-          devices={allMediaDevices.videoInputDevices}
-          open={openVideoInput}
-          onClose={handleClose}
-          anchorEl={anchorEl}
-          localSource={localVideoSource}
-          deviceChangeHandler={changeVideoSource}
-          deviceType="videoInput"
+        <MenuMoreOptions
+          onClose={handleCloseMoreOptions}
+          open={openMoreOptions}
+          anchorEl={moreOptionsAnchorEl}
         />
-        {shouldDisplayMenuMoreOptions && (
-          <>
-            <ButtonBase onClick={handleOpenMoreOptions} sx={buttonSx}>
-              <VividIcon name="more-vertical-solid" customSize={-5} />
-            </ButtonBase>
-            <MenuMoreOptions
-              onClose={handleCloseMoreOptions}
-              open={openMoreOptions}
-              anchorEl={moreOptionsAnchorEl}
-            />
-          </>
-        )}
       </Box>
     </Box>
   );

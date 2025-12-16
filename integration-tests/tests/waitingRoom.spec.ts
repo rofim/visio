@@ -11,9 +11,14 @@ test('The buttons in the meeting room should match those in the waiting room wit
   browserName,
   isMobile,
 }) => {
-  await expect(page.getByTestId('MicIcon')).toBeVisible();
+  // Check icons in the video preview area (first .video-container-button)
+  await expect(
+    page.getByTestId('video-container-button').first().getByTestId('vivid-icon-microphone-line')
+  ).toBeVisible();
 
-  await expect(page.getByTestId('VideocamIcon')).toBeVisible();
+  await expect(
+    page.getByTestId('video-container-button').nth(1).getByTestId('vivid-icon-video-line')
+  ).toBeVisible();
   await expect(page.getByTestId('PersonIcon')).toHaveCount(0);
 
   if (browserName !== 'firefox') {
@@ -43,11 +48,17 @@ test('The buttons in the meeting room should match those in the waiting room wit
   browserName,
   isMobile,
 }) => {
-  await page.getByTestId('MicIcon').click();
-  await expect(page.getByTestId('MicOffIcon')).toBeVisible();
+  // Click mic button in the video preview area
+  await page.getByTestId('video-container-button').first().click();
+  await expect(
+    page.getByTestId('video-container-button').first().getByTestId('vivid-icon-mic-mute-line')
+  ).toBeVisible();
 
-  await page.getByTestId('VideocamIcon').click();
-  await expect(page.getByTestId('VideocamOffIcon')).toBeVisible();
+  // Click video button in the video preview area
+  await page.getByTestId('video-container-button').nth(1).click();
+  await expect(
+    page.getByTestId('video-container-button').nth(1).getByTestId('vivid-icon-video-off-line')
+  ).toBeVisible();
   await expect(page.getByTestId('PersonIcon')).toBeVisible();
 
   if (browserName !== 'firefox') {

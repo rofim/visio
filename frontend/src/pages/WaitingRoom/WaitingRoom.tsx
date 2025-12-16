@@ -10,10 +10,8 @@ import UsernameInput from '../../components/WaitingRoom/UserNameInput';
 import { DEVICE_ACCESS_STATUS } from '../../utils/constants';
 import DeviceAccessAlert from '../../components/DeviceAccessAlert';
 import { getStorageItem, STORAGE_KEYS } from '../../utils/storage';
-import useIsSmallViewport from '../../hooks/useIsSmallViewport';
 import useBackgroundPublisherContext from '../../hooks/useBackgroundPublisherContext';
 import backgroundEffectsDialog$ from '../../Context/BackgroundEffectsDialog';
-import classNames from 'classnames';
 import useAppConfig from '@Context/AppConfig/hooks/useAppConfig';
 
 /**
@@ -42,7 +40,6 @@ const WaitingRoom = (): ReactElement => {
   const [openVideoInput, setOpenVideoInput] = useState<boolean>(false);
   const [openAudioOutput, setOpenAudioOutput] = useState<boolean>(false);
   const [username, setUsername] = useState(getStorageItem(STORAGE_KEYS.USERNAME) ?? '');
-  const isSmallViewport = useIsSmallViewport();
 
   const allowDeviceSelection = useAppConfig(
     ({ waitingRoomSettings }) => waitingRoomSettings.allowDeviceSelection
@@ -109,12 +106,14 @@ const WaitingRoom = (): ReactElement => {
           <PageLayout.Banner>
             <Banner />
           </PageLayout.Banner>
-
           <PageLayout.Left>
-            <div
-              className={classNames(`max-w-full`, {
-                'h-[394px]': !isSmallViewport,
-              })}
+            <Box
+              sx={{
+                maxWidth: '100%',
+                display: 'inline-flex',
+                flexDirection: 'column',
+                height: { xs: 'auto', sm: '400px' },
+              }}
             >
               <VideoContainer username={username} />
               {allowDeviceSelection && accessStatus === DEVICE_ACCESS_STATUS.ACCEPTED && (
@@ -129,7 +128,7 @@ const WaitingRoom = (): ReactElement => {
                   anchorEl={anchorEl}
                 />
               )}
-            </div>
+            </Box>
           </PageLayout.Left>
           <PageLayout.Right>
             <UsernameInput username={username} setUsername={setUsername} />

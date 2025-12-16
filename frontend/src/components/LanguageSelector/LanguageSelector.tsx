@@ -6,7 +6,6 @@ import FormControl from '@ui/FormControl';
 import Select from '@ui/Select';
 import { SelectChangeEvent } from '@ui/SelectChangeEvent';
 import useTheme from '@ui/theme';
-import { SvgIconProps } from '@mui/material';
 import { LanguageOption, LanguageSelectorProps } from './LanguageSelector.types';
 import useIsSmallViewport from '../../hooks/useIsSmallViewport';
 import VividIcon from '../VividIcon/VividIcon';
@@ -20,14 +19,13 @@ const languageOptions: LanguageOption[] = [
   { code: 'es-MX', name: 'Español (México)', flag: 'flag-mexico' },
 ];
 
-const ChevronDownIcon = (props: SvgIconProps, theme: ReturnType<typeof useTheme>) => (
-  <VividIcon
-    name="chevron-down-line"
-    customSize={-5}
-    {...props}
-    sx={{ color: theme.colors.secondary }}
-  />
+const ChevronIcon = ({ color, ...props }: { color: string } & Record<string, unknown>) => (
+  <VividIcon name="chevron-down-line" customSize={-5} sx={{ color }} {...props} />
 );
+
+const SelectIconComponent =
+  (themeColor: string) =>
+  (props: Record<string, unknown>): ReactElement => <ChevronIcon color={themeColor} {...props} />;
 
 /**
  * LanguageSelector Component
@@ -58,7 +56,7 @@ const LanguageSelector = ({ showFlag = true }: LanguageSelectorProps): ReactElem
       <Select
         value={currentLanguage}
         onChange={handleLanguageChange}
-        IconComponent={(props: SvgIconProps) => ChevronDownIcon(props, theme)}
+        IconComponent={SelectIconComponent(theme.colors.textSecondary)}
         displayEmpty
         sx={{
           '& .MuiOutlinedInput-notchedOutline': {
