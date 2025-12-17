@@ -51,7 +51,7 @@ const MicButton = (): ReactElement | false => {
               '&:hover': {
                 backgroundColor: isAudioEnabled
                   ? `${theme.colors.onSecondary}99`
-                  : `${theme.colors.alertBackground}DC`,
+                  : `${theme.colors.alertBackgroundHover}`,
               },
             }}
             icon={
@@ -65,7 +65,7 @@ const MicButton = (): ReactElement | false => {
                 <VividIcon
                   name="mic-mute-line"
                   customSize={-5}
-                  sx={{ color: theme.colors.alertText }}
+                  sx={{ color: theme.colors.alertText, transform: 'scaleX(-1)' }}
                 />
               )
             }

@@ -1,6 +1,6 @@
 import { Dispatch, ReactElement, useState, SetStateAction } from 'react';
-import { Tooltip } from '@mui/material';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
+import Tooltip from '@ui/Tooltip';
+import VividIcon from '@components/VividIcon';
 import { useTranslation } from 'react-i18next';
 import useTheme from '@ui/theme';
 import ToolbarButton from '../ToolbarButton';
@@ -66,9 +66,14 @@ const ToolbarOverflowButton = ({
             id="hidden-toolbar-items"
             onClick={handleButtonToggle}
             icon={
-              <MoreVertIcon
+              <VividIcon
+                name="more-vertical-solid"
+                customSize={-5}
+                data-testid="MoreVertIcon"
                 sx={{
-                  color: isToolbarOverflowMenuOpen ? theme.colors.background : 'white',
+                  color: isToolbarOverflowMenuOpen
+                    ? theme.colors.onBackground
+                    : theme.colors.background,
                 }}
               />
             }

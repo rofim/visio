@@ -82,9 +82,7 @@ const BackgroundGallery = (): ReactElement => {
                     cursor: isSelected ? 'default' : 'pointer',
                     backgroundColor: isSelected ? theme.colors.disabled : theme.colors.onBackground,
                     '&:hover': {
-                      backgroundColor: isSelected
-                        ? theme.colors.disabled
-                        : theme.colors.primaryHover,
+                      backgroundColor: isSelected ? theme.colors.disabled : theme.colors.background,
                     },
                   }}
                 >

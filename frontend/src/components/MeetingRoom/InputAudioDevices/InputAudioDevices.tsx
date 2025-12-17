@@ -1,29 +1,31 @@
-import { Box, MenuItem, MenuList, Typography } from '@mui/material';
-import CheckIcon from '@mui/icons-material/Check';
+import Box from '@ui/Box';
+import Typography from '@ui/Typography';
+import MenuItem from '@ui/MenuItem';
+import MenuList from '@ui/MenuList';
 import { Device } from '@vonage/client-sdk-video';
-import MicNoneIcon from '@mui/icons-material/MicNone';
 import { MouseEvent as ReactMouseEvent, ReactElement, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import useAppConfig from '@Context/AppConfig/hooks/useAppConfig';
 import useTheme from '@ui/theme';
+import VividIcon from '@components/VividIcon';
 import useDevices from '@hooks/useDevices';
 import usePublisherContext from '@hooks/usePublisherContext';
 import { setStorageItem, STORAGE_KEYS } from '@utils/storage';
 import cleanAndDedupeDeviceLabels from '@utils/cleanAndDedupeDeviceLabels';
 
-export type InputDevicesProps = {
+export type InputAudioDevicesProps = {
   handleToggle: () => void;
 };
 
 /**
- * InputDevices Component
+ * InputAudioDevices Component
  *
  * Displays the audio input devices for a user. Handles switching audio input devices.
- * @param {InputDevicesProps} props - The props for the component.
+ * @param {InputAudioDevicesProps} props - The props for the component.
  *  @property {Function} handleToggle - The click handler to handle closing the menu.
- * @returns {ReactElement | false} - The InputDevices component.
+ * @returns {ReactElement | false} - The InputAudioDevices component.
  */
-const InputDevices = ({ handleToggle }: InputDevicesProps): ReactElement | false => {
+const InputAudioDevices = ({ handleToggle }: InputAudioDevicesProps): ReactElement | false => {
   const { t } = useTranslation();
   const theme = useTheme();
   const { publisher } = usePublisherContext();
@@ -63,13 +65,15 @@ const InputDevices = ({ handleToggle }: InputDevicesProps): ReactElement | false
         <Box
           sx={{
             display: 'flex',
+            alignItems: 'center',
             ml: 2,
             mt: 1,
             mb: 0.5,
+            color: theme.colors.tertiary,
           }}
         >
-          <MicNoneIcon sx={{ fontSize: 24, mr: 2 }} />
-          <Typography>{t('devices.audio.microphone.full')}</Typography>
+          <VividIcon name="microphone-2-line" customSize={-5} />
+          <Typography sx={{ ml: 2 }}>{t('devices.audio.microphone.full')}</Typography>
         </Box>
         <MenuList>
           {options.map((option: string) => {
@@ -86,7 +90,7 @@ const InputDevices = ({ handleToggle }: InputDevicesProps): ReactElement | false
                     color: theme.colors.onBackground,
                   },
                   '&:hover': {
-                    backgroundColor: theme.colors.primaryHover,
+                    backgroundColor: theme.colors.background,
                   },
                 }}
               >
@@ -96,16 +100,19 @@ const InputDevices = ({ handleToggle }: InputDevicesProps): ReactElement | false
                     display: 'flex',
                     mb: 0.5,
                     overflow: 'hidden',
+                    color: isSelected ? theme.colors.textPrimary : theme.colors.textSecondary,
                   }}
                 >
                   {isSelected ? (
-                    <CheckIcon
-                      sx={{
-                        color: theme.colors.background,
-                        fontSize: 24,
-                        mr: 2,
-                      }}
-                    />
+                    <Box key={'input-audio-devices-check'} sx={{ mr: 2 }}>
+                      <VividIcon
+                        name="check-line"
+                        customSize={-6}
+                        sx={{
+                          color: isSelected ? theme.colors.textPrimary : theme.colors.textSecondary,
+                        }}
+                      />
+                    </Box>
                   ) : (
                     <Box sx={{ width: 40 }} /> // Placeholder when CheckIcon is not displayed
                   )}
@@ -120,4 +127,4 @@ const InputDevices = ({ handleToggle }: InputDevicesProps): ReactElement | false
   );
 };
 
-export default InputDevices;
+export default InputAudioDevices;

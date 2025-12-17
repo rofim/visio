@@ -83,7 +83,9 @@ const UsernameInput = ({ username, setUsername }: UserNameInputProps): ReactElem
 
   return (
     <Card component="form">
-      <Typography sx={{ mb: 2, typography: 'h6' }}>{t('waitingRoom.user.input.title')}</Typography>
+      <Typography sx={{ mb: 2, typography: 'h6', color: theme.colors.textSecondary }}>
+        {t('waitingRoom.user.input.title')}
+      </Typography>
       <Box
         sx={{
           width: '100%',
@@ -113,7 +115,9 @@ const UsernameInput = ({ username, setUsername }: UserNameInputProps): ReactElem
 
       <Separator width="100%" />
 
-      <Typography sx={{ mt: 3, mb: 2, typography: 'h6' }}>{t('waitingRoom.title')}</Typography>
+      <Typography sx={{ mt: 3, mb: 2, typography: 'h6', color: theme.colors.textSecondary }}>
+        {t('waitingRoom.title')}
+      </Typography>
 
       <Box>
         <Typography sx={{ mb: 2, typography: 'h6', color: theme.colors.textTertiary }} noWrap>

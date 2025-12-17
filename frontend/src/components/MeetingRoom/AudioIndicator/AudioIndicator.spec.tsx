@@ -41,7 +41,7 @@ describe('AudioIndicator', () => {
 
   it('renders Mic off icon when participant is muted', () => {
     render(<AudioIndicator {...defaultProps} hasAudio={false} />);
-    const micOffIcon = screen.getByTestId('MicOffIcon');
+    const micOffIcon = screen.getByTestId('vivid-icon-mic-mute-solid');
     expect(micOffIcon).toBeInTheDocument();
   });
 });

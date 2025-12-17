@@ -49,6 +49,7 @@ const colorVariables = {
     400: '#292828',
     500: '#202124',
   },
+
   alert: {
     50: '#FFEEF2',
     100: '#FEDFDF',
@@ -133,6 +134,7 @@ const lightColors: ThemeTokens['colors'] = {
     type: 'color',
     description: 'Tertiary color for hover states.',
   },
+
   accent: {
     value: colorVariables.canvas,
     type: 'color',
@@ -169,15 +171,15 @@ const lightColors: ThemeTokens['colors'] = {
     type: 'color',
     description: 'Background color for alert messages and notifications.',
   },
-  'alert-text': {
-    value: colorVariables.alert[600],
-    type: 'color',
-    description: 'Text color for alert messages and notifications.',
-  },
   'alert-background-hover': {
     value: colorVariables.alert[100],
     type: 'color',
     description: 'Hover background color for alert messages and notifications.',
+  },
+  'alert-text': {
+    value: colorVariables.alert[600],
+    type: 'color',
+    description: 'Text color for alert messages and notifications.',
   },
 
   error: {
@@ -250,6 +252,7 @@ const lightColors: ThemeTokens['colors'] = {
     type: 'color',
     description: 'Color used for borders and dividers between elements.',
   },
+
   'dark-background': {
     value: colorVariables['dark-grey'][500],
     type: 'color',
@@ -328,6 +331,7 @@ const darkColors: ThemeTokens['colors'] = {
     type: 'color',
     description: 'Secondary color for hover states.',
   },
+
   tertiary: {
     value: colorVariables.accent[300],
     type: 'color',
@@ -348,6 +352,7 @@ const darkColors: ThemeTokens['colors'] = {
     type: 'color',
     description: 'Tertiary color for hover states.',
   },
+
   accent: {
     value: colorVariables.canvas,
     type: 'color',
@@ -378,6 +383,7 @@ const darkColors: ThemeTokens['colors'] = {
     type: 'color',
     description: 'Text or icon color used on surface elements.',
   },
+
   'alert-background': {
     value: colorVariables.alert[900],
     type: 'color',
@@ -393,6 +399,7 @@ const darkColors: ThemeTokens['colors'] = {
     type: 'color',
     description: 'Text color for alert messages and notifications.',
   },
+
   error: {
     value: colorVariables.alert[400],
     type: 'color',
@@ -438,6 +445,7 @@ const darkColors: ThemeTokens['colors'] = {
     type: 'color',
     description: 'Success color for hover states.',
   },
+
   information: {
     value: colorVariables.information[400],
     type: 'color',
@@ -458,11 +466,13 @@ const darkColors: ThemeTokens['colors'] = {
     type: 'color',
     description: 'Background color for informational messages.',
   },
+
   border: {
     value: colorVariables.neutral[800],
     type: 'color',
     description: 'Color used for borders and dividers between elements.',
   },
+
   'dark-background': {
     value: colorVariables['dark-grey'][500],
     type: 'color',
