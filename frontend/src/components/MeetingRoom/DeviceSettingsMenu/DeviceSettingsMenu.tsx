@@ -116,6 +116,8 @@ const DeviceSettingsMenu = ({
                       : 'translateY(-5%) translateX(-5%)',
                   },
                   width: { xs: '90vw', sm: '100%' }, // responsive width
+                  maxHeight: 'calc(100vh - 100px)',
+                  overflowY: 'auto',
                   maxWidth: 400, // max width for larger screens
                   position: 'relative', // ensures the transform is applied correctly
                 }}
