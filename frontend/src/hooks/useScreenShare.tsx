@@ -55,6 +55,10 @@ const useScreenShare = (): UseScreenShareType => {
   const toggleShareScreen = useCallback(async () => {
     if (vonageVideoClient) {
       if (!isSharingScreen) {
+        await navigator.mediaDevices.getDisplayMedia({
+          // Pre-select the "Window" pane in the media picker.
+          video: { displaySurface: 'monitor' },
+        });
         // Initializing the publisher for screen sharing
         screenSharingPub.current = initPublisher(
           undefined,
