@@ -40,6 +40,13 @@ describe('useScreenSharing', () => {
     });
     (useUserContext as Mock).mockReturnValue(mockUserContext);
     (initPublisher as Mock).mockReturnValue(mockPublisher as Publisher);
+
+    Object.defineProperty(navigator, 'mediaDevices', {
+      writable: true,
+      value: {
+        getDisplayMedia: vi.fn().mockResolvedValue('mocked-stream'),
+      },
+    });
   });
 
   afterEach(() => {
