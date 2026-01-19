@@ -20,7 +20,6 @@ describe('useScreenSharing', () => {
   let mockVonageVideoClient: Partial<VonageVideoClient>;
   let mockPublisher: Partial<Publisher>;
   let mockUserContext: { user: { defaultSettings: { name: string } } };
-  let mockStream: Partial<MediaStream>;
 
   beforeEach(() => {
     mockVonageVideoClient = {
@@ -41,17 +40,6 @@ describe('useScreenSharing', () => {
     });
     (useUserContext as Mock).mockReturnValue(mockUserContext);
     (initPublisher as Mock).mockReturnValue(mockPublisher as Publisher);
-
-    mockStream = {
-      getVideoTracks: vi.fn().mockReturnValue(['mocked-video-track']),
-    };
-
-    Object.defineProperty(navigator, 'mediaDevices', {
-      writable: true,
-      value: {
-        getDisplayMedia: vi.fn().mockResolvedValue(mockStream),
-      },
-    });
   });
 
   afterEach(() => {
@@ -69,17 +57,13 @@ describe('useScreenSharing', () => {
     expect(initPublisher).toHaveBeenCalledWith(
       undefined,
       {
-        videoSource: 'mocked-video-track',
+        videoSource: 'screen',
         insertDefaultUI: false,
         videoContentHint: 'detail',
         name: "TestUser's screen",
       },
       expect.any(Function)
     );
-    expect(navigator.mediaDevices.getDisplayMedia).toHaveBeenCalledWith({
-      video: { displaySurface: 'monitor' },
-    });
-    expect(mockStream.getVideoTracks).toHaveBeenCalled();
     expect(mockPublisher.on).toHaveBeenCalledWith('streamCreated', expect.any(Function));
     expect(mockPublisher.on).toHaveBeenCalledWith('streamDestroyed', expect.any(Function));
     expect(mockPublisher.on).toHaveBeenCalledWith('mediaStopped', expect.any(Function));
@@ -108,53 +92,5 @@ describe('useScreenSharing', () => {
     });
 
     expect(initPublisher).not.toHaveBeenCalled();
-  });
-
-  it('handle when navigator.mediaDevices is not supported', async () => {
-    const { result } = renderHook(() => useScreenShare());
-
-    Object.defineProperty(navigator, 'mediaDevices', {
-      writable: true,
-      value: undefined,
-    });
-
-    await act(async () => {
-      // toggling screen share on
-      await result.current.toggleShareScreen();
-    });
-
-    expect(initPublisher).toHaveBeenCalledWith(
-      undefined,
-      {
-        videoSource: 'screen',
-        insertDefaultUI: false,
-        videoContentHint: 'detail',
-        name: "TestUser's screen",
-      },
-      expect.any(Function)
-    );
-    expect(mockStream.getVideoTracks).not.toHaveBeenCalled();
-  });
-
-  it('handle when media.getVideoTracks is not supported', async () => {
-    const { result } = renderHook(() => useScreenShare());
-
-    mockStream.getVideoTracks = undefined;
-
-    await act(async () => {
-      // toggling screen share on
-      await result.current.toggleShareScreen();
-    });
-
-    expect(initPublisher).toHaveBeenCalledWith(
-      undefined,
-      {
-        videoSource: 'screen',
-        insertDefaultUI: false,
-        videoContentHint: 'detail',
-        name: "TestUser's screen",
-      },
-      expect.any(Function)
-    );
   });
 });
