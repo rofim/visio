@@ -33,7 +33,6 @@ test.describe('chat', () => {
     isMobile,
   }) => {
     const roomName = crypto.randomBytes(5).toString('hex');
-    const pageTwo = await context.newPage();
 
     await openMeetingRoomWithSettings({
       page: pageOne,
@@ -43,6 +42,11 @@ test.describe('chat', () => {
     });
     await waitAndClickFirefox(pageOne, browserName);
 
+    // Wait for pageOne's publisher to be ready before opening pageTwo
+    // This prevents both pages from competing for fake media devices simultaneously
+    await pageOne.waitForSelector('.publisher', { state: 'visible' });
+
+    const pageTwo = await context.newPage();
     await openMeetingRoomWithSettings({
       page: pageTwo,
       username: 'User Two',

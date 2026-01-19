@@ -525,10 +525,7 @@ function setUserContextWithName(name: string) {
 }
 
 function render(ui: ReactElement, options: PublisherProviderWrapperOptions = {}) {
-  const { PublisherProviderWrapper, ...props } = makePublisherProviderWrapper({
-    ...options,
-    publisherContext: {},
-  });
+  const { PublisherProviderWrapper, ...props } = makePublisherProviderWrapper(options);
 
   return {
     ...props,

@@ -298,6 +298,7 @@ const SessionProvider = ({ children, initialValue = {} }: SessionProviderProps):
   };
   const handleReconnected = () => {
     setReconnecting(false);
+    setSubscriptionError(null);
   };
 
   const handleArchiveStarted = (id: string) => {
@@ -335,9 +336,28 @@ const SessionProvider = ({ children, initialValue = {} }: SessionProviderProps):
     activeSpeakerTracker.current.onSubscriberAudioLevelUpdated({ subscriberId, movingAvg });
   };
 
-  const handleSubscriptionError = useCallback((error: unknown) => {
-    setSubscriptionError(error instanceof Error ? error : new Error('Unknown subscription error'));
-  }, []);
+  const handleSubscriptionError = useCallback(
+    (error: unknown) => {
+      const isBrowserOnline = (() => {
+        if (typeof navigator === 'undefined') return true;
+        return navigator.onLine;
+      })();
+
+      if (reconnecting || isBrowserOnline === false) {
+        console.warn('[SUBSCRIBER] Ignoring subscription error during reconnection/offline', {
+          reconnecting,
+          isBrowserOnline,
+          error,
+        });
+        return;
+      }
+
+      setSubscriptionError(
+        error instanceof Error ? error : new Error('Unknown subscription error')
+      );
+    },
+    [reconnecting]
+  );
 
   /**
    * Connects to the session using the provided credentials.
@@ -376,9 +396,7 @@ const SessionProvider = ({ children, initialValue = {} }: SessionProviderProps):
       await vonageVideoClient.current.connect();
       setConnected(true);
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        console.error(err);
-      }
+      console.error(err);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
