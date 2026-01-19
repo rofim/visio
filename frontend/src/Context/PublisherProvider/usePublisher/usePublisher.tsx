@@ -13,6 +13,7 @@ import usePublisherQuality, { NetworkQuality } from '../usePublisherQuality/useP
 import usePublisherOptions from '../usePublisherOptions';
 import useSessionContext from '../../../hooks/useSessionContext';
 import applyBackgroundFilter from '../../../utils/backgroundFilter/applyBackgroundFilter/applyBackgroundFilter';
+import idempotentCallbackWithRetry from '@common/execution/idempotentCallbackWithRetry';
 
 type PublisherStreamCreatedEvent = Event<'streamCreated', Publisher> & {
   stream: Stream;
@@ -45,7 +46,7 @@ export type PublisherContextType = {
   isVideoEnabled: boolean;
   publish: () => Promise<void>;
   publisher: Publisher | null;
-  publisherVideoElement: HTMLVideoElement | HTMLObjectElement | undefined;
+  publisherVideoElement: HTMLVideoElement | HTMLObjectElement | null;
   quality: NetworkQuality;
   stream: Stream | null | undefined;
   toggleAudio: () => void;
@@ -53,6 +54,22 @@ export type PublisherContextType = {
   changeBackground: (backgroundSelected: string) => void;
   unpublish: () => void;
 };
+
+export type PublisherContextInitialValue = Partial<
+  Pick<
+    PublisherContextType,
+    | 'initializeLocalPublisher'
+    | 'isAudioEnabled'
+    | 'isForceMuted'
+    | 'isPublishing'
+    | 'publishingError'
+    | 'isVideoEnabled'
+    | 'publisher'
+    | 'publisherVideoElement'
+    | 'quality'
+    | 'stream'
+  >
+>;
 
 /**
  * Hook wrapper for creation, interaction with, and state for local video publisher.
@@ -74,27 +91,46 @@ export type PublisherContextType = {
  * @property {() => void} unpublish - Method to unpublish from session and destroy publisher (for ending a call).
  * @returns {PublisherContextType} the publisher context
  */
-const usePublisher = (): PublisherContextType => {
+const usePublisher = (initialValue: PublisherContextInitialValue = {}): PublisherContextType => {
   const { t } = useTranslation();
   const [publisherVideoElement, setPublisherVideoElement] = useState<
-    HTMLVideoElement | HTMLObjectElement
-  >();
+    HTMLVideoElement | HTMLObjectElement | null
+  >(initialValue?.publisherVideoElement ?? null);
+
   const publisherRef = useRef<Publisher | null>(null);
   const quality = usePublisherQuality(publisherRef.current);
-  const [isPublishing, setIsPublishing] = useState(false);
+
+  const [isPublishing, setIsPublishing] = useState(initialValue?.isPublishing ?? false);
+
   const publisherOptions = usePublisherOptions();
-  const [isForceMuted, setIsForceMuted] = useState<boolean>(false);
-  const [isVideoEnabled, setIsVideoEnabled] = useState<boolean>(false);
-  const [isAudioEnabled, setIsAudioEnabled] = useState<boolean>(false);
-  const [stream, setStream] = useState<Stream | null>();
-  const [isPublishingToSession, setIsPublishingToSession] = useState(false);
-  const [publishingError, setPublishingError] = useState<PublishingErrorType>(null);
-  const { publish: sessionPublish, unpublish: sessionUnpublish, connected } = useSessionContext();
+  const [isForceMuted, setIsForceMuted] = useState<boolean>(initialValue?.isForceMuted ?? false);
+  const [isVideoEnabled, setIsVideoEnabled] = useState<boolean>(
+    initialValue?.isVideoEnabled ?? false
+  );
+  const [isAudioEnabled, setIsAudioEnabled] = useState<boolean>(
+    initialValue?.isAudioEnabled ?? false
+  );
+  const [stream, setStream] = useState<Stream | null>(initialValue?.stream ?? null);
+
+  const [publishingError, setPublishingError] = useState<PublishingErrorType>(
+    initialValue?.publishingError ?? null
+  );
+
+  const isPublishingToSessionRef = useRef<boolean>(false);
+  const isInitializingPublisherRef = useRef<boolean>(false);
+  const reconnectingRef = useRef<boolean>(false);
+  const consecutivePublishingFailureCountRef = useRef<number>(0);
+
+  const {
+    publish: sessionPublish,
+    unpublish: sessionUnpublish,
+    connected,
+    reconnecting,
+  } = useSessionContext();
   const [deviceAccess, setDeviceAccess] = useState<DeviceAccessStatus>({
     microphone: undefined,
     camera: undefined,
   });
-  let publishAttempt: number = 0;
 
   // If we do not have audio input or video input access, we cannot publish.
   useEffect(() => {
@@ -117,16 +153,20 @@ const usePublisher = (): PublisherContextType => {
     setIsAudioEnabled(!!publisherOptions.publishAudio);
   }, [publisherOptions]);
 
-  const handleAccessAllowed = () => {
+  reconnectingRef.current = reconnecting === true;
+
+  const handleAccessAllowed = useCallback(() => {
+    isInitializingPublisherRef.current = false;
     setDeviceAccess({
       microphone: true,
       camera: true,
     });
-  };
+  }, []);
 
-  const handleDestroyed = () => {
+  const handleDestroyed = useCallback(() => {
+    console.warn('[PUBLISHER] handleDestroyed - Publisher destroyed');
     publisherRef.current = null;
-  };
+  }, []);
 
   /**
    * Change background replacement or blur effect
@@ -145,23 +185,61 @@ const usePublisher = (): PublisherContextType => {
     });
   }, []);
 
-  const handleStreamCreated = (e: PublisherStreamCreatedEvent) => {
+  const handleStreamCreated = useCallback((e: PublisherStreamCreatedEvent) => {
+    console.warn('streamCreated', {
+      streamId: e.stream?.streamId,
+      streamHasAudio: e.stream?.hasAudio,
+      streamHasVideo: e.stream?.hasVideo,
+    });
+
     setIsPublishing(true);
     setStream(e.stream);
-  };
+    // Reset the flag now that the stream is actually established
+    isPublishingToSessionRef.current = false;
 
-  const handleStreamDestroyed = () => {
+    // Successful publish resets transient failure tracking
+    consecutivePublishingFailureCountRef.current = 0;
+    setPublishingError(null);
+  }, []);
+
+  const handleStreamDestroyed = useCallback(() => {
+    console.warn('[PUBLISHER] handleStreamDestroyed', {
+      reconnecting: reconnectingRef.current,
+      hasPublisher: !!publisherRef.current,
+      hasStream: !!publisherRef.current?.stream,
+    });
+
     setStream(null);
     setIsPublishing(false);
-    if (publisherRef?.current) {
-      publisherRef.current.destroy();
-    }
-    publisherRef.current = null;
-  };
 
-  const handleAccessDenied = (event: AccessDeniedEvent) => {
-    // We check the first word of the message to see if the microphone or camera was denied access.
+    const shouldPreservePublisher =
+      reconnectingRef.current ||
+      isPublishingToSessionRef.current ||
+      isInitializingPublisherRef.current;
+
+    if (shouldPreservePublisher) {
+      console.warn('[PUBLISHER] handleStreamDestroyed - Preserving publisher', {
+        reconnecting: reconnectingRef.current,
+        isPublishingToSession: isPublishingToSessionRef.current,
+        isInitializingPublisher: isInitializingPublisherRef.current,
+      });
+      isPublishingToSessionRef.current = false;
+      return;
+    }
+
+    if (publisherRef?.current) {
+      console.warn('[PUBLISHER] handleStreamDestroyed - Destroying publisher');
+      publisherRef.current.destroy();
+      publisherRef.current = null;
+    } else {
+      console.warn('[PUBLISHER] handleStreamDestroyed - Publisher already destroyed');
+    }
+  }, []);
+
+  const handleAccessDenied = useCallback((event: AccessDeniedEvent) => {
     const deviceDeniedAccess = event.message?.startsWith('Microphone') ? 'microphone' : 'camera';
+    isInitializingPublisherRef.current = false;
+    // We check the first word of the message to see if the microphone or camera was denied access.
     setDeviceAccess((prev) => ({
       ...prev,
       [deviceDeniedAccess]: false,
@@ -171,7 +249,7 @@ const usePublisher = (): PublisherContextType => {
       publisherRef.current.destroy();
     }
     publisherRef.current = null;
-  };
+  }, []);
 
   /**
    * Method to unpublish from session and destroy publisher
@@ -179,35 +257,52 @@ const usePublisher = (): PublisherContextType => {
   const unpublish = () => {
     if (publisherRef?.current) {
       sessionUnpublish(publisherRef.current);
-      setIsPublishingToSession(false);
-      publishAttempt = 0;
+      isPublishingToSessionRef.current = false;
     }
   };
 
-  const handleVideoElementCreated = (event: PublisherVideoElementCreatedEvent) => {
+  const handleVideoElementCreated = useCallback((event: PublisherVideoElementCreatedEvent) => {
     setPublisherVideoElement(event.element);
-    setIsPublishing(true);
-  };
+  }, []);
 
   /**
    * Method to handle the mute force of a participant
    */
-  const handleMuteForced = () => {
-    if (publisherRef?.current) {
-      setIsForceMuted(true);
-      setIsAudioEnabled(false);
+  const handleMuteForced = useCallback(() => {
+    if (!publisherRef?.current) {
+      return;
     }
-  };
 
-  const addPublisherListeners = useCallback((publisher: Publisher) => {
-    publisher.on('destroyed', handleDestroyed);
-    publisher.on('streamCreated', handleStreamCreated);
-    publisher.on('streamDestroyed', handleStreamDestroyed);
-    publisher.on('accessDenied', handleAccessDenied);
-    publisher.on('videoElementCreated', handleVideoElementCreated);
-    publisher.on('muteForced', handleMuteForced);
-    publisher.on('accessAllowed', handleAccessAllowed);
+    setIsForceMuted(true);
+    setIsAudioEnabled(false);
+
+    // Force mute must survive reconnection/publisher re-creation; persist mic-off.
+    setStorageItem(STORAGE_KEYS.AUDIO_SOURCE_ENABLED, 'false');
+
+    // Extra safety: enforce mute on the SDK publisher immediately.
+    publisherRef.current.publishAudio(false);
   }, []);
+
+  const addPublisherListeners = useCallback(
+    (publisher: Publisher) => {
+      publisher.on('destroyed', handleDestroyed);
+      publisher.on('streamCreated', handleStreamCreated);
+      publisher.on('streamDestroyed', handleStreamDestroyed);
+      publisher.on('accessDenied', handleAccessDenied);
+      publisher.on('videoElementCreated', handleVideoElementCreated);
+      publisher.on('muteForced', handleMuteForced);
+      publisher.on('accessAllowed', handleAccessAllowed);
+    },
+    [
+      handleAccessAllowed,
+      handleAccessDenied,
+      handleDestroyed,
+      handleMuteForced,
+      handleStreamCreated,
+      handleStreamDestroyed,
+      handleVideoElementCreated,
+    ]
+  );
 
   /**
    * Method to create local camera publisher.
@@ -216,11 +311,36 @@ const usePublisher = (): PublisherContextType => {
   const initializeLocalPublisher = useCallback(
     (options: PublisherProperties) => {
       try {
+        // Don't re-initialize if we're currently publishing
+        if (isPublishingToSessionRef.current) {
+          console.warn(
+            '[PUBLISHER] initializeLocalPublisher - BLOCKED: Already publishing to session'
+          );
+          return;
+        }
+        // Don't re-initialize if we're already initializing
+        if (isInitializingPublisherRef.current) {
+          console.warn('[PUBLISHER] initializeLocalPublisher - BLOCKED: Already initializing');
+          return;
+        }
+        // Don't re-initialize if we already have a publisher
+        if (publisherRef.current) {
+          console.warn('[PUBLISHER] initializeLocalPublisher - BLOCKED: Publisher already exists');
+          return;
+        }
+        isInitializingPublisherRef.current = true;
+
+        console.warn('[PUBLISHER] initializeLocalPublisher - Creating new publisher');
         const publisher = initPublisher(undefined, options);
         // Add listeners synchronously as some events could be fired before callback is invoked
         addPublisherListeners(publisher);
         publisherRef.current = publisher;
+
+        // NOTE: isInitializingPublisherRef.current will be reset in handleAccessAllowed or handleAccessDenied
+        // NOT here, because getUserMedia is async and we need to keep the lock until media access is granted/denied
       } catch (error) {
+        console.warn('[PUBLISHER] initializeLocalPublisher - ERROR during initialization:', error);
+        isInitializingPublisherRef.current = false;
         if (error instanceof Error) {
           console.warn(error.stack);
         }
@@ -232,53 +352,81 @@ const usePublisher = (): PublisherContextType => {
   /**
    * Helper function to handle retrying. We allow two attempts when publishing to the session and encountering an
    * error before stopping.
-   * @returns {boolean} Returns `true` if we've already retried twice, else `false`
    */
-  const shouldNotRetryPublish = (): boolean => {
-    publishAttempt += 1;
-
-    if (publishAttempt === 3) {
-      const publishingBlocked: PublishingErrorType = {
-        header: t('publishingErrors.blocked.title'),
-        caption: t('publishingErrors.blocked.message'),
-      };
-      setPublishingError(publishingBlocked);
-      setIsPublishingToSession(false);
-      return true;
-    }
-    return false;
-  };
+  const handlePublishingError = useCallback((): void => {
+    const publishingBlocked: PublishingErrorType = {
+      header: t('publishingErrors.blocked.title'),
+      caption: t('publishingErrors.blocked.message'),
+    };
+    setPublishingError(publishingBlocked);
+  }, [t]);
 
   /**
    * Method to publish to session.
    * @returns {Promise<void>}
    */
-  const publish = async (): Promise<void> => {
+  const publish = useCallback(async (): Promise<void> => {
+    console.warn('[PUBLISHER] publish - Attempting to publish', {
+      connected,
+      reconnecting,
+      hasPublisher: !!publisherRef.current,
+      isPublishingToSession: isPublishingToSessionRef.current,
+      isAudioEnabled,
+      isVideoEnabled,
+    });
+
     try {
+      if (isPublishingToSessionRef.current) {
+        console.warn('[PUBLISHER] publish - BLOCKED: Already publishing to session');
+        return; // Avoid multiple simultaneous publish attempts
+      }
+      if (reconnecting) {
+        console.warn('[PUBLISHER] publish - BLOCKED: Session is reconnecting');
+        return;
+      }
       if (!connected) {
+        console.warn('[PUBLISHER] publish - ERROR: Not connected to session');
         throw new Error('You are not connected to session');
       }
       if (!publisherRef.current) {
+        console.warn('[PUBLISHER] publish - ERROR: Publisher not initialized');
         throw new Error('Publisher is not initialized');
       }
-      if (isPublishingToSession) {
+      if (publisherRef.current?.stream) {
+        console.warn('[PUBLISHER] publish - already has stream');
         return;
       }
 
-      if (shouldNotRetryPublish()) {
-        return;
-      }
+      isPublishingToSessionRef.current = true;
 
-      setIsPublishingToSession(true); // Avoid multiple simultaneous publish attempts
-      await sessionPublish(publisherRef.current);
+      console.warn('[PUBLISHER] publish - Starting publish with retry');
+      await idempotentCallbackWithRetry(() => sessionPublish(publisherRef.current!), {
+        retries: 2,
+        delayMs: 500,
+      });
+      console.warn('[PUBLISHER] publish - Publish successful, waiting for streamCreated event');
+      // Don't reset isPublishingToSessionRef here - wait for streamCreated event
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        console.warn(err);
-        setIsPublishingToSession(false);
-        publish();
+      console.warn('[PUBLISHER] publish - ERROR during publish:', err);
+
+      // Reset the flag on error since we won't get streamCreated
+      isPublishingToSessionRef.current = false;
+
+      // Don't surface errors during reconnection - they're transient
+      if (!reconnectingRef.current) {
+        handlePublishingError();
       }
+
+      console.warn(err);
     }
-  };
+  }, [
+    connected,
+    reconnecting,
+    sessionPublish,
+    handlePublishingError,
+    isAudioEnabled,
+    isVideoEnabled,
+  ]);
 
   /**
    * Turns the camera on and off
@@ -305,26 +453,81 @@ const usePublisher = (): PublisherContextType => {
     if (!publisherRef.current) {
       return;
     }
-    publisherRef.current.publishAudio(!isAudioEnabled);
-    setIsAudioEnabled(!isAudioEnabled);
-    setStorageItem(STORAGE_KEYS.AUDIO_SOURCE_ENABLED, (!isAudioEnabled).toString());
+
+    const nextAudioEnabled = !isAudioEnabled;
+
+    console.warn('toggleAudio (before publishAudio)', {
+      nextAudioEnabled,
+    });
+
+    publisherRef.current.publishAudio(nextAudioEnabled);
+    setIsAudioEnabled(nextAudioEnabled);
+    setStorageItem(STORAGE_KEYS.AUDIO_SOURCE_ENABLED, nextAudioEnabled.toString());
     setIsForceMuted(false);
+
+    console.warn('toggleAudio (after publishAudio)', {
+      nextAudioEnabled,
+    });
   };
 
   useEffect(() => {
     const exceptionHandler = (exceptionEvent: ExceptionEvent) => {
       if (exceptionEvent.code === 1500) {
-        publish();
+        console.warn('Unable to publish to session. Error code:', exceptionEvent.code);
+
+        consecutivePublishingFailureCountRef.current += 1;
+
+        const isBrowserOnline = (() => {
+          if (typeof navigator === 'undefined') return true;
+          return navigator.onLine;
+        })();
+
+        // During network changes, code 1500 is often transient.
+        // Try to recover by recreating the publisher; only surface a blocking error after repeated failures.
+        const shouldTreatAsTransient = reconnectingRef.current || !connected || !isBrowserOnline;
+
+        console.warn('[PUBLISHER] exception 1500', {
+          reconnecting: reconnectingRef.current,
+          connected,
+          isBrowserOnline,
+          consecutivePublishingFailureCount: consecutivePublishingFailureCountRef.current,
+          shouldTreatAsTransient,
+        });
+
+        const publisherToCleanup = publisherRef.current;
+        publisherRef.current = null;
+
+        try {
+          publisherToCleanup?.destroy();
+        } catch {
+          console.warn('[PUBLISHER] exception 1500 - Warning: Failed to destroy publisher');
+        }
+
+        isPublishingToSessionRef.current = false;
+        isInitializingPublisherRef.current = false;
+        setIsPublishing(false);
+        setStream(null);
+
+        const shouldSurfaceBlockingError =
+          shouldTreatAsTransient === false && consecutivePublishingFailureCountRef.current >= 3;
+
+        if (shouldSurfaceBlockingError) {
+          handlePublishingError();
+          return;
+        }
+
+        // Let the normal flow recreate/publish when possible
+        // (autoPublish effect + reconnection completion effect)
       }
     };
-    // If a user is `Unable to Publish` to a session and an error is thrown, we attempt to re-publish.
-    // This error would not be captured in the Session.publish callback, we have to listen for it separately.
+    // If a user is `Unable to Publish` to a session and an error is thrown, we log it.
+    // The retry logic is already handled by idempotentCallbackWithRetry in the publish function.
     OT.on('exception', exceptionHandler);
 
     return () => {
       OT.off('exception', exceptionHandler);
     };
-  });
+  }, [connected, handlePublishingError]);
 
   return {
     initializeLocalPublisher,

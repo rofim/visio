@@ -1,9 +1,21 @@
 #!/bin/bash
-# This script is used to install dependencies and build the app in the machine used by VCR 
-# rather than uploading the build built locally
-# https://developer.vonage.com/en/vonage-cloud-runtime/guides/manifest#build-script
+set -e
+
+# build artifact
+source ./vcrBuild.env.sh
 
 # run install skipping post install script which requires husky
-yarn install --production=false --ignore-scripts
-
+yarn install --production=false --ignore-scripts --frozen-lockfile
 yarn build
+
+# copy VCR manifest to the build output (FAIL if missing)
+if [ -f ./vcr-gha.yml ]; then
+  cp ./vcr-gha.yml ./backend/dist/vcr-gha.yml
+else
+  echo "❌ ERROR: ./vcr-gha.yml not found"
+  exit 1
+fi
+
+echo ""
+echo "Successfully prepared backend/dist:"
+find backend/dist -print

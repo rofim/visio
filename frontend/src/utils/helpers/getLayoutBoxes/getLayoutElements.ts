@@ -27,8 +27,8 @@ const isActiveSpeaker = (activeSpeakerId: string | undefined, id: string, index:
  */
 const getVideoDimensions = (video: Publisher | Subscriber | null) => {
   return {
-    width: video?.videoWidth(),
-    height: video?.videoHeight(),
+    width: video?.videoWidth() ?? 1280,
+    height: video?.videoHeight() ?? 720,
   };
 };
 /**

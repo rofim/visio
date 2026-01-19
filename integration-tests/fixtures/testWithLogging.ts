@@ -8,8 +8,9 @@
  */
 import { BrowserContext, Page, test as baseTest } from '@playwright/test';
 
-const projectType = process.env.PROJECT_TYPE;
-const baseURL = 'http://127.0.0.1:3345/';
+const isDebugMode = process.env.debugMode === 'true';
+
+const baseURL = isDebugMode ? 'http://localhost:5173/' : 'http://127.0.0.1:3345/';
 
 const addLogger = (page: Page, context: BrowserContext) => {
   // Get page index to help identify which tab logs are coming from
@@ -28,17 +29,6 @@ const addLogger = (page: Page, context: BrowserContext) => {
 };
 
 const test = (() => {
-  if (projectType === 'Opera') {
-    return baseTest.extend({
-      page: async ({ context }, use) => {
-        const page = await context.newPage();
-        const loggedPage = addLogger(page, context);
-        await use(loggedPage);
-        await page.close();
-      },
-    });
-  }
-
   return baseTest.extend({
     page: async ({ page, context }, use) => {
       const loggedPage = addLogger(page, context);

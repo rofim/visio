@@ -27,7 +27,6 @@ npm-debug.log
 bower_components
 
 public/js/*
-config.json
 
 server.key
 server.crt
@@ -61,3 +60,5 @@ vcr.yml
 vite.config.*.timestamp*
 vitest.config.*.timestamp*
 *.tsbuildinfo
+vcr-dev.yml
+
