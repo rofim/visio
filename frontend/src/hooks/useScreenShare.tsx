@@ -77,6 +77,8 @@ const useScreenShare = (): UseScreenShareType => {
           undefined,
           {
             videoSource: screenTrack,
+            audioSource: null,
+            publishAudio: false,
             insertDefaultUI: false,
             videoContentHint: 'detail',
             name: t('participants.screen', { participantName: user.defaultSettings.name }),
@@ -94,19 +96,23 @@ const useScreenShare = (): UseScreenShareType => {
         // Handling stream creation event
         screenSharingPub.current?.on('streamCreated', () => {
           setIsSharingScreen(true);
+          console.log('streamCreated');
         });
 
         screenSharingPub.current?.on('videoElementCreated', (e) => {
           setScreenshareVideoElement(e.element);
+          console.log('videoElementCreated');
         });
 
         screenSharingPub.current?.on('streamDestroyed', () => {
           onScreenShareStopped();
+          console.log('streamDestroyed');
         });
 
         // Handling media stopped event
         screenSharingPub.current?.on('mediaStopped', () => {
           onScreenShareStopped();
+          console.log('mediaStopped');
         });
 
         // Publishing the screen sharing stream
