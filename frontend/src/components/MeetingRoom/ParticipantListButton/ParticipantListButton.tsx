@@ -1,11 +1,11 @@
-import PeopleIcon from '@mui/icons-material/People';
-import Tooltip from '@mui/material/Tooltip';
-import { blue } from '@mui/material/colors';
-import { Badge } from '@mui/material';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
+import useShouldShowParticipantList from '@Context/AppConfig/hooks/useShouldShowParticipantList';
 import ToolbarButton from '../ToolbarButton';
-import useConfigContext from '../../../hooks/useConfigContext';
+import Badge from '@ui/Badge';
+import Tooltip from '@ui/Tooltip';
+import useTheme from '@ui/theme';
+import VividIcon from '@components/VividIcon';
 
 export type ParticipantListButtonProps = {
   handleClick: () => void;
@@ -31,10 +31,10 @@ const ParticipantListButton = ({
   participantCount,
   isOverflowButton = false,
 }: ParticipantListButtonProps): ReactElement | false => {
-  const { meetingRoomSettings } = useConfigContext();
-  const { showParticipantList } = meetingRoomSettings;
-
+  const showParticipantList = useShouldShowParticipantList();
+  const theme = useTheme();
   const { t } = useTranslation();
+
   return (
     showParticipantList && (
       <Tooltip
@@ -45,8 +45,8 @@ const ParticipantListButton = ({
           badgeContent={participantCount}
           sx={{
             '& .MuiBadge-badge': {
-              color: 'white',
-              backgroundColor: 'rgb(95, 99, 104)',
+              color: theme.colors.onTertiary,
+              backgroundColor: theme.colors.tertiary,
             },
             marginRight: '12px',
             zIndex: 1,
@@ -60,7 +60,14 @@ const ParticipantListButton = ({
               marginRight: '0px',
             }}
             onClick={handleClick}
-            icon={<PeopleIcon sx={{ color: isOpen ? blue.A100 : 'white' }} />}
+            icon={
+              <VividIcon
+                name="group-solid"
+                customSize={-4}
+                data-testid="PeopleIcon"
+                sx={{ color: isOpen ? theme.colors.secondary : theme.colors.onSecondary }}
+              />
+            }
             isOverflowButton={isOverflowButton}
           />
         </Badge>

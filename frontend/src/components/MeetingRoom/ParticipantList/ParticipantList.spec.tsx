@@ -2,19 +2,19 @@ import { afterEach, beforeEach, describe, expect, it, Mock, vi } from 'vitest';
 import { cleanup, render, screen, within, fireEvent, waitFor } from '@testing-library/react';
 import { Subscriber as OTSubscriber } from '@vonage/client-sdk-video';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { SessionContextType } from '@Context/SessionProvider/session';
+import { SubscriberWrapper } from '@app-types/session';
+import useUserContext from '@hooks/useUserContext';
+import { UserContextType } from '@Context/user';
+import useSessionContext from '@hooks/useSessionContext';
+import useRoomShareUrl from '@hooks/useRoomShareUrl';
 import ParticipantList from './ParticipantList';
-import { SessionContextType } from '../../../Context/SessionProvider/session';
-import { SubscriberWrapper } from '../../../types/session';
-import useUserContext from '../../../hooks/useUserContext';
-import { UserContextType } from '../../../Context/user';
-import useSessionContext from '../../../hooks/useSessionContext';
-import useRoomShareUrl from '../../../hooks/useRoomShareUrl';
 
 const mockedRoomName = { roomName: 'test-room-name' };
 
-vi.mock('../../../hooks/useSessionContext.tsx');
-vi.mock('../../../hooks/useUserContext');
-vi.mock('../../../hooks/useRoomShareUrl');
+vi.mock('@hooks/useSessionContext.tsx');
+vi.mock('@hooks/useUserContext');
+vi.mock('@hooks/useRoomShareUrl');
 vi.mock('react-router-dom', () => ({
   useNavigate: vi.fn(),
   useLocation: vi.fn(),
@@ -23,7 +23,6 @@ vi.mock('react-router-dom', () => ({
 const mockUseSessionContext = useSessionContext as Mock<[], SessionContextType>;
 const mockNavigate = vi.fn();
 
-const mockUseUserContext = useUserContext as Mock<[], UserContextType>;
 const mockUserContextWithDefaultSettings = {
   user: {
     defaultSettings: {
@@ -31,7 +30,6 @@ const mockUserContextWithDefaultSettings = {
     },
   },
 } as UserContextType;
-mockUseUserContext.mockImplementation(() => mockUserContextWithDefaultSettings);
 
 const createSubscriberWrapper = (
   name: string,
@@ -77,6 +75,8 @@ describe('ParticipantList', () => {
   let originalClipboard: Clipboard;
 
   beforeEach(() => {
+    vi.mocked(useUserContext).mockImplementation(() => mockUserContextWithDefaultSettings);
+
     originalClipboard = navigator.clipboard;
     Object.assign(navigator, {
       clipboard: {
@@ -103,12 +103,12 @@ describe('ParticipantList', () => {
 
     render(<ParticipantList isOpen handleClose={() => {}} />);
 
-    const copyButton = screen.getByTestId('ContentCopyIcon');
+    const copyButton = screen.getByTestId('vivid-icon-copy-line');
     fireEvent.click(copyButton);
 
     await waitFor(() => {
       expect(navigator.clipboard.writeText).toHaveBeenCalledWith('https://example.com/room123');
-      expect(screen.getByTestId('CheckIcon')).toBeInTheDocument();
+      expect(screen.getByTestId('vivid-icon-check-sent-line')).toBeInTheDocument();
     });
   });
 
@@ -132,6 +132,59 @@ describe('ParticipantList', () => {
       'James Holden',
       'Naomi Nagata',
       '', // Edge case, empty names go at the bottom
+    ]);
+  });
+
+  it('filters list by query and hides You when not matching', () => {
+    render(<ParticipantList handleClose={() => {}} isOpen />);
+
+    const input = screen.getByPlaceholderText('Search participants');
+    fireEvent.change(input, { target: { value: 'alex' } });
+
+    const names = screen
+      .getAllByTestId('participant-list-item', { exact: false })
+      .map((el) => within(el).getByTestId('participant-list-name').textContent);
+
+    expect(names).toEqual(['Alex Kamal']);
+    expect(screen.queryByText('Local Participant (You)')).not.toBeInTheDocument();
+  });
+
+  it('shows You when query matches local participant name (case-insensitive)', () => {
+    render(<ParticipantList handleClose={() => {}} isOpen />);
+
+    const input = screen.getByPlaceholderText('Search participants');
+    fireEvent.change(input, { target: { value: 'LOCAL' } });
+
+    const names = screen
+      .getAllByTestId('participant-list-item', { exact: false })
+      .map((el) => within(el).getByTestId('participant-list-name').textContent);
+
+    expect(names).toEqual(['Local Participant (You)']);
+  });
+
+  it('restores full list after clearing query', () => {
+    render(<ParticipantList handleClose={() => {}} isOpen />);
+
+    const input = screen.getByPlaceholderText('Search participants');
+    fireEvent.change(input, { target: { value: 'zzz' } });
+
+    expect(screen.queryAllByTestId('participant-list-item', { exact: false }).length).toBe(0);
+
+    fireEvent.change(input, { target: { value: '' } });
+
+    const namesInOrder = screen
+      .getAllByTestId('participant-list-item', { exact: false })
+      .map((listItem) => {
+        return within(listItem).getByTestId('participant-list-name').textContent;
+      });
+    expect(namesInOrder).toEqual([
+      'Local Participant (You)',
+      'Alex Kamal',
+      'Amos',
+      'Chrisjen Avasarala',
+      'James Holden',
+      'Naomi Nagata',
+      '',
     ]);
   });
 });

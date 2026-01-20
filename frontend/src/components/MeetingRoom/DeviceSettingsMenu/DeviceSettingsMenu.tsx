@@ -1,19 +1,19 @@
-import { ClickAwayListener } from '@mui/material';
-import Grow from '@mui/material/Grow';
-import Paper from '@mui/material/Paper';
-import Popper from '@mui/material/Popper';
-import { useTheme } from '@mui/material/styles';
 import { ReactElement, RefObject, Dispatch, SetStateAction } from 'react';
-import { PopperChildrenProps } from '@mui/base';
 import { hasMediaProcessorSupport } from '@vonage/client-sdk-video';
-import InputDevices from '../InputDevices';
-import OutputDevices from '../OutputDevices';
+import useAppConfig from '@Context/AppConfig/hooks/useAppConfig';
+import useTheme from '@ui/theme';
+import InputDevices from '../InputAudioDevices';
+import OutputDevices from '../OutputAudioDevices';
 import ReduceNoiseTestSpeakers from '../ReduceNoiseTestSpeakers';
 import useDropdownResizeObserver from '../../../hooks/useDropdownResizeObserver';
 import VideoDevices from '../VideoDevices';
 import DropdownSeparator from '../DropdownSeparator';
 import VideoDevicesOptions from '../VideoDevicesOptions';
-import useConfigContext from '../../../hooks/useConfigContext';
+import Popper from '@ui/Popper';
+import Grow from '@ui/Grow';
+import ClickAwayListener from '@ui/ClickAwayListener';
+import Paper from '@ui/Paper';
+import Box from '@ui/Box';
 
 export type DeviceSettingsMenuProps = {
   deviceType: 'audio' | 'video';
@@ -52,11 +52,12 @@ const DeviceSettingsMenu = ({
   handleClose,
   setIsOpen,
 }: DeviceSettingsMenuProps): ReactElement | false => {
-  const config = useConfigContext();
-  const isAudio = deviceType === 'audio';
+  const allowBackgroundEffects = useAppConfig(
+    ({ videoSettings }) => videoSettings.allowBackgroundEffects
+  );
   const theme = useTheme();
-  const customLightBlueColor = 'rgb(138, 180, 248)';
-  const { allowBackgroundEffects } = config.videoSettings;
+
+  const isAudio = deviceType === 'audio';
   const shouldDisplayBackgroundEffects = hasMediaProcessorSupport() && allowBackgroundEffects;
 
   const handleToggleBackgroundEffects = () => {
@@ -70,16 +71,16 @@ const DeviceSettingsMenu = ({
     if (isAudio) {
       return (
         <>
-          <InputDevices handleToggle={handleToggle} customLightBlueColor={customLightBlueColor} />
-          <OutputDevices handleToggle={handleToggle} customLightBlueColor={customLightBlueColor} />
-          <ReduceNoiseTestSpeakers customLightBlueColor={customLightBlueColor} />
+          <InputDevices handleToggle={handleToggle} />
+          <OutputDevices handleToggle={handleToggle} />
+          <ReduceNoiseTestSpeakers />
         </>
       );
     }
 
     return (
       <>
-        <VideoDevices handleToggle={handleToggle} customLightBlueColor={customLightBlueColor} />
+        <VideoDevices handleToggle={handleToggle} />
         {shouldDisplayBackgroundEffects && (
           <>
             <DropdownSeparator />
@@ -99,44 +100,42 @@ const DeviceSettingsMenu = ({
       disablePortal
       placement="bottom-start"
     >
-      {({ TransitionProps, placement }: PopperChildrenProps) => (
+      {({ TransitionProps, placement }) => (
         <Grow
           {...TransitionProps}
-          style={{
-            transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom',
-          }}
+          style={{ transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom' }}
         >
-          <div className="text-left font-normal">
+          <Box sx={{ textAlign: 'left', fontWeight: 'normal' }}>
             <ClickAwayListener onClickAway={handleClose}>
               <Paper
-                sx={{
-                  backgroundColor: 'rgb(32, 33, 36)',
-                  color: '#fff',
-                  padding: { xs: 1, sm: 2 }, // responsive padding
+                sx={(t) => ({
+                  backgroundColor: theme.colors.surface,
+                  color: theme.colors.onSurface,
+                  padding: { xs: 1, sm: 2 },
                   borderRadius: 2,
                   zIndex: 1,
                   transform: isAudio
                     ? 'translateY(-2%) translateX(5%)'
-                    : 'translateY(-5%) translateX(-15%)', // default transform
-                  [theme.breakpoints.down(741)]: {
+                    : 'translateY(-5%) translateX(-15%)',
+                  [t.breakpoints.down(741)]: {
                     transform: isAudio
                       ? 'translateY(-2%) translateX(-10%)'
                       : 'translateY(-5%) translateX(-40%)',
                   },
-                  [theme.breakpoints.down(450)]: {
+                  [t.breakpoints.down(450)]: {
                     transform: isAudio
                       ? 'translateY(-2%) translateX(-5%)'
                       : 'translateY(-5%) translateX(-5%)',
                   },
-                  width: { xs: '90vw', sm: '100%' }, // responsive width
-                  maxWidth: 400, // max width for larger screens
-                  position: 'relative', // ensures the transform is applied correctly
-                }}
+                  width: { xs: '90vw', sm: '100%' },
+                  maxWidth: 400,
+                  position: 'relative',
+                })}
               >
                 {renderSettingsMenu()}
               </Paper>
             </ClickAwayListener>
-          </div>
+          </Box>
         </Grow>
       )}
     </Popper>

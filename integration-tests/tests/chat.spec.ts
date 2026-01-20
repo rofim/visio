@@ -21,7 +21,7 @@ async function chatToggleButton(page, isMobile) {
     const chatToggleButtonOne = await page.getByTestId('chat-button-unread-count');
     chatToggleButtonOne.click();
     // Check that chat open shows blue button
-    await expect(page.getByTestId('ChatIcon')).toHaveCSS('color', 'rgb(130, 177, 255)');
+    await expect(page.getByTestId('ChatIcon')).toHaveCSS('color', 'rgb(0, 0, 0)');
   }
 }
 
@@ -33,19 +33,25 @@ test.describe('chat', () => {
     isMobile,
   }) => {
     const roomName = crypto.randomBytes(5).toString('hex');
-    const pageTwo = await context.newPage();
 
     await openMeetingRoomWithSettings({
       page: pageOne,
       username: 'User One',
       roomName,
+      browserName,
     });
     await waitAndClickFirefox(pageOne, browserName);
 
+    // Wait for pageOne's publisher to be ready before opening pageTwo
+    // This prevents both pages from competing for fake media devices simultaneously
+    await pageOne.waitForSelector('.publisher', { state: 'visible' });
+
+    const pageTwo = await context.newPage();
     await openMeetingRoomWithSettings({
       page: pageTwo,
       username: 'User Two',
       roomName,
+      browserName,
     });
     await waitAndClickFirefox(pageTwo, browserName);
 
@@ -55,37 +61,38 @@ test.describe('chat', () => {
     await chatToggleButton(pageOne, isMobile);
 
     // Send button is greyed out when text box empty
-    await expect(pageOne.getByTestId('SendIcon')).toHaveCSS('color', 'rgb(178, 180, 182)');
+    await expect(pageOne.getByTestId('SendIcon')).toHaveCSS('color', 'rgb(230, 230, 230)');
 
     await pageOne.getByPlaceholder('Send a message').fill('Hi there, welcome to the meeting!');
 
     // Send button is blue when text in box
-    await expect(pageOne.getByTestId('SendIcon')).toHaveCSS('color', 'rgb(130, 177, 255)');
+    await expect(pageOne.getByTestId('SendIcon')).toHaveCSS('color', 'rgb(153, 65, 255)');
 
     await pageOne.getByTestId('SendIcon').click();
 
     // check unread notification is present on page two
     if (isMobile) {
-      await expect(
-        pageTwo
-          .getByTestId('chat-button-unread-count')
-          .filter({ has: pageTwo.locator('[data-testid="MoreVertIcon"]') })
-      ).toHaveText('1');
+      const unreadBadge = pageTwo
+        .getByTestId('chat-button-unread-count')
+        .filter({ has: pageTwo.locator('[data-testid="MoreVertIcon"]') });
+      await unreadBadge.waitFor({ state: 'visible', timeout: 5000 });
+      await expect(unreadBadge).toHaveText('1');
       await chatToggleButton(pageTwo, isMobile);
     } else {
-      await expect(pageTwo.getByTestId('chat-button-unread-count')).toHaveText('1');
+      const unreadBadge = pageTwo.getByTestId('chat-button-unread-count');
+      await unreadBadge.waitFor({ state: 'visible', timeout: 5000 });
+      await expect(unreadBadge).toHaveText('1');
       await pageTwo.getByTestId('chat-button-unread-count').click();
     }
 
     // Check badge is hidden:  MUI hides badge by setting dimensions to 0x0
+    // eslint-disable-next-line @typescript-eslint/require-await
     await pageTwo.waitForFunction(async () => {
-      const badge = document.querySelector(
-        '[data-testid="chat-button-unread-count"]'
-      ) as HTMLElement;
+      const badge = document.querySelector<HTMLElement>('[data-testid="chat-button-unread-count"]');
       return badge.offsetHeight === 0 && badge.offsetWidth === 0;
     });
 
-    await expect(pageTwo.getByTestId('chat-message').getByRole('paragraph')).toHaveText(
+    await expect(pageTwo.getByTestId('chat-msg-content')).toHaveText(
       'Hi there, welcome to the meeting!'
     );
     await expect(pageTwo.getByTestId('chat-msg-participant-name')).toHaveText('User One');
@@ -95,6 +102,6 @@ test.describe('chat', () => {
     const messageTwo = await pageTwo.getByTestId('chat-message').nth(1);
 
     await expect(messageTwo.getByTestId('chat-msg-participant-name')).toHaveText('User Two');
-    await expect(messageTwo.getByRole('paragraph')).toHaveText('Thanks!');
+    await expect(messageTwo.getByTestId('chat-msg-content')).toHaveText('Thanks!');
   });
 });

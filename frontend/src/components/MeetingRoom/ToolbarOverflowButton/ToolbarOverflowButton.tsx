@@ -1,7 +1,8 @@
 import { Dispatch, ReactElement, useState, SetStateAction } from 'react';
-import { Tooltip } from '@mui/material';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
+import Tooltip from '@ui/Tooltip';
+import VividIcon from '@components/VividIcon';
 import { useTranslation } from 'react-i18next';
+import useTheme from '@ui/theme';
 import ToolbarButton from '../ToolbarButton';
 import ToolbarOverflowMenu from '../ToolbarOverflowMenu';
 import UnreadMessagesBadge from '../UnreadMessagesBadge';
@@ -38,6 +39,7 @@ const ToolbarOverflowButton = ({
   captionsState,
 }: ToolbarOverflowButtonProps): ReactElement => {
   const { t } = useTranslation();
+  const theme = useTheme();
   const [isToolbarOverflowMenuOpen, setIsToolbarOverflowMenuOpen] = useState<boolean>(false);
   const [openEmojiGridMobile, setOpenEmojiGridMobile] = useState<boolean>(true);
 
@@ -64,8 +66,15 @@ const ToolbarOverflowButton = ({
             id="hidden-toolbar-items"
             onClick={handleButtonToggle}
             icon={
-              <MoreVertIcon
-                style={{ color: `${!isToolbarOverflowMenuOpen ? 'white' : 'rgb(138, 180, 248)'}` }}
+              <VividIcon
+                name="more-vertical-solid"
+                customSize={-5}
+                data-testid="MoreVertIcon"
+                sx={{
+                  color: isToolbarOverflowMenuOpen
+                    ? theme.colors.onBackground
+                    : theme.colors.background,
+                }}
               />
             }
             sx={{

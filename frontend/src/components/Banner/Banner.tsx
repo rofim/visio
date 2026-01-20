@@ -1,8 +1,9 @@
 import { ReactElement } from 'react';
-import BannerDateTime from '../BannerDateTime';
-import BannerLinks from '../BannerLinks';
+import Box from '@ui/Box';
+import Header from '@ui/Header';
 import BannerLogo from '../BannerLogo';
 import BannerLanguage from '../BannerLanguage';
+import useTheme from '@ui/theme';
 
 /**
  * Banner Component
@@ -11,16 +12,50 @@ import BannerLanguage from '../BannerLanguage';
  * @returns {ReactElement} - the banner component.
  */
 const Banner = (): ReactElement => {
-  return (
-    <div className="flex w-full flex-row justify-between">
-      <BannerLogo />
+  const theme = useTheme();
 
-      <div className="flex px-4">
-        <BannerDateTime />
-        <BannerLanguage />
-        <BannerLinks />
-      </div>
-    </div>
+  return (
+    <Header
+      appBarProps={{
+        position: 'static',
+        className: 'banner-header',
+      }}
+    >
+      <Box
+        flex={1}
+        sx={{
+          bgcolor: theme.colors.surface,
+          p: { xs: 3, sm: 5 },
+        }}
+      >
+        <BannerLogo />
+      </Box>
+
+      <Box
+        flex={1}
+        sx={{
+          bgcolor: {
+            xs: theme.colors.surface,
+            md: theme.colors.background,
+          },
+          p: { xs: 3, sm: 5 },
+          display: 'flex',
+          justifyContent: 'flex-end',
+          alignItems: 'center',
+          height: '100%',
+        }}
+      >
+        <BannerLanguage
+          sx={{
+            mr: {
+              // necessary to align the down arrow of the selector with the layout padding
+              xs: '-8px',
+              sm: 'unset',
+            },
+          }}
+        />
+      </Box>
+    </Header>
   );
 };
 

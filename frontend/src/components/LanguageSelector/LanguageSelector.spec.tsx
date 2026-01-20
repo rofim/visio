@@ -1,4 +1,3 @@
-/* eslint-disable import/first */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.mock('../../env', async () => {
@@ -83,22 +82,13 @@ describe('LanguageSelector', () => {
       expect(screen.queryByTestId('vivid-icon-flag-united-kingdom')).not.toBeInTheDocument();
     });
 
-    it('applies custom className', () => {
-      env.setSupportedLanguages('en');
-
-      render(<LanguageSelector className="bg-red-500" />);
-
-      const formControl = screen.getByTestId('language-selector').closest('.MuiFormControl-root');
-      expect(formControl).toHaveClass('bg-red-500');
-    });
-
     it('renders VividIcon with correct size in main display', () => {
       env.setSupportedLanguages('en');
 
       render(<LanguageSelector />);
 
       const icon = screen.getByTestId('vivid-icon-flag-united-kingdom');
-      expect(icon).toHaveAttribute('data-size', '-3');
+      expect(icon).toHaveAttribute('data-size', '-2');
     });
   });
 
@@ -320,13 +310,12 @@ describe('LanguageSelector', () => {
         const spanishOption = screen.getByTestId('language-option-es');
         expect(spanishOption).toHaveTextContent('Español');
 
-        // Check for flag icons in dropdown (they should have size -5)
         const englishIcon = screen
           .getAllByTestId('vivid-icon-flag-united-kingdom')
-          .find((icon) => icon.getAttribute('data-size') === '-5');
+          .find((icon) => icon.getAttribute('data-size') === '-2');
         const spanishIcon = screen
           .getAllByTestId('vivid-icon-flag-spain')
-          .find((icon) => icon.getAttribute('data-size') === '-5');
+          .find((icon) => icon.getAttribute('data-size') === '-2');
 
         expect(englishIcon).toBeInTheDocument();
         expect(spanishIcon).toBeInTheDocument();
@@ -358,10 +347,9 @@ describe('LanguageSelector', () => {
       fireEvent.mouseDown(selectButton);
 
       await waitFor(() => {
-        // Check that dropdown icons have size -5
         const dropdownIcon = screen
           .getAllByTestId('vivid-icon-flag-united-kingdom')
-          .find((icon) => icon.getAttribute('data-size') === '-5');
+          .find((icon) => icon.getAttribute('data-size') === '-2');
         expect(dropdownIcon).toBeInTheDocument();
       });
     });
@@ -373,17 +361,15 @@ describe('LanguageSelector', () => {
 
       render(<LanguageSelector />);
 
-      // Main display should have size -3
       const displayIcon = screen.getByTestId('vivid-icon-flag-united-kingdom');
-      expect(displayIcon).toHaveAttribute('data-size', '-3');
+      expect(displayIcon).toHaveAttribute('data-size', '-2');
 
       const selectButton = screen.getByRole('combobox');
       fireEvent.mouseDown(selectButton);
 
       await waitFor(() => {
-        // Dropdown should have size -5 (smaller)
         const dropdownIcons = screen.getAllByTestId('vivid-icon-flag-united-kingdom');
-        const dropdownIcon = dropdownIcons.find((icon) => icon.getAttribute('data-size') === '-5');
+        const dropdownIcon = dropdownIcons.find((icon) => icon.getAttribute('data-size') === '-2');
         expect(dropdownIcon).toBeInTheDocument();
       });
     });

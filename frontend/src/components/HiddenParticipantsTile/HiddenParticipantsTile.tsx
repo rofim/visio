@@ -1,11 +1,13 @@
 import { ReactElement } from 'react';
-import { AvatarGroup } from '@mui/material';
 import { Box } from 'opentok-layout-js';
-import { SubscriberWrapper } from '../../types/session';
+import { SubscriberWrapper } from '@app-types/session';
+import getBoxStyle from '@utils/helpers/getBoxStyle';
+import useSessionContext from '@hooks/useSessionContext';
+import useShouldShowParticipantList from '@Context/AppConfig/hooks/useShouldShowParticipantList';
 import AvatarInitials from '../AvatarInitials';
-import getBoxStyle from '../../utils/helpers/getBoxStyle';
-import useSessionContext from '../../hooks/useSessionContext';
-import useConfigContext from '../../hooks/useConfigContext';
+import AvatarGroup from '@ui/AvatarGroup';
+import ButtonBase from '@ui/ButtonBase';
+import useTheme from '@ui/theme';
 
 export type HiddenParticipantsTileProps = {
   box: Box;
@@ -26,25 +28,39 @@ const HiddenParticipantsTile = ({
   hiddenSubscribers,
 }: HiddenParticipantsTileProps): ReactElement => {
   const { toggleParticipantList } = useSessionContext();
-  const config = useConfigContext();
-  const { showParticipantList } = config.meetingRoomSettings;
+
+  const showParticipantList = useShouldShowParticipantList();
+  const theme = useTheme();
+
   const { height, width } = box;
   const diameter = Math.min(height, width) * 0.38;
   return (
-    <button
+    <ButtonBase
       id="hidden-participants"
       data-testid="hidden-participants"
-      className={`absolute m-1 flex items-center justify-center rounded-xl bg-notVeryGray-100 transition-colors ${
-        showParticipantList ? 'cursor-pointer hover:bg-[rgb(76,80,82)]' : 'cursor-default'
-      }`}
-      style={getBoxStyle(box)}
+      sx={{
+        position: 'absolute',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 3,
+        backgroundColor: theme.colors.darkGrey,
+        transition: 'background-color 150ms',
+        cursor: showParticipantList ? 'pointer' : 'default',
+        ...(showParticipantList && {
+          '&:hover': {
+            backgroundColor: theme.colors.darkGreyHover,
+          },
+        }),
+        ...getBoxStyle(box),
+      }}
       onClick={showParticipantList ? toggleParticipantList : () => {}}
       type="button"
     >
       <AvatarGroup
         total={hiddenSubscribers.length}
-        className="border-none"
         sx={{
+          border: 'none',
           '& .MuiAvatar-root': {
             transitionDuration: '150ms',
             height: `${diameter}px`,
@@ -60,7 +76,7 @@ const HiddenParticipantsTile = ({
           return <AvatarInitials key={streamId} initials={initials} username={name} sx={sx} />;
         })}
       </AvatarGroup>
-    </button>
+    </ButtonBase>
   );
 };
 

@@ -1,0 +1,26 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "files": [],
+  "include": ["eslint.config.mjs", "./test/setup.ts"],
+  "references": [
+    {
+      "path": "./tsconfig.lib.json"
+    },
+    {
+      "path": "./tsconfig.spec.json"
+    }
+  ],
+  "compilerOptions": {
+    "rootDir": "..",
+    "baseUrl": "./",
+    "moduleResolution": "bundler",
+    "composite": true,
+    "paths": {
+      "@core": ["./src"],
+      "@core/*": ["./src/*"],
+      "@common/*": ["../common/src/*"],
+      "@common": ["../common/src"]
+    },
+    "lib": ["DOM", "DOM.Iterable", "ESNext"]
+  }
+}

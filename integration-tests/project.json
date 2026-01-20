@@ -1,0 +1,98 @@
+{
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "name": "integration-tests",
+  "projectType": "application",
+  "root": "integration-tests",
+  "sourceRoot": "integration-tests",
+  "targets": {
+    "test": {
+      "executor": "nx:run-commands",
+      "description": "Run playwright tests in all browsers",
+      "options": {
+        "cwd": "integration-tests",
+        "command": "playwright test --project='Google Chrome Fake Devices' --project=firefox --project='Microsoft Edge' --project='Mobile Chrome'"
+      }
+    },
+    "updateScreenshots": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "cwd": "integration-tests",
+        "command": "playwright test --project='Google Chrome Fake Devices' --project=firefox --project='Microsoft Edge' --project='Mobile Chrome' --update-snapshots"
+      }
+    },
+    "updateScreenshots:": {
+      "executor": "nx:run-commands",
+      "description": "Update snapshots only for one Playwright test file",
+      "cache": false,
+      "outputs": [],
+      "options": {
+        "cwd": "integration-tests",
+        "command": "playwright test {args._} --project='Google Chrome Fake Devices' --project=firefox --project='Microsoft Edge' --project='Mobile Chrome' --update-snapshots"
+      }
+    },
+    "postinstall": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "integration-tests",
+        "command": "playwright install"
+      }
+    },
+    "ts-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "integration-tests",
+        "command": "tsc -p tsconfig.json --pretty true --noEmit"
+      }
+    },
+    "ts-check:watch": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "integration-tests",
+        "command": "tsc -p tsconfig.json --noEmit --watch --preserveWatchOutput"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "integration-tests",
+        "command": "eslint . --report-unused-disable-directives --max-warnings 0"
+      }
+    },
+    "lint:fix": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "integration-tests",
+        "command": "eslint . --fix --report-unused-disable-directives --max-warnings 0"
+      }
+    },
+    "test:": {
+      "executor": "nx:run-commands",
+      "description": "Run playwright tests in a specific file using the compiled version of the app without interruptions",
+      "options": {
+        "cwd": "integration-tests",
+        "command": "playwright test {args._} --project='Google Chrome Fake Devices' --workers=1 --headed",
+        "env": { "headedMode": "true" }
+      }
+    },
+    "test:dev": {
+      "executor": "nx:run-commands",
+      "description": "Run playwright tests in a specific file using the dev version of the app without interruptions",
+      "options": {
+        "cwd": "integration-tests",
+        "command": "playwright test {args._} --project='Google Chrome Fake Devices' --workers=1 --headed",
+        "env": { "headedMode": "true", "debugMode": "true" }
+      }
+    },
+    "test:debug": {
+      "executor": "nx:run-commands",
+      "description": "Run playwright tests in a specific file in debug mode with the dev version of the app",
+      "options": {
+        "cwd": "integration-tests",
+        "command": "playwright test {args._} --project='Google Chrome Fake Devices' --workers=1 --timeout=0",
+        "env": { "headedMode": "true", "debugMode": "true", "PWDEBUG": "1" }
+      }
+    }
+  },
+  "tags": ["e2e", "playwright"]
+}

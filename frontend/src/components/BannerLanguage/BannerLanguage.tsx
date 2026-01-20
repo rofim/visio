@@ -1,5 +1,8 @@
-import { ReactElement } from 'react';
+import Box from '@ui/Box';
 import LanguageSelector from '../LanguageSelector';
+import type { BoxProps } from '@mui/material';
+
+type BannerLanguageProps = BoxProps;
 
 /**
  * BannerLanguage Component
@@ -7,11 +10,11 @@ import LanguageSelector from '../LanguageSelector';
  * This component provides a language selection feature for the banner.
  * @returns {ReactElement} The BannerLanguage component.
  */
-const BannerLanguage = (): ReactElement => {
+const BannerLanguage: React.FC<BannerLanguageProps> = (props) => {
   return (
-    <div className="flex items-center" data-testid="banner-language">
+    <Box display="flex" alignItems="center" data-testid="banner-language" {...props}>
       <LanguageSelector />
-    </div>
+    </Box>
   );
 };
 

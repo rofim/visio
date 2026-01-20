@@ -11,7 +11,7 @@ import EventEmitter from 'events';
 import logOnConnect from '../logOnConnect';
 import VonageVideoClient from './vonageVideoClient';
 import { Credential, SignalEvent, SignalType } from '../../types/session';
-import { wait } from '../idempotentCallbackWithRetry/idempotentCallbackWithRetry';
+import wait from '@common/execution/wait';
 
 vi.mock('../logOnConnect');
 vi.mock('@vonage/client-sdk-video');
@@ -21,8 +21,6 @@ const mockSubscriber = Object.assign(new EventEmitter(), {
   id: 'test-id',
 }) as unknown as TestSubscriber;
 
-const mockLogOnConnect = logOnConnect as Mock<[], void>;
-const consoleErrorSpy = vi.spyOn(console, 'error');
 const mockInitSession = vi.fn();
 const mockConnect = vi.fn();
 const mockSubscribe = vi.fn();
@@ -41,6 +39,8 @@ describe('VonageVideoClient', () => {
   let mockSession: TestSession;
 
   beforeEach(() => {
+    vi.spyOn(console, 'error');
+
     mockSession = Object.assign(new EventEmitter(), {
       connect: mockConnect,
       subscribe: mockSubscribe,
@@ -78,8 +78,8 @@ describe('VonageVideoClient', () => {
     it('logs on successful connection', async () => {
       await vonageVideoClient?.connect();
 
-      expect(mockLogOnConnect).toHaveBeenCalled();
-      expect(consoleErrorSpy).not.toHaveBeenCalled();
+      expect(logOnConnect).toHaveBeenCalled();
+      expect(console.error).not.toHaveBeenCalled();
       expect(vonageVideoClient).not.toBeUndefined();
     });
 
@@ -90,8 +90,8 @@ describe('VonageVideoClient', () => {
       });
       await expect(() => vonageVideoClient?.connect()).rejects.toThrowError(fakeError);
 
-      expect(mockLogOnConnect).not.toHaveBeenCalled();
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Error connecting to session:', fakeError);
+      expect(logOnConnect).not.toHaveBeenCalled();
+      expect(console.error).toHaveBeenCalledWith('Error connecting to session:', fakeError);
       expect(vonageVideoClient).not.toBeUndefined();
     });
   });

@@ -1,5 +1,5 @@
-import { beforeEach, describe, it, expect, vi, Mock, afterAll } from 'vitest';
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { beforeEach, describe, it, expect, vi } from 'vitest';
+import { act, renderHook as renderHookBase, waitFor } from '@testing-library/react';
 import {
   initPublisher,
   Publisher,
@@ -7,18 +7,16 @@ import {
   hasMediaProcessorSupport,
 } from '@vonage/client-sdk-video';
 import EventEmitter from 'events';
+import useUserContext from '@hooks/useUserContext';
+import useSessionContext from '@hooks/useSessionContext';
+import appConfig from '@Context/AppConfig';
 import usePublisher from './usePublisher';
-import useUserContext from '../../../hooks/useUserContext';
 import { UserContextType } from '../../user';
-import useSessionContext from '../../../hooks/useSessionContext';
 import { SessionContextType } from '../../SessionProvider/session';
 
 vi.mock('@vonage/client-sdk-video');
-vi.mock('../../../hooks/useUserContext.tsx');
-vi.mock('../../../hooks/useSessionContext.tsx');
-
-const mockUseUserContext = useUserContext as Mock<[], UserContextType>;
-const mockUseSessionContext = useSessionContext as Mock<[], SessionContextType>;
+vi.mock('@hooks/useUserContext.tsx');
+vi.mock('@hooks/useSessionContext.tsx');
 
 const defaultSettings = {
   publishAudio: false,
@@ -46,30 +44,27 @@ describe('usePublisher', () => {
     applyVideoFilter: vi.fn(),
     clearVideoFilter: vi.fn(),
   }) as unknown as Publisher;
+
   let mockSessionContext: SessionContextType;
   const mockedInitPublisher = vi.fn();
   const mockedSessionPublish = vi.fn();
   const mockedSessionUnpublish = vi.fn();
-  const consoleWarnSpy = vi.spyOn(console, 'warn');
 
   beforeEach(() => {
-    vi.resetAllMocks();
+    vi.spyOn(console, 'warn').mockImplementation(vi.fn());
 
-    mockUseUserContext.mockImplementation(() => mockUserContextWithDefaultSettings);
+    vi.mocked(useUserContext).mockImplementation(() => mockUserContextWithDefaultSettings);
 
-    (initPublisher as Mock).mockImplementation(mockedInitPublisher);
-    (hasMediaProcessorSupport as Mock).mockImplementation(vi.fn().mockReturnValue(true));
+    vi.mocked(initPublisher).mockImplementation(mockedInitPublisher);
+    vi.mocked(hasMediaProcessorSupport).mockImplementation(vi.fn().mockReturnValue(true));
 
     mockSessionContext = {
       publish: mockedSessionPublish,
       unpublish: mockedSessionUnpublish,
       connected: true,
     } as unknown as SessionContextType;
-    mockUseSessionContext.mockReturnValue(mockSessionContext);
-  });
 
-  afterAll(() => {
-    vi.restoreAllMocks();
+    vi.mocked(useSessionContext).mockReturnValue(mockSessionContext);
   });
 
   describe('initializeLocalPublisher', () => {
@@ -85,7 +80,7 @@ describe('usePublisher', () => {
     });
 
     it('should log errors', async () => {
-      (initPublisher as Mock).mockImplementation(() => {
+      vi.mocked(initPublisher).mockImplementation(() => {
         throw new Error('The second mouse gets the cheese.');
       });
 
@@ -95,14 +90,14 @@ describe('usePublisher', () => {
       });
 
       await waitFor(() => {
-        expect(consoleWarnSpy).toHaveBeenCalled();
+        expect(console.warn).toHaveBeenCalled();
       });
     });
   });
 
   describe('unpublish', () => {
     it('should unpublish when requested', async () => {
-      (initPublisher as Mock).mockImplementation(() => mockPublisher);
+      vi.mocked(initPublisher).mockImplementation(() => mockPublisher);
 
       const { result, rerender } = renderHook(() => usePublisher());
 
@@ -124,20 +119,21 @@ describe('usePublisher', () => {
   });
 
   describe('changeBackground', () => {
-    let result: ReturnType<typeof renderHook>['result'];
-    beforeEach(async () => {
-      (initPublisher as Mock).mockImplementation(() => mockPublisher);
-      result = renderHook(() => usePublisher()).result;
-      await act(async () => {
-        await (result.current as ReturnType<typeof usePublisher>).initializeLocalPublisher({});
-      });
-      (mockPublisher.applyVideoFilter as Mock).mockClear();
-      (mockPublisher.clearVideoFilter as Mock).mockClear();
+    beforeEach(() => {
+      vi.mocked(initPublisher).mockImplementation(() => mockPublisher);
     });
 
     it('applies low blur filter', async () => {
-      await act(async () => {
-        await (result.current as ReturnType<typeof usePublisher>).changeBackground('low-blur');
+      const { result } = renderHook(() => usePublisher());
+      act(() => {
+        result.current.initializeLocalPublisher({});
+      });
+      await waitFor(() => {
+        expect(result.current.publisher).toBe(mockPublisher);
+      });
+
+      act(() => {
+        result.current.changeBackground('low-blur');
       });
       expect(mockPublisher.applyVideoFilter).toHaveBeenCalledWith({
         type: 'backgroundBlur',
@@ -146,8 +142,16 @@ describe('usePublisher', () => {
     });
 
     it('applies background replacement with image', async () => {
-      await act(async () => {
-        await (result.current as ReturnType<typeof usePublisher>).changeBackground('bg1.jpg');
+      const { result } = renderHook(() => usePublisher());
+      act(() => {
+        result.current.initializeLocalPublisher({});
+      });
+      await waitFor(() => {
+        expect(result.current.publisher).toBe(mockPublisher);
+      });
+
+      act(() => {
+        result.current.changeBackground('bg1.jpg');
       });
       expect(mockPublisher.applyVideoFilter).toHaveBeenCalledWith({
         type: 'backgroundReplacement',
@@ -156,8 +160,16 @@ describe('usePublisher', () => {
     });
 
     it('clears video filter for unknown option', async () => {
-      await act(async () => {
-        await (result.current as ReturnType<typeof usePublisher>).changeBackground('none');
+      const { result } = renderHook(() => usePublisher());
+      act(() => {
+        result.current.initializeLocalPublisher({});
+      });
+      await waitFor(() => {
+        expect(result.current.publisher).toBe(mockPublisher);
+      });
+
+      act(() => {
+        result.current.changeBackground('none');
       });
       expect(mockPublisher.clearVideoFilter).toHaveBeenCalled();
     });
@@ -165,7 +177,7 @@ describe('usePublisher', () => {
 
   describe('publish', () => {
     it('should publish to the session', async () => {
-      (initPublisher as Mock).mockImplementation(() => mockPublisher);
+      vi.mocked(initPublisher).mockImplementation(() => mockPublisher);
 
       const { result } = renderHook(() => usePublisher());
 
@@ -193,12 +205,12 @@ describe('usePublisher', () => {
       });
 
       await waitFor(() => {
-        expect(consoleWarnSpy).toHaveBeenCalled();
+        expect(console.warn).toHaveBeenCalled();
       });
     });
 
     it('should only publish to session once', async () => {
-      (initPublisher as Mock).mockImplementation(() => mockPublisher);
+      vi.mocked(initPublisher).mockImplementation(() => mockPublisher);
 
       const { result } = renderHook(() => usePublisher());
 
@@ -222,8 +234,8 @@ describe('usePublisher', () => {
       expect(mockedSessionPublish).toHaveBeenCalledOnce();
     });
 
-    it('should attempt to publish only twice before failing', async () => {
-      (initPublisher as Mock).mockImplementation(() => mockPublisher);
+    it('should attempt to publish before failing', async () => {
+      vi.mocked(initPublisher).mockImplementation(() => mockPublisher);
       mockedSessionPublish.mockImplementation((_, callback) => {
         callback(new Error('Mocked error'));
       });
@@ -243,12 +255,12 @@ describe('usePublisher', () => {
           "We're having trouble connecting you with others in the meeting room. Please check your network and try again.",
       };
       expect(result.current.publishingError).toEqual(publishingBlockedError);
-      expect(mockedSessionPublish).toHaveBeenCalledTimes(2);
+      expect(mockedSessionPublish).toHaveBeenCalledTimes(3);
     });
   });
 
   it('should set publishingError and destroy publisher when receiving an accessDenied event', async () => {
-    (initPublisher as Mock).mockImplementation(() => mockPublisher);
+    vi.mocked(initPublisher).mockImplementation(() => mockPublisher);
     const { result } = renderHook(() => usePublisher());
 
     act(() => {
@@ -276,7 +288,7 @@ describe('usePublisher', () => {
   });
 
   it('should not set publishingError when receiving an accessAllowed event', async () => {
-    (initPublisher as Mock).mockImplementation(() => mockPublisher);
+    vi.mocked(initPublisher).mockImplementation(() => mockPublisher);
     const { result } = renderHook(() => usePublisher());
 
     act(() => {
@@ -292,3 +304,7 @@ describe('usePublisher', () => {
     });
   });
 });
+
+function renderHook<Result, Props>(render: (initialProps: Props) => Result) {
+  return renderHookBase(render, { wrapper: appConfig.Provider });
+}

@@ -13,7 +13,7 @@ describe('ZoomIndicator', () => {
     vi.clearAllMocks();
   });
 
-  it('renders correctly at 100% zoom', async () => {
+  it('renders correctly at 100% zoom', () => {
     render(
       <ZoomIndicator
         zoomLevel={1}
@@ -23,7 +23,7 @@ describe('ZoomIndicator', () => {
       />
     );
 
-    const icon = screen.getByTestId('ZoomInOutlinedIcon');
+    const icon = screen.getByTestId('vivid-icon-zoom-in-solid');
     const mainButton = screen.getByTestId('zoom-indicator-button');
 
     expect(icon).toBeInTheDocument();
@@ -67,7 +67,7 @@ describe('ZoomIndicator', () => {
     expect(mockZoomIn).not.toHaveBeenCalled();
   });
 
-  it('displays correct icon and text depending on zoom-level', async () => {
+  it('displays correct icon and text depending on zoom-level', () => {
     const { rerender } = render(
       <ZoomIndicator
         zoomLevel={1.25}
@@ -77,7 +77,7 @@ describe('ZoomIndicator', () => {
       />
     );
 
-    const zoomOutIcon = screen.getByTestId('ZoomOutOutlinedIcon');
+    const zoomOutIcon = screen.getByTestId('vivid-icon-zoom-out-solid');
     const zoomLevelText = screen.getByTestId('zoom-level');
     const zoomOutButton = screen.getByTestId('zoom-out-button');
     const zoomInButton = screen.getByTestId('zoom-in-button');
@@ -96,12 +96,12 @@ describe('ZoomIndicator', () => {
       />
     );
 
-    expect(screen.queryByTestId('ZoomOutOutlinedIcon')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('vivid-icon-zoom-out-solid')).not.toBeInTheDocument();
     expect(screen.queryByTestId('zoom-level')).not.toBeInTheDocument();
     expect(screen.queryByTestId('zoom-out-button')).not.toBeInTheDocument();
     expect(screen.queryByTestId('zoom-in-button')).not.toBeInTheDocument();
 
-    const zoomInIcon = screen.getByTestId('ZoomInOutlinedIcon');
+    const zoomInIcon = screen.getByTestId('vivid-icon-zoom-in-solid');
     expect(zoomInIcon).toBeInTheDocument();
   });
 
@@ -125,7 +125,7 @@ describe('ZoomIndicator', () => {
     expect(mockZoomOut).toHaveBeenCalledOnce();
   });
 
-  it('disables zoom buttons at limits', async () => {
+  it('disables zoom buttons at limits', () => {
     const { rerender } = render(
       <ZoomIndicator
         zoomLevel={MIN_ZOOM}
@@ -157,7 +157,7 @@ describe('ZoomIndicator', () => {
     expect(zoomInButton).toBeDisabled();
   });
 
-  it('shows correct percentage values', async () => {
+  it('shows correct percentage values', () => {
     const testCases = [
       { zoomLevel: MIN_ZOOM, expectedText: '50%' },
       { zoomLevel: 1.25, expectedText: '125%' },
@@ -182,7 +182,7 @@ describe('ZoomIndicator', () => {
     });
   });
 
-  it('has correct tooltip titles', async () => {
+  it('has correct tooltip titles', () => {
     const { rerender } = render(
       <ZoomIndicator
         zoomLevel={1}

@@ -30,7 +30,11 @@ test.describe('Recording Feature', () => {
     await archivingButton.click();
 
     const confirmStartButton = pageOne.getByTestId('popup-dialog-primary-button');
+    await confirmStartButton.waitFor({ state: 'visible' });
     await confirmStartButton.click();
+
+    // Wait a bit to ensure recording is at least 3s long
+    await pageOne.waitForTimeout(3000);
 
     if (isMobile) {
       const recordingIndicator = pageOne
@@ -44,7 +48,7 @@ test.describe('Recording Feature', () => {
           message: 'Waiting for recording to start (mobile red icon)',
           timeout: 5000,
         })
-        .toBe('rgb(239, 68, 68)');
+        .toBe('rgb(230, 29, 29)');
 
       await pageOne.getByTestId('MoreVertIcon').click();
       await pageOne.mouse.move(0, 0);
@@ -57,7 +61,7 @@ test.describe('Recording Feature', () => {
             timeout: 5000,
           }
         )
-        .toBe('rgb(239, 68, 68)');
+        .toBe('rgb(255, 255, 255)');
     }
     await archivingButton.click();
     await confirmStartButton.click();
@@ -74,7 +78,10 @@ test.describe('Recording Feature', () => {
 
     await pageOne.getByTestId('CallEndIcon').click();
 
-    await pageOne.getByText('Recording 1', { exact: true }).waitFor();
+    // Wait for the archive to be processed and appear in the list
+    // Archives start in 'pending' state and show "Loading..." text
+    // We need to wait for it to become 'available' and show "Recording 1"
+    await pageOne.getByText('Recording 1', { exact: true }).waitFor({ timeout: 120000 });
 
     const downloadIcon = pageOne.getByTestId('archive-download-button');
     await expect(downloadIcon).toBeVisible({ timeout: 10000 });

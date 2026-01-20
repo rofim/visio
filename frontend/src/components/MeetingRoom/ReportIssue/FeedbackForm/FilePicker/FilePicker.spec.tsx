@@ -1,10 +1,10 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, expect, it, vi, Mock, beforeEach } from 'vitest';
 import FilePicker from './FilePicker';
-import * as util from '../../../../../utils/util';
+import * as util from '@utils/util';
 import '@testing-library/jest-dom';
 
-vi.mock('../../../../../utils/util', () => ({ isMobile: vi.fn() }));
+vi.mock('@utils/util', () => ({ isMobile: vi.fn() }));
 
 describe('FilePicker component', () => {
   const mockFileSelect = vi.fn();
@@ -97,10 +97,20 @@ describe('FilePicker component', () => {
     document.body.appendChild(videoElement);
 
     // Mocking the play method
-    videoElement.play = vi.fn().mockResolvedValue(undefined);
+    vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue(undefined);
+
+    // Mock canvas context and drawing operations
+    const mockContext = {
+      drawImage: vi.fn(),
+    };
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(
+      mockContext as unknown as CanvasRenderingContext2D
+    );
 
     // Stub the toDataURL function of HTMLCanvasElement
-    HTMLCanvasElement.prototype.toDataURL = vi.fn(() => 'data:image/png;base64,fakebase64data');
+    vi.spyOn(HTMLCanvasElement.prototype, 'toDataURL').mockReturnValue(
+      'data:image/png;base64,fakebase64data'
+    );
 
     render(<FilePicker onFileSelect={mockFileSelect} />);
 

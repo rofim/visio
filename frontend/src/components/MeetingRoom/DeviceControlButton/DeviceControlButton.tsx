@@ -1,18 +1,19 @@
-import Mic from '@mui/icons-material/MicNone';
-import { IconButton } from '@mui/material';
-import VideocamIcon from '@mui/icons-material/Videocam';
-import VideocamOffIcon from '@mui/icons-material/VideocamOff';
-import Tooltip from '@mui/material/Tooltip';
-import ButtonGroup from '@mui/material/ButtonGroup';
-import { MicOff, ArrowDropUp, ArrowDropDown } from '@mui/icons-material';
 import { useState, useRef, useCallback, ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
-import MutedAlert from '../../MutedAlert';
-import usePublisherContext from '../../../hooks/usePublisherContext';
+import useIsMicrophoneControlAllowed from '@Context/AppConfig/hooks/useIsMicrophoneControlAllowed';
+import useIsCameraControlAllowed from '@Context/AppConfig/hooks/useIsCameraControlAllowed';
+import usePublisherContext from '@hooks/usePublisherContext';
+import useBackgroundPublisherContext from '@hooks/useBackgroundPublisherContext';
+import getControlButtonTooltip from '@utils/getControlButtonTooltip';
+import useTheme from '@ui/theme';
 import DeviceSettingsMenu from '../DeviceSettingsMenu';
-import useBackgroundPublisherContext from '../../../hooks/useBackgroundPublisherContext';
-import useConfigContext from '../../../hooks/useConfigContext';
-import getControlButtonTooltip from '../../../utils/getControlButtonTooltip';
+import MutedAlert from '../../MutedAlert';
+import ButtonGroup from '@ui/ButtonGroup';
+import IconButton from '@ui/IconButton';
+import Tooltip from '@ui/Tooltip';
+import VividIcon from '@components/VividIcon';
+import Box from '@ui/Box';
+import usePushToTalk from '@hooks/usePushToTalk';
 
 export type DeviceControlButtonProps = {
   deviceType: 'audio' | 'video';
@@ -36,20 +37,22 @@ const DeviceControlButton = ({
   const { t } = useTranslation();
   const { isVideoEnabled, toggleAudio, toggleVideo, isAudioEnabled } = usePublisherContext();
   const { toggleVideo: toggleBackgroundVideoPublisher } = useBackgroundPublisherContext();
-  const config = useConfigContext();
+  const theme = useTheme();
+
+  const isMicrophoneControlAllowed = useIsMicrophoneControlAllowed();
+  const isCameraControlAllowed = useIsCameraControlAllowed();
+
   const isAudio = deviceType === 'audio';
   const [open, setOpen] = useState<boolean>(false);
   const anchorRef = useRef<HTMLInputElement | null>(null);
-  const { allowMicrophoneControl } = config.audioSettings;
-  const { allowCameraControl } = config.videoSettings;
-  const isButtonDisabled = isAudio ? !allowMicrophoneControl : !allowCameraControl;
+  const isButtonDisabled = isAudio ? !isMicrophoneControlAllowed : !isCameraControlAllowed;
 
   const tooltipTitle = getControlButtonTooltip({
     isAudio,
     isAudioEnabled,
     isVideoEnabled,
-    allowMicrophoneControl,
-    allowCameraControl,
+    allowMicrophoneControl: isMicrophoneControlAllowed,
+    allowCameraControl: isCameraControlAllowed,
     t,
   });
 
@@ -66,22 +69,56 @@ const DeviceControlButton = ({
 
   const renderControlIcon = () => {
     if (isAudio) {
-      if (!allowMicrophoneControl) {
-        return <Mic className="text-gray-400" />;
+      if (!isMicrophoneControlAllowed) {
+        return (
+          <VividIcon
+            name="microphone-2-solid"
+            customSize={-6}
+            sx={{ color: theme.colors.disabled }}
+          />
+        );
       }
       if (isAudioEnabled) {
-        return <Mic className="text-white" />;
+        return (
+          <VividIcon
+            name="microphone-2-solid"
+            customSize={-6}
+            data-testid="MicNoneIcon"
+            sx={{ color: theme.colors.onDarkGrey }}
+          />
+        );
       }
-      return <MicOff data-testid="MicOffToolbar" className="text-red-600" />;
+      return (
+        <VividIcon
+          name="mic-mute-solid"
+          customSize={-6}
+          data-testid="MicOffToolbar"
+          sx={{ color: theme.colors.error, transform: 'scaleX(-1)' }}
+        />
+      );
     }
 
-    if (!allowCameraControl) {
-      return <VideocamIcon className="text-gray-400" />;
+    if (!isCameraControlAllowed) {
+      return <VividIcon name="video-solid" customSize={-6} sx={{ color: theme.colors.disabled }} />;
     }
     if (isVideoEnabled) {
-      return <VideocamIcon className="text-white" />;
+      return (
+        <VividIcon
+          name="video-solid"
+          customSize={-6}
+          data-testid="VideocamIcon"
+          sx={{ color: theme.colors.onDarkGrey }}
+        />
+      );
     }
-    return <VideocamOffIcon className="text-red-500" />;
+    return (
+      <VividIcon
+        name="video-off-solid"
+        customSize={-6}
+        data-testid="VideocamOffIcon"
+        sx={{ color: theme.colors.error }}
+      />
+    );
   };
 
   const handleDeviceStateChange = () => {
@@ -93,13 +130,23 @@ const DeviceControlButton = ({
     }
   };
 
+  usePushToTalk({
+    enabled: isAudio && isMicrophoneControlAllowed,
+    isAudioEnabled,
+    toggleAudio,
+  });
+
   return (
     <>
       {isAudio && <MutedAlert />}
       <ButtonGroup
-        className="mr-3 mt-1 bg-notVeryGray-55"
         disableElevation
-        sx={{ borderRadius: '30px' }}
+        sx={{
+          mr: 2,
+          mt: 0.25,
+          backgroundColor: theme.colors.darkGrey,
+          borderRadius: '30px',
+        }}
         variant="contained"
         ref={anchorRef}
         aria-label={t('devices.buttons.ariaLabel')}
@@ -111,18 +158,26 @@ const DeviceControlButton = ({
           aria-label={isAudio ? t('devices.audio.ariaLabel') : t('devices.video.ariaLabel')}
           aria-haspopup="menu"
           onClick={handleToggle}
-          className="size-12"
+          sx={{ width: 48, height: 48 }}
           data-testid={isAudio ? 'audio-dropdown-button' : 'video-dropdown-button'}
         >
           {open ? (
-            <ArrowDropDown sx={{ color: 'rgb(138, 180, 248)' }} />
+            <VividIcon
+              name="chevron-down-line"
+              customSize={-6}
+              sx={{ color: theme.colors.onDarkGrey }}
+            />
           ) : (
-            <ArrowDropUp className="text-gray-400" />
+            <VividIcon
+              name="chevron-up-line"
+              customSize={-6}
+              sx={{ color: theme.colors.onDarkGrey }}
+            />
           )}
         </IconButton>
         <Tooltip title={tooltipTitle} aria-label={t('devices.settings.ariaLabel')}>
-          <div>
-            {/* We add the div here so that the tooltip is present if the button is disabled */}
+          <Box>
+            {/* We add the Box here so that the tooltip is present if the button is disabled */}
             <IconButton
               onClick={handleDeviceStateChange}
               disabled={isButtonDisabled}
@@ -131,11 +186,16 @@ const DeviceControlButton = ({
                 isAudio ? t('devices.audio.microphone.full') : t('devices.video.camera.full')
               }
               size="small"
-              className="m-[3px] size-[50px] rounded-full shadow-md"
+              sx={{
+                m: '3px',
+                width: 40,
+                height: 40,
+                borderRadius: '50%',
+              }}
             >
               {renderControlIcon()}
             </IconButton>
-          </div>
+          </Box>
         </Tooltip>
       </ButtonGroup>
       <DeviceSettingsMenu

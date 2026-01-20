@@ -66,12 +66,12 @@ This application provides features for common conferencing use cases, such as:
   </details>
 - <details>
     <summary>
-      Background effects in meeting and waiting room. You can set predefined images, custom image or slight/strong background blur. Images can be uploaded from local device or URL in these formats: JPG, PNG, GIF or BMP. Background effects are not supported in non-Chromium-based browsers or on iOS.
+      Video effects in meeting and waiting room. You can set predefined images, custom image or slight/strong background blur. Images can be uploaded from local device or URL in these formats: JPG, PNG, GIF or BMP. Video effects are not supported in non-Chromium-based browsers or on iOS.
       
     Please see [OT.hasMediaProcessorSupport](https://vonage.github.io/video-docs/video-js-reference/latest/OT.html#hasMediaProcessorSupport) for more information.
     </summary>
   
-    <img src="docs/assets/BGEffects.png" alt="Screenshot of background effects">
+    <img src="docs/assets/BGEffects.png" alt="Screenshot of video effects">
   </details>
 - <details>
     <summary>
@@ -106,6 +106,8 @@ This application provides features for common conferencing use cases, such as:
 
 ## Project Architecture
 
+The project uses an Nx workspace to manage the frontend and backend applications.
+
 ![Vonage Video API Reference App Architecture Diagram](./docs/assets/project-architecture.svg)
 
 ## Platforms Supported
@@ -115,9 +117,8 @@ The Vonage Video API Reference App for React is currently supported on the lates
 - ![Edge icon](/docs/assets/edge.svg) Microsoft Edge
 - ![Opera icon](/docs/assets/opera.svg) Opera
 - ![Safari icon](/docs/assets/safari.svg) Safari
-- ![Electron icon](/docs/assets/electron.svg) Electron
 
-*Note:* Some browsers such as Firefox or Safari do not support media processors like video and audio filters (e.g background effects): Please see [OT.hasMediaProcessorSupport](https://vonage.github.io/video-docs/video-js-reference/latest/OT.html#hasMediaProcessorSupport) for more information.
+*Note:* Some browsers such as Firefox or Safari do not support media processors like video and audio filters (e.g video effects): Please see [OT.hasMediaProcessorSupport](https://vonage.github.io/video-docs/video-js-reference/latest/OT.html#hasMediaProcessorSupport) for more information.
 
 *Note:* Mobile web views have limited supported at the moment. The minimum supported device width is `360px`.
 
@@ -285,7 +286,6 @@ instance:
   name: my-instance-name
   runtime: nodejs22
   region: aws.euw1
-  build-script: './vcrBuild.sh'
   entrypoint: [yarn, run-server]
   application-id: my-deployment-app-id
 debug:
@@ -299,6 +299,48 @@ You can also check your instances at https://dashboard.nexmo.com/serverless/inst
 
 Note: This will deploy the project using your local code and .env files, which is useful for debugging.
 For a more centralized deployment to VCR see our GHA workflow `.github/workflows/deploy-to-vcr.yml`.
+
+### Development Deployment from Local
+
+For quick development deployments directly from your local machine, you can use the `deploy:dev` script:
+
+1. **Install the VCR CLI** (if not already installed):
+   
+   Follow the installation instructions at https://developer.vonage.com/en/vonage-cloud-runtime/getting-started/working-locally#cli-installation
+
+2. **Configure VCR with your credentials**:
+
+   ```bash
+   vcr configure
+   ```
+
+   Enter your Vonage API Key and Secret, and select a region.
+
+3. **Generate application keys**:
+
+   ```bash
+   vcr app generate-keys --app-id <app-id> docs
+   ```
+
+   Replace `<app-id>` with your Vonage application ID.
+
+4. **Set up your development configuration**:
+
+   Copy the development configuration example file:
+
+   ```bash
+   cp vcr-dev.example.yml vcr-dev.yml
+   ```
+
+   Open `vcr-dev.yml` and add your application ID.
+
+5. **Deploy to development**:
+
+   ```bash
+   yarn deploy:dev
+   ```
+
+This will deploy using your local development configuration and code, making it quick to test changes in a cloud environment.
 
 ## Testing
 
@@ -353,6 +395,8 @@ yarn test:backend:watch
 
 ### Frontend Suite
 We have frontend tests using [vitest](https://vitest.dev/) and [React Testing Library](https://testing-library.com/docs/react-testing-library/intro). We recommend using the [vitest VSCode integration]( https://marketplace.visualstudio.com/items?itemName=vitest.explorer) to run tests.
+
+For guidance on writing frontend unit tests, see the [Frontend Unit Testing Guide](./docs/TESTING.md).
 
 Alternatively you can run the tests in the terminal:
 - To run frontend tests once:

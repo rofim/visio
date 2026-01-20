@@ -4,7 +4,7 @@ import { Publisher, initPublisher } from '@vonage/client-sdk-video';
 import useScreenShare from '../useScreenShare';
 import useSessionContext from '../useSessionContext';
 import useUserContext from '../useUserContext';
-import VonageVideoClient from '../../utils/VonageVideoClient';
+import type VonageVideoClient from '../../utils/VonageVideoClient';
 
 // Mocking dependencies
 vi.mock('@vonage/client-sdk-video', () => ({
@@ -27,6 +27,7 @@ describe('useScreenSharing', () => {
     } as unknown as VonageVideoClient;
 
     mockPublisher = {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       on: vi.fn() as Mock, // NOSONAR
       destroy: vi.fn(),
     };

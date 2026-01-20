@@ -11,11 +11,13 @@ import {
   ReactElement,
 } from 'react';
 import { Connection, Publisher, Stream } from '@vonage/client-sdk-video';
-import fetchCredentials from '../../api/fetchCredentials';
-import useUserContext from '../../hooks/useUserContext';
-import useConfigContext from '../../hooks/useConfigContext';
-import ActiveSpeakerTracker from '../../utils/ActiveSpeakerTracker';
-import useRightPanel, { RightPanelActiveTab } from '../../hooks/useRightPanel';
+import useRightPanel, { RightPanelActiveTab } from '@hooks/useRightPanel';
+import useUserContext from '@hooks/useUserContext';
+import useChat from '@hooks/useChat';
+import useEmoji, { EmojiWrapper } from '@hooks/useEmoji';
+import appConfigContext from '@Context/AppConfig';
+import fetchCredentials from '@api/fetchCredentials';
+import ActiveSpeakerTracker from '@utils/ActiveSpeakerTracker';
 import {
   Credential,
   LocalCaptionReceived,
@@ -24,19 +26,17 @@ import {
   SubscriberAudioLevelUpdatedEvent,
   SubscriberWrapper,
   LayoutMode,
-} from '../../types/session';
-import useChat from '../../hooks/useChat';
-import { ChatMessageType } from '../../types/chat';
-import { isMobile } from '../../utils/util';
+} from '@app-types/session';
+import { ChatMessageType } from '@app-types/chat';
+import { isMobile } from '@utils/util';
 import {
   sortByDisplayPriority,
   togglePinAndSortByDisplayOrder,
-} from '../../utils/sessionStateOperations';
-import { MAX_PIN_COUNT_DESKTOP, MAX_PIN_COUNT_MOBILE } from '../../utils/constants';
-import VonageVideoClient from '../../utils/VonageVideoClient';
-import useEmoji, { EmojiWrapper } from '../../hooks/useEmoji';
+} from '@utils/sessionStateOperations';
+import { MAX_PIN_COUNT_DESKTOP, MAX_PIN_COUNT_MOBILE } from '@utils/constants';
+import VonageVideoClient from '@utils/VonageVideoClient';
 
-export type { ChatMessageType } from '../../types/chat';
+export type { ChatMessageType } from '@app-types/chat';
 
 export type SessionContextType = {
   vonageVideoClient: null | VonageVideoClient;
@@ -105,18 +105,31 @@ export const SessionContext = createContext<SessionContextType>({
   subscriptionError: null,
 });
 
-export type ConnectionEventType = {
-  connection: Connection;
-  reason?: string;
-  id?: string;
-};
+export type ConnectionEventType = { connection: Connection; reason?: string; id?: string };
+
+export type SessionContextInitialValue = Partial<
+  Pick<
+    SessionContextType,
+    | 'connected'
+    | 'reconnecting'
+    | 'layoutMode'
+    | 'subscriberWrappers'
+    | 'lastStreamUpdate'
+    | 'subscriptionError'
+    | 'ownCaptions'
+    | 'archiveId'
+    | 'activeSpeakerId'
+  >
+>;
 
 /**
  * @typedef {object} SessionProviderProps
  * @property {ReactNode} children - The content to be rendered as children.
+ * @property {SessionContextInitialValue} initialValue - Optional initial values for session context state.
  */
 export type SessionProviderProps = {
   children: ReactNode;
+  initialValue?: SessionContextInitialValue;
 };
 
 const MAX_PIN_COUNT = isMobile() ? MAX_PIN_COUNT_MOBILE : MAX_PIN_COUNT_DESKTOP;
@@ -129,20 +142,34 @@ const MAX_PIN_COUNT = isMobile() ? MAX_PIN_COUNT_MOBILE : MAX_PIN_COUNT_DESKTOP;
  * @param {SessionProviderProps} props - The provider properties
  * @returns {SessionContextType} a context provider for a publisher preview
  */
-const SessionProvider = ({ children }: SessionProviderProps): ReactElement => {
-  const config = useConfigContext();
-  const [lastStreamUpdate, setLastStreamUpdate] = useState<StreamPropertyChangedEvent | null>(null);
-  const vonageVideoClient = useRef<null | VonageVideoClient>(null);
-  const [reconnecting, setReconnecting] = useState(false);
-  const [subscriberWrappers, setSubscriberWrappers] = useState<SubscriberWrapper[]>([]);
-  const [subscriptionError, setSubscriptionError] = useState<Error | null>(null);
-  const [ownCaptions, setOwnCaptions] = useState<string | null>(null);
-  const [layoutMode, setLayoutMode] = useState<LayoutMode>(
-    config.meetingRoomSettings.defaultLayoutMode
+const SessionProvider = ({ children, initialValue = {} }: SessionProviderProps): ReactElement => {
+  const appConfig = appConfigContext.use.api();
+
+  const [lastStreamUpdate, setLastStreamUpdate] = useState<StreamPropertyChangedEvent | null>(
+    initialValue?.lastStreamUpdate ?? null
   );
-  const [archiveId, setArchiveId] = useState<string | null>(null);
+  const vonageVideoClient = useRef<null | VonageVideoClient>(null);
+  const [reconnecting, setReconnecting] = useState(initialValue?.reconnecting ?? false);
+  const [subscriberWrappers, setSubscriberWrappers] = useState<SubscriberWrapper[]>(
+    initialValue?.subscriberWrappers ?? []
+  );
+  const [subscriptionError, setSubscriptionError] = useState<Error | null>(
+    initialValue?.subscriptionError ?? null
+  );
+  const [ownCaptions, setOwnCaptions] = useState<string | null>(initialValue?.ownCaptions ?? null);
+
+  const [layoutMode, setLayoutMode] = useState<LayoutMode>(
+    initialValue?.layoutMode ??
+      (() => {
+        return appConfig.getState().meetingRoomSettings.defaultLayoutMode;
+      })()
+  );
+
+  const [archiveId, setArchiveId] = useState<string | null>(initialValue?.archiveId ?? null);
   const activeSpeakerTracker = useRef<ActiveSpeakerTracker>(new ActiveSpeakerTracker());
-  const [activeSpeakerId, setActiveSpeakerId] = useState<string | undefined>();
+  const [activeSpeakerId, setActiveSpeakerId] = useState<string | undefined>(
+    initialValue?.activeSpeakerId ?? undefined
+  );
   const activeSpeakerIdRef = useRef<string | undefined>(undefined);
   const { messages, onChatMessage, sendChatMessage } = useChat({
     signal: vonageVideoClient.current?.signal,
@@ -241,7 +268,7 @@ const SessionProvider = ({ children }: SessionProviderProps): ReactElement => {
   }, [moveSubscriberToTopOfDisplayOrder, setActiveSpeakerIdAndRef]);
 
   const { user } = useUserContext();
-  const [connected, setConnected] = useState(false);
+  const [connected, setConnected] = useState(initialValue?.connected ?? false);
 
   /**
    * Handles changes to stream properties. This triggers a re-render when a stream property changes
@@ -271,6 +298,7 @@ const SessionProvider = ({ children }: SessionProviderProps): ReactElement => {
   };
   const handleReconnected = () => {
     setReconnecting(false);
+    setSubscriptionError(null);
   };
 
   const handleArchiveStarted = (id: string) => {
@@ -305,15 +333,31 @@ const SessionProvider = ({ children }: SessionProviderProps): ReactElement => {
     movingAvg,
     subscriberId,
   }: SubscriberAudioLevelUpdatedEvent) => {
-    activeSpeakerTracker.current.onSubscriberAudioLevelUpdated({
-      subscriberId,
-      movingAvg,
-    });
+    activeSpeakerTracker.current.onSubscriberAudioLevelUpdated({ subscriberId, movingAvg });
   };
 
-  const handleSubscriptionError = useCallback((error: unknown) => {
-    setSubscriptionError(error instanceof Error ? error : new Error('Unknown subscription error'));
-  }, []);
+  const handleSubscriptionError = useCallback(
+    (error: unknown) => {
+      const isBrowserOnline = (() => {
+        if (typeof navigator === 'undefined') return true;
+        return navigator.onLine;
+      })();
+
+      if (reconnecting || isBrowserOnline === false) {
+        console.warn('[SUBSCRIBER] Ignoring subscription error during reconnection/offline', {
+          reconnecting,
+          isBrowserOnline,
+          error,
+        });
+        return;
+      }
+
+      setSubscriptionError(
+        error instanceof Error ? error : new Error('Unknown subscription error')
+      );
+    },
+    [reconnecting]
+  );
 
   /**
    * Connects to the session using the provided credentials.
@@ -352,9 +396,7 @@ const SessionProvider = ({ children }: SessionProviderProps): ReactElement => {
       await vonageVideoClient.current.connect();
       setConnected(true);
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        console.error(err);
-      }
+      console.error(err);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -364,8 +406,8 @@ const SessionProvider = ({ children }: SessionProviderProps): ReactElement => {
    * @param {string} roomName - The name of the room to join.
    */
   const joinRoom = useCallback(
-    async (roomName: string) => {
-      fetchCredentials(roomName)
+    (roomName: string) => {
+      return fetchCredentials(roomName)
         .then((credentials) => {
           return connect(credentials.data);
         })
@@ -392,7 +434,7 @@ const SessionProvider = ({ children }: SessionProviderProps): ReactElement => {
    */
   const forceMute = useCallback(async (stream: Stream) => {
     if (vonageVideoClient.current) {
-      vonageVideoClient.current.forceMuteStream(stream);
+      await vonageVideoClient.current.forceMuteStream(stream);
     }
   }, []);
 

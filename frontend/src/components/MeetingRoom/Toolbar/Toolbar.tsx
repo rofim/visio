@@ -1,21 +1,23 @@
 import { Dispatch, ReactElement, SetStateAction, useCallback, useRef, useState } from 'react';
+import useSessionContext from '@hooks/useSessionContext';
+import { RightPanelActiveTab } from '@hooks/useRightPanel';
+import isReportIssueEnabled from '@utils/isReportIssueEnabled';
+import useToolbarButtons from '@hooks/useToolbarButtons';
+import useBackgroundPublisherContext from '@hooks/useBackgroundPublisherContext';
+import Box from '@ui/Box';
+import useTheme from '@ui/theme';
 import ScreenSharingButton from '../../ScreenSharingButton';
 import TimeRoomNameMeetingRoom from '../TimeRoomName';
 import ExitButton from '../ExitButton';
-import useSessionContext from '../../../hooks/useSessionContext';
 import LayoutButton from '../LayoutButton';
 import ParticipantListButton from '../ParticipantListButton';
 import ArchivingButton from '../ArchivingButton';
 import CaptionsButton from '../CaptionsButton';
 import ChatButton from '../ChatButton';
-import { RightPanelActiveTab } from '../../../hooks/useRightPanel';
 import ReportIssueButton from '../ReportIssueButton';
 import ToolbarOverflowButton from '../ToolbarOverflowButton';
 import EmojiGridButton from '../EmojiGridButton';
-import isReportIssueEnabled from '../../../utils/isReportIssueEnabled';
-import useToolbarButtons from '../../../hooks/useToolbarButtons';
 import DeviceControlButton from '../DeviceControlButton';
-import useBackgroundPublisherContext from '../../../hooks/useBackgroundPublisherContext';
 
 export type CaptionsState = {
   isUserCaptionsEnabled: boolean;
@@ -42,7 +44,7 @@ export type ToolbarProps = {
  * It displays the following items:
  * - The current time and meeting room name
  * - The microphone state with the ability to toggle it on/off and open a drop-down with some audio settings
- * - The video state with the ability to toggle it on/off and open a dropdown with some video settings
+ * - The video state with the ability to toggle it on/off and open a dropdown with some video effects
  * - Screensharing button (only on desktop devices)
  * - Button to toggle current layout (grid or active speaker)
  * - Button to express yourself (emojis)
@@ -69,6 +71,7 @@ const Toolbar = ({
   participantCount,
   captionsState,
 }: ToolbarProps): ReactElement => {
+  const theme = useTheme();
   const { disconnect, subscriberWrappers } = useSessionContext();
   const { destroyBackgroundPublisher } = useBackgroundPublisherContext();
   const isViewingScreenShare = subscriberWrappers.some((subWrapper) => subWrapper.isScreenshare);
@@ -152,21 +155,38 @@ const Toolbar = ({
   const rightPanelButtons = toolbarButtons.map(displayRightPanelButtons);
   // We display the right panel if we have at least one right panel button to display.
   const displayRightPanel = rightPanelButtons.some((rightPanelButton) => !!rightPanelButton);
-  // We hide the TimeRoomName container when there is no space, and remove its margin when we don't display the right panel container.
-  const displayTimeRoomNameClass = `${!displayRightPanel ? 'mr-3 ' : ''}${!displayTimeRoomName ? 'hidden ' : ''}flex flex-1 justify-start overflow-hidden`;
-  // We hide the right panel buttons container when there are no buttons to display, and grow/shrink it when we display the TimeRoomName container.
-  const rightPanelButtonsClass = `${!displayRightPanel ? 'hidden ' : ''}${displayTimeRoomName ? 'flex-1 ' : ''}ml-3 box-border flex justify-end`;
 
   return (
-    <div
+    <Box
       ref={toolbarRef}
-      className="absolute bottom-0 left-0 flex h-[80px] w-full flex-row items-center justify-between bg-darkGray-100 p-4"
+      sx={{
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        display: 'flex',
+        height: '80px',
+        width: '100%',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        backgroundColor: theme.colors.darkBackground,
+        padding: 2,
+      }}
     >
-      <div ref={timeRoomNameRef} className={displayTimeRoomNameClass}>
+      <Box
+        ref={timeRoomNameRef}
+        sx={{
+          display: displayTimeRoomName ? 'flex' : 'none',
+          flex: 1,
+          justifyContent: 'start',
+          overflow: 'hidden',
+          marginRight: displayRightPanel ? 0 : 1.5,
+        }}
+      >
         {displayTimeRoomName && <TimeRoomNameMeetingRoom />}
-      </div>
-      <div className="flex flex-1 justify-center">
-        <div ref={mediaControlsRef} className="flex flex-row">
+      </Box>
+      <Box sx={{ display: 'flex', flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Box ref={mediaControlsRef} sx={{ display: 'flex', flexDirection: 'row' }}>
           <DeviceControlButton
             deviceType="audio"
             toggleBackgroundEffects={toggleBackgroundEffects}
@@ -175,9 +195,9 @@ const Toolbar = ({
             deviceType="video"
             toggleBackgroundEffects={toggleBackgroundEffects}
           />
-        </div>
+        </Box>
         {toolbarButtons.map(displayCenterToolbarButtons)}
-        <div ref={overflowAndExitRef} className="flex flex-row">
+        <Box ref={overflowAndExitRef} sx={{ display: 'flex', flexDirection: 'row' }}>
           {shouldShowOverflowButton && (
             <ToolbarOverflowButton
               isSharingScreen={isSharingScreen}
@@ -187,13 +207,22 @@ const Toolbar = ({
             />
           )}
           <ExitButton handleLeave={handleLeave} />
-        </div>
-      </div>
+        </Box>
+      </Box>
 
-      <div className={rightPanelButtonsClass} ref={rightPanelControlsRef}>
+      <Box
+        ref={rightPanelControlsRef}
+        sx={{
+          display: displayRightPanel ? 'flex' : 'none',
+          flex: displayTimeRoomName ? 1 : 'initial',
+          marginLeft: 1.5,
+          boxSizing: 'border-box',
+          justifyContent: 'end',
+        }}
+      >
         {rightPanelButtons}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 };
 

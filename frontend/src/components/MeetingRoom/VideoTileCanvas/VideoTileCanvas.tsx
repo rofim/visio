@@ -1,6 +1,5 @@
 import { ReactElement, useRef } from 'react';
 import { Publisher as OTPublisher } from '@vonage/client-sdk-video';
-import { CircularProgress } from '@mui/material';
 import useLayoutManager from '../../../hooks/useLayoutManager';
 import usePublisherContext from '../../../hooks/usePublisherContext';
 import useSessionContext from '../../../hooks/useSessionContext';
@@ -14,6 +13,8 @@ import useSubscribersInDisplayOrder from '../../../hooks/useSubscribersInDisplay
 import getLayoutBoxes from '../../../utils/helpers/getLayoutBoxes';
 import useActiveSpeaker from '../../../hooks/useActiveSpeaker';
 import useIsSmallViewport from '../../../hooks/useIsSmallViewport';
+import CircularProgress from '@ui/CircularProgress';
+import Box from '@ui/Box';
 
 export type VideoTileCanvasProps = {
   isSharingScreen: boolean;
@@ -40,9 +41,9 @@ const VideoTileCanvas = ({
   const wrapDimensions = useElementDimensions({ elementRef: wrapRef });
 
   const activeSpeakerId = useActiveSpeaker();
-  const { isPublishing, publisher } = usePublisherContext();
+  const { publisher } = usePublisherContext();
   const getLayout = useLayoutManager();
-  const { connected, subscriberWrappers, layoutMode } = useSessionContext();
+  const { connected, reconnecting, subscriberWrappers, layoutMode } = useSessionContext();
 
   // Determine if we will display a large video tile based on current layout mode and screenshare presence
   const pinnedSubscriberCount = subscriberWrappers.filter(
@@ -65,6 +66,7 @@ const VideoTileCanvas = ({
   const subscribersInDisplayOrder = useSubscribersInDisplayOrder(subscribersOnScreen);
 
   // Get the layout Boxes which specify exact position, height, and width for all video tiles
+
   const layoutBoxes = getLayoutBoxes({
     activeSpeakerId,
     getLayout,
@@ -84,57 +86,60 @@ const VideoTileCanvas = ({
 
   // Height is 100dvh - toolbar height (80px) and header height (80px) - 24px wrapper margin on small viewport device
   // Height is 100dvh - toolbar height (80px) - 24px wrapper margin on desktop
-  const heightClass = isSmallViewport
-    ? '@apply h-[calc(100dvh_-_184px)]'
-    : '@apply h-[calc(100dvh_-_104px)]';
+  const wrapperHeight = isSmallViewport ? 'calc(100dvh - 184px)' : 'calc(100dvh - 104px)';
 
   // Width is 100vw - 360px panel width - 24px panel right margin - 24px wrapper margin
-  const widthClass = isRightPanelOpen
-    ? '@apply w-[calc(100vw_-_392px)]'
-    : '@apply w-[calc(100vw_-_24px)]';
+  const wrapperWidth = isRightPanelOpen ? 'calc(100vw - 392px)' : 'calc(100vw - 24px)';
+
+  const shouldShowProgress = connected !== true || reconnecting === true;
+  const progressTestId =
+    reconnecting === true ? 'reconnecting-progress-spinner' : 'progress-spinner';
+
   return (
-    <div ref={wrapRef} id="wrapper" className={`m-3 ${widthClass} ${heightClass}`}>
-      <div id="video-container" className="relative size-full">
-        {!connected ? (
+    <Box
+      ref={wrapRef}
+      id="wrapper"
+      sx={{
+        padding: 3,
+        width: wrapperWidth,
+        height: wrapperHeight,
+      }}
+    >
+      <Box id="video-container" sx={{ position: 'relative', width: '100%', height: '100%' }}>
+        {layoutBoxes.publisherBox && <Publisher box={layoutBoxes.publisherBox} />}
+        {isSharingScreen && (
+          <ScreenSharePublisher
+            publisher={screensharingPublisher}
+            box={layoutBoxes.localScreenshareBox}
+            element={screenshareVideoElement}
+          />
+        )}
+        {// Note: we still render hidden subscribers with flag `hidden`
+        // inside the subscriber component we will unsubscribe to video to save bandwidth
+        [...subscribersInDisplayOrder, ...hiddenSubscribers]?.map((subscriberWrapper, index) => (
+          <Subscriber
+            key={subscriberWrapper.id}
+            subscriberWrapper={subscriberWrapper}
+            isHidden={!subscribersInDisplayOrder.includes(subscriberWrapper)}
+            box={layoutBoxes.subscriberBoxes?.[index]}
+            isActiveSpeaker={activeSpeakerId === subscriberWrapper.id}
+          />
+        ))}
+        {!!hiddenSubscribers.length && layoutBoxes.hiddenParticipantsBox && (
+          <HiddenParticipantsTile
+            hiddenSubscribers={hiddenSubscribers}
+            box={layoutBoxes.hiddenParticipantsBox}
+          />
+        )}
+
+        {shouldShowProgress && (
           <CircularProgress
-            data-testid="progress-spinner"
+            data-testid={progressTestId}
             sx={{ position: 'absolute', top: '50%' }}
           />
-        ) : (
-          <>
-            {isPublishing && layoutBoxes.publisherBox && (
-              <Publisher box={layoutBoxes.publisherBox} />
-            )}
-            {isSharingScreen && (
-              <ScreenSharePublisher
-                publisher={screensharingPublisher}
-                box={layoutBoxes.localScreenshareBox}
-                element={screenshareVideoElement}
-              />
-            )}
-            {// Note: we still render hidden subscribers with flag `hidden`
-            // inside the subscriber component we will unsubscribe to video to save bandwidth
-            [...subscribersInDisplayOrder, ...hiddenSubscribers]?.map(
-              (subscriberWrapper, index) => (
-                <Subscriber
-                  key={subscriberWrapper.id}
-                  subscriberWrapper={subscriberWrapper}
-                  isHidden={!subscribersInDisplayOrder.includes(subscriberWrapper)}
-                  box={layoutBoxes.subscriberBoxes?.[index]}
-                  isActiveSpeaker={activeSpeakerId === subscriberWrapper.id}
-                />
-              )
-            )}
-            {!!hiddenSubscribers.length && layoutBoxes.hiddenParticipantsBox && (
-              <HiddenParticipantsTile
-                hiddenSubscribers={hiddenSubscribers}
-                box={layoutBoxes.hiddenParticipantsBox}
-              />
-            )}
-          </>
         )}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 };
 

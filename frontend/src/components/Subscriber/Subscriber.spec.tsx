@@ -134,12 +134,12 @@ describe('Subscriber', () => {
     );
 
     const subscriberContainer = screen.getByTestId(`subscriber-container-${mockedSubscriberId}`);
-    expect(screen.queryByTestId('PushPinIcon')).toBeVisible();
+    expect(screen.getByTestId('vivid-icon-pin-2-solid')).toBeVisible();
     await act(() => userEvent.hover(subscriberContainer));
-    expect(screen.getByTestId('PushPinOffIcon')).toBeVisible();
+    expect(screen.getByTestId('vivid-icon-pin-2-off-solid')).toBeVisible();
   });
 
-  it('should not render pin icon when screenshare subscriber is hovered', async () => {
+  it('should not render pin icon when screenshare subscriber is hovered', () => {
     const mockedSubscriberId = 'OT_7a0a1bfd-2892-4f5e-90e0-33dafdc7c373';
     const subscriberWrapper = createSubscriberWrapper(mockedSubscriberId, true);
     const mockedBox = createMockBox(10, 10, 10, 10);

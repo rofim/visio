@@ -5,10 +5,11 @@ import {
   AudioFilter,
   hasMediaProcessorSupport,
 } from '@vonage/client-sdk-video';
-import useUserContext from '../../../hooks/useUserContext';
-import getInitials from '../../../utils/getInitials';
-import DeviceStore from '../../../utils/DeviceStore';
-import useConfigContext from '../../../hooks/useConfigContext';
+import useAppConfig from '@Context/AppConfig/hooks/useAppConfig';
+import useUserContext from '@hooks/useUserContext';
+import getInitials from '@utils/getInitials';
+import DeviceStore from '@utils/DeviceStore';
+import { getStorageItem, STORAGE_KEYS } from '@utils/storage';
 
 /**
  * React hook to get PublisherProperties combining default options and options set in UserContext
@@ -17,11 +18,17 @@ import useConfigContext from '../../../hooks/useConfigContext';
 
 const usePublisherOptions = (): PublisherProperties | null => {
   const { user } = useUserContext();
-  const config = useConfigContext();
+
+  const defaultResolution = useAppConfig(({ videoSettings }) => videoSettings.defaultResolution);
+  const allowVideoOnJoin = useAppConfig(({ videoSettings }) => videoSettings.allowVideoOnJoin);
+  const allowAudioOnJoin = useAppConfig(({ audioSettings }) => audioSettings.allowAudioOnJoin);
+
+  // Extract individual properties to avoid object reference changes
+  const { name, noiseSuppression, backgroundFilter, publishAudio, publishVideo, publishCaptions } =
+    user.defaultSettings;
+
   const [publisherOptions, setPublisherOptions] = useState<PublisherProperties | null>(null);
   const deviceStoreRef = useRef<DeviceStore | null>(null);
-  const { defaultResolution, allowVideoOnJoin } = config.videoSettings;
-  const { allowAudioOnJoin } = config.audioSettings;
 
   useEffect(() => {
     const setOptions = async () => {
@@ -33,14 +40,6 @@ const usePublisherOptions = (): PublisherProperties | null => {
       const videoSource = deviceStoreRef.current.getConnectedDeviceId('videoinput');
       const audioSource = deviceStoreRef.current.getConnectedDeviceId('audioinput');
 
-      const {
-        name,
-        noiseSuppression,
-        backgroundFilter,
-        publishAudio,
-        publishVideo,
-        publishCaptions,
-      } = user.defaultSettings;
       const initials = getInitials(name);
 
       const audioFilter: AudioFilter | undefined =
@@ -51,24 +50,38 @@ const usePublisherOptions = (): PublisherProperties | null => {
       const videoFilter: VideoFilter | undefined =
         backgroundFilter && hasMediaProcessorSupport() ? backgroundFilter : undefined;
 
-      setPublisherOptions({
+      const isAudioDisabled = getStorageItem(STORAGE_KEYS.AUDIO_SOURCE_ENABLED) === 'false';
+      const isVideoDisabled = getStorageItem(STORAGE_KEYS.VIDEO_SOURCE_ENABLED) === 'false';
+
+      const options = {
         audioFallback: { publisher: true },
         audioSource,
         initials,
         insertDefaultUI: false,
         name,
-        publishAudio: allowAudioOnJoin && publishAudio,
-        publishVideo: allowVideoOnJoin && publishVideo,
+        publishAudio: allowAudioOnJoin && publishAudio && !isAudioDisabled,
+        publishVideo: allowVideoOnJoin && publishVideo && !isVideoDisabled,
         resolution: defaultResolution,
         audioFilter,
         videoFilter,
         videoSource,
         publishCaptions,
-      });
+      };
+      setPublisherOptions(options);
     };
 
     setOptions();
-  }, [allowAudioOnJoin, defaultResolution, allowVideoOnJoin, user.defaultSettings]);
+  }, [
+    allowAudioOnJoin,
+    defaultResolution,
+    allowVideoOnJoin,
+    name,
+    noiseSuppression,
+    backgroundFilter,
+    publishAudio,
+    publishVideo,
+    publishCaptions,
+  ]);
 
   return publisherOptions;
 };

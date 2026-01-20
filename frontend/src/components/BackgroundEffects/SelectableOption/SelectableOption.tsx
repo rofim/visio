@@ -1,5 +1,7 @@
 import { ReactElement, ReactNode } from 'react';
-import { Box, Paper, Tooltip } from '@mui/material';
+import useTheme from '@ui/theme';
+import Box from '@ui/Box';
+import Tooltip from '@ui/Tooltip';
 import { DEFAULT_SELECTABLE_OPTION_WIDTH } from '../../../utils/constants';
 
 export type SelectableOptionProps = {
@@ -38,10 +40,11 @@ const SelectableOption = ({
   title,
   image,
   size = DEFAULT_SELECTABLE_OPTION_WIDTH,
-  isDisabled = false,
   children,
-  ...otherProps // Used by MUI Tooltip
+  ...otherProps
 }: SelectableOptionProps): ReactElement => {
+  const theme = useTheme();
+
   return (
     <Box
       key={id}
@@ -52,25 +55,25 @@ const SelectableOption = ({
         mr: 1,
       }}
     >
-      <Paper
+      <Box
         data-testid={`background-${id}`}
         onClick={onClick}
-        elevation={isSelected ? 4 : 1}
-        aria-disabled={isDisabled}
         aria-pressed={isSelected}
         sx={{
           width: size,
           height: size,
           overflow: 'hidden',
-          borderRadius: '16px',
-          border: isSelected ? '2px solid #1976d2' : '',
-          cursor: isDisabled ? 'not-allowed' : 'pointer',
+          borderRadius: theme.shapes.borderRadiusMedium,
+          border: isSelected
+            ? `1.5px solid ${theme.colors.primary}`
+            : `1px solid ${theme.colors.border}`,
+          cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          transition: 'all 0.1s ease-in-out',
-          backgroundColor: isDisabled ? '#f5f5f5' : '#fff',
-          opacity: isDisabled ? 0.5 : 1,
+          color: theme.colors.secondary,
+          backgroundColor: isSelected ? theme.colors.background : theme.colors.surface,
+          opacity: 1,
         }}
         {...otherProps}
       >
@@ -88,7 +91,7 @@ const SelectableOption = ({
               <img
                 src={image}
                 title={title}
-                alt="background"
+                alt={title}
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
             ) : (
@@ -97,7 +100,7 @@ const SelectableOption = ({
           </Box>
         </Tooltip>
         {children}
-      </Paper>
+      </Box>
     </Box>
   );
 };

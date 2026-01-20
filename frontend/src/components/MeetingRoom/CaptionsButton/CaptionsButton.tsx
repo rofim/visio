@@ -1,12 +1,13 @@
-import { ClosedCaption, ClosedCaptionDisabled } from '@mui/icons-material';
-import { Tooltip } from '@mui/material';
 import { Dispatch, ReactElement, useState, SetStateAction } from 'react';
 import { AxiosError } from 'axios';
 import { useTranslation } from 'react-i18next';
-import useRoomName from '../../../hooks/useRoomName';
+import useIsMeetingCaptionsAllowed from '@Context/AppConfig/hooks/useIsMeetingCaptionsAllowed';
+import { disableCaptions, enableCaptions } from '@api/captions';
+import useRoomName from '@hooks/useRoomName';
 import ToolbarButton from '../ToolbarButton';
-import { disableCaptions, enableCaptions } from '../../../api/captions';
-import useConfigContext from '../../../hooks/useConfigContext';
+import Tooltip from '@ui/Tooltip';
+import VividIcon from '@components/VividIcon';
+import useTheme from '@ui/theme';
 
 export type CaptionsState = {
   isUserCaptionsEnabled: boolean;
@@ -35,14 +36,15 @@ const CaptionsButton = ({
   handleClick,
   captionsState,
 }: CaptionsButtonProps): ReactElement | false => {
-  const config = useConfigContext();
+  const isMeetingCaptionsAllowed = useIsMeetingCaptionsAllowed();
+
   const { t } = useTranslation();
   const roomName = useRoomName();
   const [captionsId, setCaptionsId] = useState<string>('');
   const { isUserCaptionsEnabled, setIsUserCaptionsEnabled, setCaptionsErrorResponse } =
     captionsState;
   const title = isUserCaptionsEnabled ? t('captions.disable') : t('captions.enable');
-  const { allowCaptions } = config.meetingRoomSettings;
+  const theme = useTheme();
 
   const handleClose = () => {
     if (isOverflowButton && handleClick) {
@@ -65,6 +67,7 @@ const CaptionsButton = ({
       setIsUserCaptionsEnabled(true);
     } catch (error) {
       if (error instanceof AxiosError) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         handleCaptionsErrorResponse(error.response?.data.message);
       }
     }
@@ -77,6 +80,7 @@ const CaptionsButton = ({
       setIsUserCaptionsEnabled(false);
     } catch (error) {
       if (error instanceof AxiosError) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         handleCaptionsErrorResponse(error.response?.data.message);
       }
     }
@@ -96,19 +100,23 @@ const CaptionsButton = ({
   };
 
   return (
-    allowCaptions && (
+    isMeetingCaptionsAllowed && (
       <Tooltip title={title} aria-label={t('captions.ariaLabel')}>
         <ToolbarButton
           onClick={handleActionClick}
           data-testid="captions-button"
           icon={
             !isUserCaptionsEnabled ? (
-              <ClosedCaption style={{ color: 'white' }} />
+              <VividIcon
+                name="closed-captioning-solid"
+                customSize={-5}
+                sx={{ color: theme.colors.onSecondary }}
+              />
             ) : (
-              <ClosedCaptionDisabled
-                style={{
-                  color: 'rgb(239 68 68)',
-                }}
+              <VividIcon
+                name="closed-captioning-off-solid"
+                customSize={-5}
+                sx={{ color: theme.colors.error }}
               />
             )
           }
