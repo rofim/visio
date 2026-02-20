@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAtom } from 'jotai';
-import { getRofimSession } from '../utils/session';
+import { getRofimSession, RofimSession } from '../utils/session';
 import environment from '../environments';
 import {
   canJoinVisioAtom,
@@ -51,14 +51,18 @@ const useWebSocket = (shouldLogToMatomo: boolean = false) => {
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const onMessage = (event: any) => {
+  const onMessage = (event: any, rofimSesion: RofimSession) => {
     if (event.channel === 'teleconsultation:doctor:add-delay') {
       setDoctorDelayInMinute(event.content.doctorDelayInMinute);
       setStartTime(new Date(event.content.startTime).getTime());
     }
 
     if (event.channel === 'teleconsultation:doctor:visio-live') {
-      setCanJoinVisio(true);
+      if (
+        event?.content?.emittingTcId &&
+        rofimSesion?.room === `${event.content.emittingTcId}-teleconsultation`
+      )
+        setCanJoinVisio(true);
     }
   };
 
@@ -104,7 +108,7 @@ const useWebSocket = (shouldLogToMatomo: boolean = false) => {
       socket.on('connect', onConnect);
       socket.on('disconnect', onDisconnect);
       socket.on('connect_error', onConnectionError);
-      socket.on('message', onMessage);
+      socket.on('message', (event) => onMessage(event, rofimSession));
 
       socket.connect();
 
