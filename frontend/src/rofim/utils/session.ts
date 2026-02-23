@@ -1,6 +1,18 @@
 import { jwtDecode } from 'jwt-decode';
 import { getStorageItem, resetStorage, setStorageItem, STORAGE_KEYS } from '../../utils/storage';
 
+export type RofimSession = {
+  username: string;
+  room: string;
+  token: string;
+  authorizationHeader: string;
+  sessionId: string;
+  type: string;
+  slug?: string;
+  patientId?: string;
+  waitingRoom: boolean;
+};
+
 const parseSession = (rawJwt: string | null) => {
   if (!rawJwt) {
     return null;
@@ -62,10 +74,10 @@ export const initRofimSession = () => {
   }
 };
 
-export const getRofimSession = () => {
+export const getRofimSession = (): RofimSession | null => {
   const token = getStorageItem('token');
-  const patientId = getStorageItem('patientId') || null;
-  const slug = getStorageItem('slug') || null;
+  const patientId = getStorageItem('patientId') || undefined;
+  const slug = getStorageItem('slug') || undefined;
   const waitingRoom = getStorageItem('waitingRoom') === 'true';
   const parsedSession = parseSession(token);
   return parsedSession
