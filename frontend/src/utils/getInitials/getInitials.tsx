@@ -9,8 +9,10 @@ const getInitialFromName = (name: string): string => {
  */
 export default (username: string): string => {
   const cleanUsername = username.replace(/^(Dr\.|Pr\.)\s*/i, '').trim();
-  // Matches any names, including hyphenated names.
-  const names = cleanUsername.match(/(\w+(-\w+)?)/gm);
+  // Matches Unicode names including accented characters, Cyrillic,
+  // Arabic, Chinese, and other alphabets, plus hyphenated names (Jean-Pierre).
+  // \p{L} = Unicode letters, \p{M} = combining marks, 'gu' = global + Unicode flags
+  const names = cleanUsername.match(/[\p{L}\p{M}]+(-[\p{L}\p{M}]+)*/gu);
   let lastInitial = '';
 
   if (!names) {

@@ -52,7 +52,7 @@ const ArchivingButton = ({
     secondaryActionText: t('button.cancel'),
   };
 
-  const [actionText, setActionText] = useState<DialogTexts>(startRecordingText);
+  const actionText = isRecording ? stopRecordingText : startRecordingText;
 
   const handleClose = () => {
     setIsModalOpen(false);
@@ -67,14 +67,12 @@ const ArchivingButton = ({
     if (action === 'start') {
       if (!archiveId && roomName) {
         try {
-          setActionText(stopRecordingText);
           await startArchiving(roomName);
         } catch (err) {
           console.log(err);
         }
       }
     } else if (archiveId && roomName) {
-      setActionText(startRecordingText);
       stopArchiving(roomName, archiveId);
     }
   };

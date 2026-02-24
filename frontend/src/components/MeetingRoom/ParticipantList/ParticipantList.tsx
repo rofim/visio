@@ -12,6 +12,7 @@ import { SubscriberWrapper } from '../../../types/session';
 import getParticipantColor from '../../../utils/getParticipantColor';
 import useRoomShareUrl from '../../../hooks/useRoomShareUrl';
 import RightPanelTitle from '../RightPanel/RightPanelTitle';
+import usePublisherContext from '../../../hooks/usePublisherContext';
 
 const compareNameAlphabetically = (a: SubscriberWrapper, b: SubscriberWrapper) => {
   const nameA = a.subscriber?.stream?.name;
@@ -51,6 +52,8 @@ const ParticipantList = ({ handleClose, isOpen }: ParticipantListProps): ReactEl
     },
   } = useUserContext();
   const roomShareUrl = useRoomShareUrl();
+  const { isAudioEnabled } = usePublisherContext();
+
   const copyUrl = () => {
     navigator.clipboard.writeText(roomShareUrl);
 
@@ -97,7 +100,8 @@ const ParticipantList = ({ handleClose, isOpen }: ParticipantListProps): ReactEl
           <ParticipantListItem
             key="you"
             dataTestId="participant-list-item-you"
-            audioLevel={publisherAudio}
+            hasAudio={isAudioEnabled}
+            audioLevel={isAudioEnabled ? publisherAudio : undefined}
             name={`${name} (${t('user.you')})`}
             initials={getInitials(name)}
             avatarColor={getParticipantColor(name)}
