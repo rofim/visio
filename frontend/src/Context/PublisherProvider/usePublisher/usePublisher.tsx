@@ -12,11 +12,7 @@ import usePublisherQuality, { NetworkQuality } from '../usePublisherQuality/useP
 import usePublisherOptions from '../usePublisherOptions';
 import useSessionContext from '../../../hooks/useSessionContext';
 import { setStorageItem, STORAGE_KEYS } from '../../../utils/storage';
-
-type PublishingErrorType = {
-  header: string;
-  caption: string;
-} | null;
+import applyBackgroundFilter from '../../../utils/backgroundFilter/applyBackgroundFilter/applyBackgroundFilter';
 
 type PublisherStreamCreatedEvent = Event<'streamCreated', Publisher> & {
   stream: Stream;
@@ -30,6 +26,11 @@ type DeviceAccessStatus = {
   microphone: boolean | undefined;
   camera: boolean | undefined;
 };
+
+export type PublishingErrorType = {
+  header: string;
+  caption: string;
+} | null;
 
 export type AccessDeniedEvent = Event<'accessDenied', Publisher> & {
   message?: string;
@@ -49,6 +50,7 @@ export type PublisherContextType = {
   stream: Stream | null | undefined;
   toggleAudio: () => void;
   toggleVideo: () => void;
+  changeBackground: (backgroundSelected: string) => void;
   unpublish: () => void;
 };
 
@@ -68,12 +70,12 @@ export type PublisherContextType = {
  * @property {Stream | null | undefined} stream - OT Stream object for publisher
  * @property {() => void} toggleAudio - Method to toggle microphone on/off. State updated internally, can be read via isAudioEnabled.
  * @property {() => void} toggleVideo - Method to toggle camera on/off. State updated internally, can be read via isVideoEnabled.
+ * @property {(backgroundSelected: string) => void} changeBackground - Method to change background replacement or blur effect.
  * @property {() => void} unpublish - Method to unpublish from session and destroy publisher (for ending a call).
  * @returns {PublisherContextType} the publisher context
  */
 const usePublisher = (): PublisherContextType => {
   const { t } = useTranslation();
-
   const [publisherVideoElement, setPublisherVideoElement] = useState<
     HTMLVideoElement | HTMLObjectElement
   >();
@@ -125,6 +127,23 @@ const usePublisher = (): PublisherContextType => {
   const handleDestroyed = () => {
     publisherRef.current = null;
   };
+
+  /**
+   * Change background replacement or blur effect
+   * @param {string} backgroundSelected - The selected background option
+   * @returns {void}
+   */
+  const changeBackground = useCallback((backgroundSelected: string) => {
+    applyBackgroundFilter({
+      publisher: publisherRef.current,
+      backgroundSelected,
+      setUser: undefined,
+      setBackgroundFilter: undefined,
+      storeItem: true,
+    }).catch(() => {
+      console.error('Failed to apply background filter.');
+    });
+  }, []);
 
   const handleStreamCreated = (e: PublisherStreamCreatedEvent) => {
     setIsPublishing(true);
@@ -250,11 +269,11 @@ const usePublisher = (): PublisherContextType => {
         return;
       }
 
-      sessionPublish(publisherRef.current);
-      setIsPublishingToSession(true);
+      setIsPublishingToSession(true); // Avoid multiple simultaneous publish attempts
+      await sessionPublish(publisherRef.current);
     } catch (err: unknown) {
       if (err instanceof Error) {
-        console.warn(err.stack);
+        console.warn(err);
         setIsPublishingToSession(false);
         publish();
       }
@@ -321,6 +340,7 @@ const usePublisher = (): PublisherContextType => {
     stream,
     toggleAudio,
     toggleVideo,
+    changeBackground,
     unpublish,
   };
 };

@@ -1,48 +1,24 @@
-import { Typography, IconButton, MenuList, MenuItem } from '@mui/material';
-import BlurOnIcon from '@mui/icons-material/BlurOn';
-import { useState, useEffect, ReactElement } from 'react';
-import Grow from '@mui/material/Grow';
-import ToggleOffIcon from '@mui/icons-material/ToggleOff';
-import ToggleOnIcon from '@mui/icons-material/ToggleOn';
+import { Typography, MenuList, MenuItem } from '@mui/material';
+import { ReactElement } from 'react';
+import PortraitIcon from '@mui/icons-material/Portrait';
 import { useTranslation } from 'react-i18next';
-import usePublisherContext from '../../../hooks/usePublisherContext';
-import { setStorageItem, STORAGE_KEYS } from '../../../utils/storage';
 
 export type VideoDevicesOptionsProps = {
-  customLightBlueColor: string;
+  toggleBackgroundEffects: () => void;
 };
 
 /**
  * VideoDevicesOptions Component
  *
- * This component renders a drop-down menu for video device settings.
+ * This component renders a drop-down menu for video device settings (Background Effects).
  * @param {VideoDevicesOptionsProps} props - the props for the component.
- *  @property {string} customLightBlueColor - the custom color used for the toggled icon.
+ * @property {Function} toggleBackgroundEffects - Function to toggle background effects.
  * @returns {ReactElement} The video devices options component.
  */
-const VideoDevicesOptions = ({ customLightBlueColor }: VideoDevicesOptionsProps): ReactElement => {
+const VideoDevicesOptions = ({
+  toggleBackgroundEffects,
+}: VideoDevicesOptionsProps): ReactElement => {
   const { t } = useTranslation();
-  const { publisher } = usePublisherContext();
-  const [isToggled, setIsToggled] = useState(false);
-
-  const handleToggle = async () => {
-    const newState = !isToggled;
-    setIsToggled(newState);
-    setStorageItem(STORAGE_KEYS.BACKGROUND_BLUR, JSON.stringify(newState));
-    if (newState) {
-      await publisher?.applyVideoFilter({
-        type: 'backgroundBlur',
-        blurStrength: 'high',
-      });
-    } else {
-      await publisher?.clearVideoFilter();
-    }
-  };
-
-  useEffect(() => {
-    const videoFilter = publisher?.getVideoFilter();
-    setIsToggled(videoFilter !== null);
-  }, [publisher]);
 
   return (
     <MenuList
@@ -53,7 +29,7 @@ const VideoDevicesOptions = ({ customLightBlueColor }: VideoDevicesOptionsProps)
       }}
     >
       <MenuItem
-        onClick={handleToggle}
+        onClick={toggleBackgroundEffects}
         sx={{
           backgroundColor: 'transparent',
           '&:hover': {
@@ -61,26 +37,10 @@ const VideoDevicesOptions = ({ customLightBlueColor }: VideoDevicesOptionsProps)
           },
         }}
       >
-        <BlurOnIcon sx={{ fontSize: 24, mr: 2 }} />
-        <Typography data-testid="blur-text" sx={{ mr: 2 }}>
-          {t('devices.video.blur.label')}
+        <PortraitIcon sx={{ fontSize: 24, mr: 2 }} />
+        <Typography data-testid="background-effects-text" sx={{ mr: 2 }}>
+          {t('backgroundEffects.title')}
         </Typography>
-        <IconButton disableRipple aria-label={t('devices.video.blur.ariaLabel')}>
-          <Grow in={!isToggled} timeout={300}>
-            <ToggleOffIcon
-              data-testid="toggle-off-icon"
-              fontSize="large"
-              sx={{ position: 'absolute', color: 'white' }}
-            />
-          </Grow>
-          <Grow in={isToggled} timeout={300}>
-            <ToggleOnIcon
-              data-testid="toggle-on-icon"
-              fontSize="large"
-              sx={{ position: 'absolute', color: customLightBlueColor }}
-            />
-          </Grow>
-        </IconButton>
       </MenuItem>
     </MenuList>
   );

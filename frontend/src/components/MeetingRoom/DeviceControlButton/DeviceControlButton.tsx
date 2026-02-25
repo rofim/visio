@@ -10,9 +10,13 @@ import { useTranslation } from 'react-i18next';
 import MutedAlert from '../../MutedAlert';
 import usePublisherContext from '../../../hooks/usePublisherContext';
 import DeviceSettingsMenu from '../DeviceSettingsMenu';
+import useBackgroundPublisherContext from '../../../hooks/useBackgroundPublisherContext';
+import useConfigContext from '../../../hooks/useConfigContext';
+import getControlButtonTooltip from '../../../utils/getControlButtonTooltip';
 
 export type DeviceControlButtonProps = {
   deviceType: 'audio' | 'video';
+  toggleBackgroundEffects: () => void;
 };
 
 /**
@@ -21,17 +25,33 @@ export type DeviceControlButtonProps = {
  * This component displays a current status of audio/video device (camera/microphone enabled/disabled)
  * and shows a dropdown that displays available audio/video devices.
  * @param {DeviceControlButtonProps} props - the props for the component.
- *  @property {boolean} deviceType - (optional) indicates the type of the device to control.
+ *  @property {boolean} deviceType - indicates the type of the device to control.
+ *  @property {Function} toggleBackgroundEffects - function to toggle background effects for video devices.
  * @returns {ReactElement} The DeviceControlButton component.
  */
-const DeviceControlButton = ({ deviceType }: DeviceControlButtonProps): ReactElement => {
+const DeviceControlButton = ({
+  deviceType,
+  toggleBackgroundEffects,
+}: DeviceControlButtonProps): ReactElement => {
   const { t } = useTranslation();
   const { isVideoEnabled, toggleAudio, toggleVideo, isAudioEnabled } = usePublisherContext();
+  const { toggleVideo: toggleBackgroundVideoPublisher } = useBackgroundPublisherContext();
+  const config = useConfigContext();
   const isAudio = deviceType === 'audio';
   const [open, setOpen] = useState<boolean>(false);
   const anchorRef = useRef<HTMLInputElement | null>(null);
-  const audioTitle = isAudioEnabled ? t('devices.audio.disable') : t('devices.audio.enable');
-  const videoTitle = isVideoEnabled ? t('devices.video.disable') : t('devices.video.enable');
+  const { allowMicrophoneControl } = config.audioSettings;
+  const { allowCameraControl } = config.videoSettings;
+  const isButtonDisabled = isAudio ? !allowMicrophoneControl : !allowCameraControl;
+
+  const tooltipTitle = getControlButtonTooltip({
+    isAudio,
+    isAudioEnabled,
+    isVideoEnabled,
+    allowMicrophoneControl,
+    allowCameraControl,
+    t,
+  });
 
   const handleToggle = () => {
     setOpen((prevOpen) => !prevOpen);
@@ -46,16 +66,31 @@ const DeviceControlButton = ({ deviceType }: DeviceControlButtonProps): ReactEle
 
   const renderControlIcon = () => {
     if (isAudio) {
+      if (!allowMicrophoneControl) {
+        return <Mic className="text-gray-400" />;
+      }
       if (isAudioEnabled) {
         return <Mic className="text-white" />;
       }
       return <MicOff data-testid="MicOffToolbar" className="text-red-600" />;
     }
 
+    if (!allowCameraControl) {
+      return <VideocamIcon className="text-gray-400" />;
+    }
     if (isVideoEnabled) {
       return <VideocamIcon className="text-white" />;
     }
     return <VideocamOffIcon className="text-red-500" />;
+  };
+
+  const handleDeviceStateChange = () => {
+    if (isAudio) {
+      toggleAudio();
+    } else {
+      toggleVideo();
+      toggleBackgroundVideoPublisher();
+    }
   };
 
   return (
@@ -85,24 +120,28 @@ const DeviceControlButton = ({ deviceType }: DeviceControlButtonProps): ReactEle
             <ArrowDropUp className="text-gray-400" />
           )}
         </IconButton>
-        <Tooltip
-          title={isAudio ? audioTitle : videoTitle}
-          aria-label={t('devices.settings.ariaLabel')}
-        >
-          <IconButton
-            onClick={isAudio ? toggleAudio : toggleVideo}
-            edge="start"
-            aria-label={isAudio ? 'microphone' : 'camera'}
-            size="small"
-            className="m-[3px] size-[50px] rounded-full shadow-md"
-          >
-            {renderControlIcon()}
-          </IconButton>
+        <Tooltip title={tooltipTitle} aria-label={t('devices.settings.ariaLabel')}>
+          <div>
+            {/* We add the div here so that the tooltip is present if the button is disabled */}
+            <IconButton
+              onClick={handleDeviceStateChange}
+              disabled={isButtonDisabled}
+              edge="start"
+              aria-label={
+                isAudio ? t('devices.audio.microphone.full') : t('devices.video.camera.full')
+              }
+              size="small"
+              className="m-[3px] size-[50px] rounded-full shadow-md"
+            >
+              {renderControlIcon()}
+            </IconButton>
+          </div>
         </Tooltip>
       </ButtonGroup>
       <DeviceSettingsMenu
         deviceType={deviceType}
         handleToggle={handleToggle}
+        toggleBackgroundEffects={toggleBackgroundEffects}
         anchorRef={anchorRef}
         isOpen={open}
         handleClose={handleClose}

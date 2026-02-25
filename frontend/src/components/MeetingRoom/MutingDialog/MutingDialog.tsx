@@ -33,7 +33,7 @@ export type MutingDialogProps = {
 const MutingDialog = ({ isOpen, setIsOpen, stream }: MutingDialogProps): ReactElement => {
   const { t } = useTranslation();
   const { forceMute } = useSessionContext();
-  const participants: MutingDialogTexts = {
+  const muteParticipantText: MutingDialogTexts = {
     contents: t('participants.mute.dialog.content', { participantName: stream?.name }),
     primaryActionText: t('button.mute'),
     secondaryActionText: t('button.cancel'),
@@ -58,12 +58,14 @@ const MutingDialog = ({ isOpen, setIsOpen, stream }: MutingDialogProps): ReactEl
       aria-describedby="alert-dialog-description"
     >
       <DialogContent>
-        <DialogContentText id="alert-dialog-description">{participants.contents}</DialogContentText>
+        <DialogContentText id="alert-dialog-description">
+          {muteParticipantText.contents}
+        </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>{participants.secondaryActionText}</Button>
+        <Button onClick={handleClose}>{muteParticipantText.secondaryActionText}</Button>
         <Button onClick={handleActionClick} autoFocus>
-          {participants.primaryActionText}
+          {muteParticipantText.primaryActionText}
         </Button>
       </DialogActions>
     </Dialog>

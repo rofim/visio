@@ -1,10 +1,11 @@
+import env from '../env';
 import isReportIssueEnabled from './isReportIssueEnabled/isReportIssueEnabled';
 
 /**
  * @constant {string} API_URL - The base URL determined by the current environment.
  */
 export const API_URL =
-  import.meta.env.VITE_API_URL ||
+  env.VITE_API_URL ||
   (window.location.origin.includes('localhost') ? 'http://localhost:3345' : window.location.origin);
 
 /**
@@ -113,3 +114,56 @@ export const CAPTION_ERROR_DISPLAY_DURATION_MS = 4000;
  * Typically used as the max-width breakpoint for responsive layouts.
  */
 export const SMALL_VIEWPORT = 768;
+
+/*
+ * @constant {number} TABLET_VIEWPORT - The pixel width threshold used to determine if the viewport is considered tablet.
+ * Typically used as the max-width breakpoint for responsive layouts.
+ */
+export const TABLET_VIEWPORT = 899;
+
+/**
+ * @constant {string} BACKGROUNDS_PATH - The path to the backgrounds assets directory.
+ */
+export const BACKGROUNDS_PATH = '/background';
+
+/**
+ * @constant {number} MAX_SIZE_MB - The maximum file size (in megabytes) allowed for image uploads.
+ * Used to validate image uploads in components like AddBackgroundEffectLayout.
+ */
+export const MAX_SIZE_MB = 2;
+
+/**
+ * @constant {string[]} ALLOWED_TYPES - An array of allowed MIME types for image uploads.
+ * Used to validate image uploads in components like AddBackgroundEffectLayout.
+ */
+export const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/bmp'];
+
+/**
+ * @constant {number} MAX_LOCAL_STORAGE_BYTES - The maximum size (in bytes) for storing images in localStorage.
+ * This is set to approximately 4MB, which is a common limit for localStorage across browsers.
+ */
+export const MAX_LOCAL_STORAGE_BYTES = 4 * 1024 * 1024;
+
+/**
+ * @constant {number} DEFAULT_SELECTABLE_OPTION_WIDTH - The default size (in pixels) for selectable option elements.
+ * Used to define the width of selectable options in UI components.
+ */
+export const DEFAULT_SELECTABLE_OPTION_WIDTH = 68;
+
+/**
+ * @constant {number} MIN_ZOOM - The minimum zoom level for screenshare content.
+ * A zoom level of 1 corresponds to 100% (no zoom).
+ */
+export const MIN_ZOOM = 0.5;
+
+/**
+ * @constant {number} MAX_ZOOM - The maximum zoom level for screenshare content.
+ * A zoom level of 1 corresponds to 100% (no zoom).
+ */
+export const MAX_ZOOM = 5;
+
+/**
+ * @constant {number} ZOOM_STEP - The incremental step for zooming in or out on screenshare content.
+ * This value determines how much the zoom level changes with each zoom action (e.g., mouse wheel event).
+ */
+export const ZOOM_STEP = 0.25;

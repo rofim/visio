@@ -29,6 +29,15 @@ import usePublisherOptions from '../../Context/PublisherProvider/usePublisherOpt
 const mockedNavigate = vi.fn();
 const mockedParams = { roomName: 'test-room-name' };
 const mockedLocation = vi.fn();
+vi.mock('../../hooks/useBackgroundPublisherContext', () => ({
+  __esModule: true,
+  default: () => ({
+    initBackgroundLocalPublisher: vi.fn(),
+    destroyBackgroundLocalPublisher: vi.fn(),
+    backgroundPublisher: null,
+    accessStatus: undefined,
+  }),
+}));
 vi.mock('react-router-dom', async () => {
   const mod = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
   return {
@@ -43,6 +52,27 @@ vi.mock('@mui/material', async () => {
   return {
     ...actual,
     useMediaQuery: vi.fn(),
+  };
+});
+vi.mock('../../hooks/useConfigContext', () => {
+  return {
+    default: () => ({
+      videoSettings: {
+        allowCameraControl: true,
+      },
+      audioSettings: {
+        allowMicrophoneControl: true,
+      },
+      meetingRoomSettings: {
+        defaultLayoutMode: 'active-speaker',
+        showParticipantList: true,
+        allowChat: true,
+        allowScreenShare: true,
+        allowArchiving: true,
+        allowCaptions: true,
+        allowEmojis: true,
+      },
+    }),
   };
 });
 
@@ -100,6 +130,7 @@ const createSubscriberWrapper = (id: string): SubscriberWrapper => {
     videoWidth: () => 1280,
     videoHeight: () => 720,
     subscribeToVideo: () => {},
+    getVideoFilter: vi.fn(() => undefined),
     stream: {
       streamId: id,
     },
@@ -126,6 +157,7 @@ describe('MeetingRoom', () => {
       getAudioSource: () => defaultAudioDevice,
       videoWidth: () => 1280,
       videoHeight: () => 720,
+      getVideoFilter: vi.fn(() => undefined),
     }) as unknown as Publisher;
     publisherContext = {
       publisher: null,

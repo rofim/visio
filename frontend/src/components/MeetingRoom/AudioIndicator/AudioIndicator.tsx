@@ -41,7 +41,7 @@ const AudioIndicator = ({
   const { forceMute } = useSessionContext();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
-  const participants: DialogTexts = {
+  const muteParticipantText: DialogTexts = {
     contents: t('participants.mute.dialog.content', { participantName }),
     primaryActionText: t('button.mute'),
     secondaryActionText: t('button.cancel'),
@@ -92,7 +92,7 @@ const AudioIndicator = ({
         isOpen={isModalOpen}
         handleClose={handleClose}
         handleActionClick={handleActionClick}
-        actionText={participants}
+        actionText={muteParticipantText}
       />
     </div>
   );

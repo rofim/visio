@@ -6,6 +6,10 @@ Videocam
 issuetype
 Autolinker
 NOSONAR
+jiraiOSComponentId
+supportedLngs
+applinks
+
 supportedLngs
 Rofim
 preprod

@@ -8,7 +8,7 @@ export type ArchiveResponse = {
 
 /**
  * Returns a list of archives and the status of the archives for a given meeting room.
- * @param {number} locale - current locale
+ * @param {string} locale - current locale
  * @param {string} roomName - The roomName we check for archives
  * @returns {Promise<ArchiveResponse>} The archives from the meeting room (if any) and whether any archives are pending.
  */

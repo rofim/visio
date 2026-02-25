@@ -47,7 +47,7 @@ const getArchiveStatus = (status: ServerArchiveStatus): ArchiveStatus => {
 
 /**
  * Modifies an archive retrieved from the server to be easily consumable.
- * @param {number} locale - current locale
+ * @param {string} locale - current locale
  * @param {ServerArchive} serverArchive - The archive to be modified.
  * @returns {Archive} The modified archive.
  */

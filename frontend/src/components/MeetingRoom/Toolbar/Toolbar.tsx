@@ -16,6 +16,7 @@ import isReportIssueEnabled from '../../../utils/isReportIssueEnabled';
 import useToolbarButtons from '../../../hooks/useToolbarButtons';
 import DeviceControlButton from '../DeviceControlButton';
 import PictureInPictureButton from '../../../rofim/components/PictureInPictureButton';
+import useBackgroundPublisherContext from '../../../hooks/useBackgroundPublisherContext';
 
 export type CaptionsState = {
   isUserCaptionsEnabled: boolean;
@@ -28,6 +29,7 @@ export type ToolbarProps = {
   isSharingScreen: boolean;
   rightPanelActiveTab: RightPanelActiveTab;
   toggleParticipantList: () => void;
+  toggleBackgroundEffects: () => void;
   toggleChat: () => void;
   toggleReportIssue: () => void;
   participantCount: number;
@@ -62,12 +64,14 @@ const Toolbar = ({
   toggleShareScreen,
   rightPanelActiveTab,
   toggleParticipantList,
+  toggleBackgroundEffects,
   toggleChat,
   toggleReportIssue,
   participantCount,
   captionsState,
 }: ToolbarProps): ReactElement => {
   const { disconnect, subscriberWrappers } = useSessionContext();
+  const { destroyBackgroundPublisher } = useBackgroundPublisherContext();
   const isViewingScreenShare = subscriberWrappers.some((subWrapper) => subWrapper.isScreenshare);
   const isScreenSharePresent = isViewingScreenShare || isSharingScreen;
   const isPinningPresent = subscriberWrappers.some((subWrapper) => subWrapper.isPinned);
@@ -76,7 +80,8 @@ const Toolbar = ({
       return;
     }
     disconnect();
-  }, [disconnect]);
+    destroyBackgroundPublisher();
+  }, [destroyBackgroundPublisher, disconnect]);
   const [openEmojiGridDesktop, setOpenEmojiGridDesktop] = useState<boolean>(false);
 
   // An array of buttons available for the toolbar. As the toolbar resizes, buttons may be hidden and moved to the
@@ -164,8 +169,14 @@ const Toolbar = ({
       </div>
       <div className="flex flex-1 justify-center">
         <div ref={mediaControlsRef} className="flex flex-row">
-          <DeviceControlButton deviceType="audio" />
-          <DeviceControlButton deviceType="video" />
+          <DeviceControlButton
+            deviceType="audio"
+            toggleBackgroundEffects={toggleBackgroundEffects}
+          />
+          <DeviceControlButton
+            deviceType="video"
+            toggleBackgroundEffects={toggleBackgroundEffects}
+          />
         </div>
         <div id="center-toolbar-buttons" className="flex">
           {toolbarButtons.map(displayCenterToolbarButtons)}

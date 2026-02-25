@@ -9,6 +9,7 @@ import useUserContext from '../../../hooks/useUserContext';
 import getInitials from '../../../utils/getInitials';
 import DeviceStore from '../../../utils/DeviceStore';
 import { getStorageItem, STORAGE_KEYS } from '../../../utils/storage';
+import useConfigContext from '../../../hooks/useConfigContext';
 
 /**
  * React hook to get PublisherProperties combining default options and options set in UserContext
@@ -17,8 +18,11 @@ import { getStorageItem, STORAGE_KEYS } from '../../../utils/storage';
 
 const usePublisherOptions = (): PublisherProperties | null => {
   const { user } = useUserContext();
+  const config = useConfigContext();
   const [publisherOptions, setPublisherOptions] = useState<PublisherProperties | null>(null);
   const deviceStoreRef = useRef<DeviceStore | null>(null);
+  const { defaultResolution, allowVideoOnJoin } = config.videoSettings;
+  const { allowAudioOnJoin } = config.audioSettings;
 
   useEffect(() => {
     const setOptions = async () => {
@@ -30,8 +34,14 @@ const usePublisherOptions = (): PublisherProperties | null => {
       const videoSource = deviceStoreRef.current.getConnectedDeviceId('videoinput');
       const audioSource = deviceStoreRef.current.getConnectedDeviceId('audioinput');
 
-      const { name, noiseSuppression, blur, publishAudio, publishVideo, publishCaptions } =
-        user.defaultSettings;
+      const {
+        name,
+        noiseSuppression,
+        backgroundFilter,
+        publishAudio,
+        publishVideo,
+        publishCaptions,
+      } = user.defaultSettings;
       const initials = getInitials(name);
 
       const audioFilter: AudioFilter | undefined =
@@ -40,9 +50,7 @@ const usePublisherOptions = (): PublisherProperties | null => {
           : undefined;
 
       const videoFilter: VideoFilter | undefined =
-        blur && hasMediaProcessorSupport()
-          ? { type: 'backgroundBlur', blurStrength: 'high' }
-          : undefined;
+        backgroundFilter && hasMediaProcessorSupport() ? backgroundFilter : undefined;
 
       setPublisherOptions({
         audioFallback: { publisher: true },
@@ -51,10 +59,14 @@ const usePublisherOptions = (): PublisherProperties | null => {
         insertDefaultUI: false,
         name,
         publishAudio:
-          !!publishAudio && getStorageItem(STORAGE_KEYS.AUDIO_SOURCE_ENABLED) !== 'false',
+          allowAudioOnJoin &&
+          publishAudio &&
+          getStorageItem(STORAGE_KEYS.AUDIO_SOURCE_ENABLED) !== 'false',
         publishVideo:
-          !!publishVideo && getStorageItem(STORAGE_KEYS.VIDEO_SOURCE_ENABLED) !== 'false',
-        resolution: '1280x720',
+          allowVideoOnJoin &&
+          publishVideo &&
+          getStorageItem(STORAGE_KEYS.VIDEO_SOURCE_ENABLED) !== 'false',
+        resolution: defaultResolution,
         audioFilter,
         videoFilter,
         videoSource,
@@ -63,7 +75,7 @@ const usePublisherOptions = (): PublisherProperties | null => {
     };
 
     setOptions();
-  }, [user.defaultSettings]);
+  }, [allowAudioOnJoin, defaultResolution, allowVideoOnJoin, user.defaultSettings]);
 
   return publisherOptions;
 };
