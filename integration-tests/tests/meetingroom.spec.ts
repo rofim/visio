@@ -1,18 +1,20 @@
 import { expect } from '@playwright/test';
 import { randomBytes } from 'crypto';
 import { test } from '../fixtures/testWithLogging';
-import { openMeetingRoomWithSettings, waitAndClickFirefox } from './utils';
+import { openMeetingRoomWithSettings, waitUntilReady } from './utils';
 
 test.describe('meeting room', () => {
   test('should allow a user to mute another participant', async ({
     page: pageOne,
-    context,
+    browser,
     browserName,
     isMobile,
   }) => {
     const roomName = randomBytes(5).toString('hex');
 
-    const pageTwo = await context.newPage();
+    // Use a separate context for User Two to avoid localStorage pollution
+    const contextTwo = await browser.newContext();
+    const pageTwo = await contextTwo.newPage();
 
     await openMeetingRoomWithSettings({
       page: pageOne,
@@ -22,7 +24,7 @@ test.describe('meeting room', () => {
       browserName,
     });
     // These clicks and waits are needed for firefox
-    await waitAndClickFirefox(pageOne, browserName);
+    await waitUntilReady(pageOne, browserName);
 
     await openMeetingRoomWithSettings({
       page: pageTwo,
@@ -32,6 +34,10 @@ test.describe('meeting room', () => {
       browserName,
     });
     await expect(pageTwo.getByTestId('MicNoneIcon')).toBeVisible();
+
+    // Wait for User Two's subscriber tile to appear on pageOne before opening participant list
+    await pageOne.waitForSelector('.subscriber', { state: 'visible' });
+    await expect(pageOne.locator('.subscriber').getByText('User Two')).toBeVisible();
 
     if (isMobile) {
       await pageOne.getByTestId('MoreVertIcon').click();
@@ -49,5 +55,8 @@ test.describe('meeting room', () => {
     await pageOne.getByTestId('popup-dialog-primary-button').click();
 
     await expect(pageTwo.getByTestId('MicOffToolbar')).toBeVisible();
+
+    // Clean up the second context
+    await contextTwo.close();
   });
 });

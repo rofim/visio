@@ -12,6 +12,12 @@ const customWordList = [
   'applinks',
   'precall',
   'Precall',
+  'Rendererable',
+  'Hydrateable',
+  'firefoxUserPrefs',
+  'gollum',
+  'PWDEBUG',
+  'unstub',
 ];
 
 export default customWordList;

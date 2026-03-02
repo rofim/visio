@@ -41,6 +41,7 @@ jobs:
             });
 
             core.setOutput('number', String(pr.number));
+            core.setOutput('title', pr.title || '');
             core.setOutput('head_sha', pr.head.sha);
             core.setOutput(
               'is_fork',

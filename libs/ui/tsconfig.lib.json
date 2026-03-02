@@ -1,7 +1,6 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "rootDir": "src",
     "outDir": "dist",
     "jsx": "react-jsx",
     "module": "ESNext",
@@ -9,6 +8,21 @@
     "types": ["node", "vite/client"],
     "tsBuildInfoFile": "dist/tsconfig.lib.tsbuildinfo"
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["**/*.spec.*", "**/*.test.*", "**/*.story.*"]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.json",
+    "src/theme/helpers/tailwind/index.cjs",
+    "../common/src/**/*.ts",
+    "../common/src/**/*.tsx",
+    "../common/srcBrowser/**/*.ts",
+    "../common/srcBrowser/**/*.tsx",
+    "../common/test/**/*.ts",
+    "../common/test/**/*.tsx",
+    "../common/testBrowser/**/*.ts",
+    "../common/testBrowser/**/*.tsx",
+    "../core/src/**/*.ts",
+    "../core/src/**/*.tsx"
+  ],
+  "exclude": ["**/*.spec.*", "**/*.test.*"]
 }

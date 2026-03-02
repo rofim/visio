@@ -1,4 +1,4 @@
-name: Remove PR VCR instance on merge
+name: Remove PR VCR instance on close
 
 on:
   pull_request:

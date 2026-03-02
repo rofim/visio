@@ -12,6 +12,9 @@ import useSessionContext from '../../hooks/useSessionContext';
 import isMouseEventInsideBox from '../../utils/isMouseEventInsideBox';
 import ScreenshareVideoTile from '../MeetingRoom/ScreenshareVideoTile';
 import useTheme from '@ui/theme';
+import { ABSOLUTE_DISTANCE_THRESHOLD_REM_VALUE } from '@utils/constants';
+import toRemValue from '@common/helpers/toRemValue';
+import attempt from '@common/execution/attempt';
 
 export type SubscriberProps = {
   subscriberWrapper: SubscriberWrapper;
@@ -49,12 +52,15 @@ const Subscriber = ({
   useEffect(() => {
     // If hidden - Unsubscribe from video to save bandwidth and cpu
     // If not hidden - re-subscribe to video
-    subscriberWrapper.subscriber.subscribeToVideo(!isHidden);
+    void attempt(() => {
+      subscriberWrapper.subscriber.subscribeToVideo(!isHidden);
+    });
   }, [isHidden, subscriberWrapper.subscriber]);
 
   useEffect(() => {
     if (subscriberWrapper && subRef.current) {
       const { element } = subscriberWrapper;
+
       // eslint-disable-next-line react-hooks/immutability
       element.id = subscriberWrapper.id;
       element.classList.add('video__element');
@@ -94,8 +100,8 @@ const Subscriber = ({
   const audioIndicatorStyle: React.CSSProperties = {
     borderRadius: theme.shapes.borderRadiusLarge,
     position: 'absolute',
-    top: '0.75rem',
-    right: '0.75rem',
+    top: toRemValue(ABSOLUTE_DISTANCE_THRESHOLD_REM_VALUE),
+    right: toRemValue(ABSOLUTE_DISTANCE_THRESHOLD_REM_VALUE),
     backgroundColor: theme.colors.darkBackground,
     height: '1.5rem',
     width: '1.5rem',

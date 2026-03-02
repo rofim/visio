@@ -1,44 +1,60 @@
-import { render, screen } from '@testing-library/react';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { render as renderBase, screen, waitFor } from '@testing-library/react';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { ReactElement } from 'react';
 import BackgroundEffectOptions from './BackgroundEffectOptions';
-import useBackgroundPublisherContext from '@hooks/useBackgroundPublisherContext';
-
-vi.mock('@hooks/useBackgroundPublisherContext');
+import { makeTestProvider, providers } from '@test/providers';
+import { setupWindowNavigatorMock, makeMediaStreamMock } from '@web-test/fixtures';
 
 describe('BackgroundEffectOptions', () => {
-  const mockBackgroundPublisherContext = {
-    backgroundSelected: '',
-    setBackgroundSelected: vi.fn(),
-    customImages: [],
-    addCustomImage: vi.fn(),
-    deleteCustomImage: vi.fn(),
-    isPublishing: false,
-    isVideoEnabled: true,
-    publisher: null,
-    publisherVideoElement: undefined,
-    destroyBackgroundPublisher: vi.fn(),
-    toggleVideo: vi.fn(),
-    changeBackground: vi.fn(),
-    backgroundFilter: undefined,
-    localVideoSource: undefined,
-    accessStatus: null,
-    changeVideoSource: vi.fn(),
-    initBackgroundLocalPublisher: vi.fn(),
-    handleBackgroundChange: vi.fn(),
-    handleAddCustomImage: vi.fn(),
-  };
-
   beforeEach(() => {
-    vi.mocked(useBackgroundPublisherContext).mockReturnValue(mockBackgroundPublisherContext);
+    vi.clearAllMocks();
+
+    setupWindowNavigatorMock({
+      mediaDevices: {
+        addEventListener: vi.fn(),
+        enumerateDevices: Promise.resolve([]),
+        getUserMedia: Promise.resolve(
+          makeMediaStreamMock({
+            getVideoTracks: [],
+            getAudioTracks: [],
+          })
+        ),
+        getDisplayMedia: Promise.resolve(makeMediaStreamMock({})),
+        getSupportedConstraints: vi.fn().mockReturnValue({}),
+      },
+    });
+
+    const { permissions } = globalThis.navigator;
+
+    vi.spyOn(permissions, 'query').mockResolvedValue({ state: 'granted' } as PermissionStatus);
   });
 
-  it('renders background options grid with effects and gallery', () => {
+  it('renders background options grid with effects and gallery', async () => {
     render(<BackgroundEffectOptions mode="meeting" />);
 
-    expect(screen.getByTestId('vivid-icon-remove-line')).toBeInTheDocument();
-    expect(screen.getByTestId('vivid-icon-blur-line')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId('vivid-icon-remove-line')).toBeInTheDocument();
+      expect(screen.getByTestId('vivid-icon-blur-line')).toBeInTheDocument();
 
-    expect(screen.getByAltText('Bookshelf Room')).toBeInTheDocument();
-    expect(screen.getByAltText('Busy Room')).toBeInTheDocument();
+      expect(screen.getByAltText('Bookshelf Room')).toBeInTheDocument();
+      expect(screen.getByAltText('Busy Room')).toBeInTheDocument();
+    });
   });
 });
+
+function render(ui: ReactElement) {
+  const { wrapper, ...context } = makeTestProvider([
+    providers.appConfig,
+    providers.user,
+    providers.session,
+    providers.publisher,
+    providers.backgroundPublisher,
+  ]);
+
+  return {
+    ...context,
+    ...renderBase(ui, {
+      wrapper,
+    }),
+  };
+}

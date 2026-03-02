@@ -1,11 +1,11 @@
 import { Dispatch, ReactElement, useState, SetStateAction } from 'react';
 import { AxiosError } from 'axios';
 import { useTranslation } from 'react-i18next';
-import useIsMeetingCaptionsAllowed from '@Context/AppConfig/hooks/useIsMeetingCaptionsAllowed';
+import appConfig$ from '@stores/appConfig';
 import { disableCaptions, enableCaptions } from '@api/captions';
 import useRoomName from '@hooks/useRoomName';
 import ToolbarButton from '../ToolbarButton';
-import Tooltip from '@ui/Tooltip';
+import Tooltip from '@mui/material/Tooltip';
 import VividIcon from '@components/VividIcon';
 import useTheme from '@ui/theme';
 
@@ -36,7 +36,7 @@ const CaptionsButton = ({
   handleClick,
   captionsState,
 }: CaptionsButtonProps): ReactElement | false => {
-  const isMeetingCaptionsAllowed = useIsMeetingCaptionsAllowed();
+  const isMeetingCaptionsAllowed = appConfig$.useIsMeetingCaptionsAllowed();
 
   const { t } = useTranslation();
   const roomName = useRoomName();
@@ -95,7 +95,7 @@ const CaptionsButton = ({
   };
 
   const handleActionClick = () => {
-    handleCaptions(isUserCaptionsEnabled ? 'disable' : 'enable');
+    void handleCaptions(isUserCaptionsEnabled ? 'disable' : 'enable');
     handleClose();
   };
 

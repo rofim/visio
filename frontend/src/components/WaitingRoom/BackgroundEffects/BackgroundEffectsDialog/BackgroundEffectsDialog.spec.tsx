@@ -1,38 +1,51 @@
-import { render, screen } from '@testing-library/react';
+import { render as renderBase, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import type { ReactElement } from 'react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { makeTestProvider, providers } from '@test/providers';
+import type { ProviderOptions } from '@test/providers';
 import BackgroundEffectsDialog from './BackgroundEffectsDialog';
-
-vi.mock('../../../../hooks/useBackgroundPublisherContext', () => ({
-  __esModule: true,
-  default: () => ({
-    publisherVideoElement: null,
-    changeBackground: vi.fn(),
-    customImages: [],
-    backgroundSelected: '',
-    setBackgroundSelected: vi.fn(),
-    handleBackgroundChange: vi.fn(),
-    handleAddCustomImage: vi.fn(),
-  }),
-}));
+import { setupWindowNavigatorMock, makeMediaStreamMock } from '@web-test/fixtures';
 
 describe('BackgroundEffectsDialog', () => {
-  it('renders dialog when open', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    setupWindowNavigatorMock({
+      mediaDevices: {
+        addEventListener: vi.fn(),
+        enumerateDevices: Promise.resolve([]),
+        getUserMedia: Promise.resolve(makeMediaStreamMock({})),
+        getDisplayMedia: Promise.resolve(makeMediaStreamMock({})),
+        getSupportedConstraints: vi.fn().mockReturnValue({}),
+      },
+    });
+
+    const { permissions } = globalThis.navigator;
+
+    vi.spyOn(permissions, 'query').mockResolvedValue({ state: 'granted' } as PermissionStatus);
+  });
+
+  it('renders dialog when open', async () => {
     render(
       <BackgroundEffectsDialog isBackgroundEffectsOpen setIsBackgroundEffectsOpen={() => {}} />
     );
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+    });
     expect(screen.getByText(/video effects/i)).toBeInTheDocument();
   });
 
-  it('does not render dialog when closed', () => {
+  it('does not render dialog when closed', async () => {
     const { queryByRole } = render(
       <BackgroundEffectsDialog
         isBackgroundEffectsOpen={false}
         setIsBackgroundEffectsOpen={() => {}}
       />
     );
-    expect(queryByRole('dialog')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(queryByRole('dialog')).not.toBeInTheDocument();
+    });
   });
 
   it('calls setBackgroundEffectsOpen(false) on close', async () => {
@@ -44,8 +57,58 @@ describe('BackgroundEffectsDialog', () => {
       />
     );
     const backdrop = document.querySelector('.MuiBackdrop-root');
+
+    if (!backdrop) {
+      throw new Error('Backdrop not found');
+    }
+
     expect(backdrop).toBeTruthy();
-    await userEvent.click(backdrop!);
-    expect(setBackgroundEffectsOpen).toHaveBeenCalledWith(false);
+
+    await userEvent.click(backdrop);
+
+    await waitFor(() => {
+      expect(setBackgroundEffectsOpen).toHaveBeenCalledWith(false);
+    });
   });
 });
+
+type RenderOptions = {
+  appConfigContext?: ProviderOptions['AppConfigContext'];
+  userContext?: ProviderOptions['UserContext'];
+  sessionContext?: ProviderOptions['SessionContext'];
+  publisherContext?: ProviderOptions['PublisherContext'];
+  backgroundPublisherContext?: ProviderOptions['BackgroundPublisherContext'];
+};
+
+function render(
+  ui: ReactElement,
+  {
+    appConfigContext,
+    userContext,
+    sessionContext,
+    publisherContext,
+    backgroundPublisherContext,
+  }: RenderOptions = {}
+) {
+  const { wrapper, ...context } = makeTestProvider(
+    [
+      providers.appConfig,
+      providers.user,
+      providers.session,
+      providers.publisher,
+      providers.backgroundPublisher,
+    ],
+    {
+      appConfigContext,
+      userContext,
+      sessionContext,
+      publisherContext,
+      backgroundPublisherContext,
+    }
+  );
+
+  return {
+    ...context,
+    ...renderBase(ui, { wrapper }),
+  };
+}

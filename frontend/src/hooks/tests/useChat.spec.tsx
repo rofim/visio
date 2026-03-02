@@ -1,30 +1,21 @@
-import { act, renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, it, Mock, vi } from 'vitest';
+import { act, renderHook as renderHookBase } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import useChat from '../useChat';
-import useUserContext from '../useUserContext';
-import { UserContextType } from '../../Context/user';
+import { makeTestProvider, ProviderOptions, providers } from '@test/providers';
 
-vi.mock('../useUserContext.tsx');
-const mockUseUserContext = useUserContext as Mock<[], UserContextType>;
-const mockUserContext = {
-  user: {
-    defaultSettings: { name: 'Local User' },
-  },
-} as UserContextType;
 const mockSignal = vi.fn();
 
 describe('useChat', () => {
   beforeEach(() => {
-    mockUseUserContext.mockImplementation(() => mockUserContext);
+    vi.clearAllMocks();
   });
 
   it('onChatMessage should parse message and update messages state', () => {
-    const { result, rerender } = renderHook(() => useChat({ signal: mockSignal }));
+    const { result } = renderHook(() => useChat({ signal: mockSignal }));
 
     act(() => {
       result.current.onChatMessage('{"participantName":"Remote User","text":"Hello!"}');
     });
-    rerender();
 
     expect(result.current.messages[0]).toMatchObject({
       participantName: 'Remote User',
@@ -34,7 +25,15 @@ describe('useChat', () => {
   });
 
   it('sendChatMessage should send message via signal', () => {
-    const { result } = renderHook(() => useChat({ signal: mockSignal }));
+    const { result } = renderHook(() => useChat({ signal: mockSignal }), {
+      userContext: {
+        value: {
+          defaultSettings: {
+            name: 'Local User',
+          },
+        },
+      },
+    });
 
     result.current.sendChatMessage('Hello there!');
 
@@ -44,3 +43,21 @@ describe('useChat', () => {
     });
   });
 });
+
+type RenderOptions = {
+  userContext?: ProviderOptions['UserContext'];
+};
+
+function renderHook<Result, Props>(
+  render: (initialProps: Props) => Result,
+  { userContext }: RenderOptions = {}
+) {
+  const { wrapper, ...context } = makeTestProvider([providers.user], {
+    userContext,
+  });
+
+  return {
+    ...context,
+    ...renderHookBase(render, { wrapper }),
+  };
+}

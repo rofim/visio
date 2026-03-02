@@ -1,17 +1,11 @@
-import Box from '@ui/Box';
-import Typography from '@ui/Typography';
-import MenuItem from '@ui/MenuItem';
-import MenuList from '@ui/MenuList';
-import { Device } from '@vonage/client-sdk-video';
-import { MouseEvent as ReactMouseEvent, ReactElement, useMemo } from 'react';
+import { Box, MenuItem, MenuList, Tooltip, Typography } from '@mui/material';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
-import useAppConfig from '@Context/AppConfig/hooks/useAppConfig';
+import appConfig$ from '@stores/appConfig';
 import useTheme from '@ui/theme';
 import VividIcon from '@components/VividIcon';
-import useDevices from '@hooks/useDevices';
-import usePublisherContext from '@hooks/usePublisherContext';
-import { setStorageItem, STORAGE_KEYS } from '@utils/storage';
-import cleanAndDedupeDeviceLabels from '@utils/cleanAndDedupeDeviceLabels';
+import { useDistinctLabelMediaDevices } from '@ui/hooks';
+import mediaDevices$ from '@core/stores/devices';
 
 export type InputAudioDevicesProps = {
   handleToggle: () => void;
@@ -28,35 +22,24 @@ export type InputAudioDevicesProps = {
 const InputAudioDevices = ({ handleToggle }: InputAudioDevicesProps): ReactElement | false => {
   const { t } = useTranslation();
   const theme = useTheme();
-  const { publisher } = usePublisherContext();
 
-  const allowDeviceSelection = useAppConfig(
+  const allowDeviceSelection = appConfig$.use.select(
     ({ meetingRoomSettings }) => meetingRoomSettings.allowDeviceSelection
   );
 
-  const {
-    allMediaDevices: { audioInputDevices },
-  } = useDevices();
+  // Use store's selection as source of truth, not publisher.getAudioSource() which can be stale
+  const selectedDeviceId = mediaDevices$.useDeviceId('audioinput');
 
-  const audioInputDevicesCleaned = useMemo(
-    () => cleanAndDedupeDeviceLabels(audioInputDevices),
-    [audioInputDevices]
+  const audioInputDevices = useDistinctLabelMediaDevices('audioinput', (devices) =>
+    devices.map((device) => ({
+      ...device,
+      label: device.label || t('unknown.device'),
+    }))
   );
 
-  const options = audioInputDevicesCleaned.map((availableDevice) => {
-    return availableDevice.label || t('unknown.device');
-  });
-
-  const handleChangeAudioSource = (event: ReactMouseEvent<HTMLLIElement>) => {
-    const menuItem = event.target as HTMLLIElement;
+  const handleChangeAudioSource = (deviceId: string) => {
     handleToggle();
-    const audioDeviceId = audioInputDevices?.find((device: Device) => {
-      return device.label === menuItem.textContent;
-    })?.deviceId;
-    if (audioDeviceId) {
-      publisher?.setAudioSource(audioDeviceId);
-      setStorageItem(STORAGE_KEYS.AUDIO_SOURCE, audioDeviceId);
-    }
+    void mediaDevices$.actions.selectDevice('audioinput', deviceId);
   };
 
   return (
@@ -76,13 +59,13 @@ const InputAudioDevices = ({ handleToggle }: InputAudioDevicesProps): ReactEleme
           <Typography sx={{ ml: 2 }}>{t('devices.audio.microphone.full')}</Typography>
         </Box>
         <MenuList>
-          {options.map((option: string) => {
-            const isSelected = option === publisher?.getAudioSource().label;
+          {audioInputDevices.map((device) => {
+            const isSelected = device.deviceId === selectedDeviceId;
             return (
               <MenuItem
-                key={option}
+                key={device.deviceId}
                 selected={isSelected}
-                onClick={(event) => handleChangeAudioSource(event)}
+                onClick={() => handleChangeAudioSource(device.deviceId)}
                 sx={{
                   backgroundColor: 'transparent',
                   '&.Mui-selected': {
@@ -95,7 +78,7 @@ const InputAudioDevices = ({ handleToggle }: InputAudioDevicesProps): ReactEleme
                 }}
               >
                 <Box
-                  key={`${option}-input-device`}
+                  key={`${device.deviceId}-input-device`}
                   sx={{
                     display: 'flex',
                     mb: 0.5,
@@ -114,9 +97,13 @@ const InputAudioDevices = ({ handleToggle }: InputAudioDevicesProps): ReactEleme
                       />
                     </Box>
                   ) : (
-                    <Box sx={{ minWidth: 36 }} /> // Placeholder when CheckIcon is not displayed
+                    <Box sx={{ minWidth: 36 }} />
                   )}
-                  <Typography noWrap>{option}</Typography>
+                  <Tooltip title={device.label} placement="right" arrow>
+                    <Typography component="span" noWrap>
+                      {device.label}
+                    </Typography>
+                  </Tooltip>
                 </Box>
               </MenuItem>
             );

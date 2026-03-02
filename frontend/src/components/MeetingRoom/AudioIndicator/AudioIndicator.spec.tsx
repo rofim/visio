@@ -1,10 +1,9 @@
-import { describe, expect, it, vi, beforeEach, Mock } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { render as renderBase, screen } from '@testing-library/react';
 import { Stream } from '@vonage/client-sdk-video';
 import AudioIndicator, { AudioIndicatorProps } from './AudioIndicator';
-import useSessionContext from '../../../hooks/useSessionContext';
-
-vi.mock('../../../hooks/useSessionContext');
+import { makeTestProvider, providers, type ProviderOptions } from '@test/providers';
+import { ReactElement } from 'react';
 
 describe('AudioIndicator', () => {
   const mockForceMute = vi.fn();
@@ -29,19 +28,59 @@ describe('AudioIndicator', () => {
   };
 
   beforeEach(() => {
-    (useSessionContext as Mock).mockReturnValue({ forceMute: mockForceMute });
     vi.clearAllMocks();
   });
 
   it('renders Mic icon when participant is unmuted but not speaking', () => {
-    render(<AudioIndicator {...defaultProps} />);
+    render(<AudioIndicator {...defaultProps} />, {
+      sessionContext: {
+        __interceptor: (context) => {
+          if (context) {
+            context.forceMute = mockForceMute;
+          }
+        },
+      },
+    });
     const micIcon = screen.getByTestId('MicIcon');
     expect(micIcon).toBeInTheDocument();
   });
 
   it('renders Mic off icon when participant is muted', () => {
-    render(<AudioIndicator {...defaultProps} hasAudio={false} />);
+    render(<AudioIndicator {...defaultProps} hasAudio={false} />, {
+      sessionContext: {
+        __interceptor: (context) => {
+          if (context) {
+            context.forceMute = mockForceMute;
+          }
+        },
+      },
+    });
     const micOffIcon = screen.getByTestId('vivid-icon-mic-mute-solid');
     expect(micOffIcon).toBeInTheDocument();
   });
 });
+
+type RenderOptions = {
+  appConfigContext?: ProviderOptions['AppConfigContext'];
+  userContext?: ProviderOptions['UserContext'];
+  sessionContext?: ProviderOptions['SessionContext'];
+};
+
+function render(
+  ui: ReactElement,
+  { appConfigContext, userContext, sessionContext }: RenderOptions = {}
+) {
+  const { wrapper, ...context } = makeTestProvider(
+    [providers.appConfig, providers.user, providers.session],
+    {
+      appConfigContext,
+      userContext,
+      sessionContext,
+    }
+  );
+
+  return {
+    ...context,
+    ...renderBase(ui, { wrapper }),
+  };
+}
