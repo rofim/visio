@@ -1,5 +1,7 @@
-import { Box, SxProps } from '@mui/material';
 import { ReactElement } from 'react';
+import useTheme from '@ui/theme';
+import type { SxProps } from '@ui/SxProps';
+import Box from '@ui/Box';
 
 export type VoiceIndicatorProps = {
   publisherAudioLevel: number;
@@ -34,44 +36,47 @@ const VoiceIndicatorIcon = ({
   sx,
   size,
 }: VoiceIndicatorProps): ReactElement => {
+  const theme = useTheme();
   const barHeights = calculateBarHeights(publisherAudioLevel);
+  const isAnimating = publisherAudioLevel >= 5;
 
   return (
     <Box sx={{ ...sx }} key={20} display="flex" flexDirection="column" gap={2} alignItems="center">
-      <div
-        className="flex items-center justify-center gap-[8%] bg-primary"
-        style={{
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '8%',
           height: size,
           width: size,
           borderRadius: '50%',
+          backgroundColor: theme.colors.primary,
         }}
       >
         {barHeights.map((height, i) => (
-          <div
-            // https://stackoverflow.com/questions/46735483/error-do-not-use-array-index-in-keys
-            // eslint-disable-next-line react/no-array-index-key
+          <Box
             key={i} // NOSONAR
-            className="flex items-center"
-            style={{
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
               height: height / 4,
               minHeight: '10%',
               width: '10%',
-              backgroundColor: 'white',
+              backgroundColor: theme.colors.background,
             }}
           >
-            <div
-              className="bg-primary-dark h-2/3 w-full rounded"
-              style={{
+            <Box
+              sx={{
                 height: `${height - 20}%`,
                 width: '80%',
                 // smooth out the animation with a CSS effect
-                animation:
-                  publisherAudioLevel < 5 ? 'none' : 'speech 250ms ease-in-out infinite alternate',
+                animation: !isAnimating ? 'none' : 'speech 250ms ease-in-out infinite alternate',
               }}
             />
-          </div>
+          </Box>
         ))}
-      </div>
+      </Box>
     </Box>
   );
 };

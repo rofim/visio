@@ -1,28 +1,22 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { afterEach, beforeEach, describe, expect, it, Mock, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { PropsWithChildren } from 'react';
+import useUserContext from '@hooks/useUserContext';
+import useAudioOutputContext from '@hooks/useAudioOutputContext';
+import { nativeDevices } from '@utils/mockData/device';
+import mergeAppConfigs from '@Context/AppConfig/helpers/mergeAppConfigs';
 import RoomContext from '../RoomContext';
-import useUserContext from '../../hooks/useUserContext';
 import { UserContextType } from '../user';
-import useAudioOutputContext from '../../hooks/useAudioOutputContext';
 import { AudioOutputContextType } from '../AudioOutputProvider';
-import { nativeDevices } from '../../utils/mockData/device';
+import mediaDevicesMock from '@common/test/mocks/mediaDevicesMock';
 
-vi.mock('../../hooks/useUserContext');
-vi.mock('../../hooks/useAudioOutputContext');
-vi.mock('../ConfigProvider', () => ({
-  __esModule: true,
-  ConfigProvider: ({ children }: PropsWithChildren) => children,
-  default: ({ children }: PropsWithChildren) => children,
-}));
+vi.mock('@hooks/useUserContext');
+vi.mock('@hooks/useAudioOutputContext');
 vi.mock('../BackgroundPublisherProvider', () => ({
   __esModule: true,
   BackgroundPublisherProvider: ({ children }: PropsWithChildren) => children,
 }));
-
-const mockUseUserContext = useUserContext as Mock<[], UserContextType>;
-const mockUseAudioOutputContext = useAudioOutputContext as Mock<[], AudioOutputContextType>;
 
 const fakeName = 'Tommy Traddles';
 const fakeAudioOutput = 'their-device-id';
@@ -38,32 +32,28 @@ const mockUseAudioOutputContextValues = {
   currentAudioOutputDevice: fakeAudioOutput,
 } as AudioOutputContextType;
 
-mockUseUserContext.mockImplementation(() => mockUserContextWithDefaultSettings);
-mockUseAudioOutputContext.mockImplementation(() => mockUseAudioOutputContextValues);
+const defaultAppConfigValue = mergeAppConfigs({
+  /**
+   * This flag prevents the provider from attempting to load the config.json file
+   */
+  isAppConfigLoaded: true,
+});
 
 describe('RoomContext', () => {
-  const nativeMediaDevices = global.navigator.mediaDevices;
   beforeEach(() => {
-    Object.defineProperty(global.navigator, 'mediaDevices', {
-      writable: true,
-      value: {
-        enumerateDevices: vi.fn(
-          () =>
-            new Promise<MediaDeviceInfo[]>((res) => {
-              res(nativeDevices as MediaDeviceInfo[]);
-            })
-        ),
-        addEventListener: vi.fn(() => []),
-        removeEventListener: vi.fn(() => []),
-      },
-    });
-  });
+    vi.mocked(useUserContext).mockImplementation(() => mockUserContextWithDefaultSettings);
+    vi.mocked(useAudioOutputContext).mockImplementation(() => mockUseAudioOutputContextValues);
 
-  afterEach(() => {
     Object.defineProperty(global.navigator, 'mediaDevices', {
       writable: true,
-      value: nativeMediaDevices,
+      value: mediaDevicesMock,
     });
+
+    vi.spyOn(mediaDevicesMock, 'enumerateDevices').mockResolvedValue(
+      nativeDevices as MediaDeviceInfo[]
+    );
+    vi.spyOn(mediaDevicesMock, 'addEventListener').mockImplementation(() => {});
+    vi.spyOn(mediaDevicesMock, 'removeEventListener').mockImplementation(() => {});
   });
 
   it('renders content', () => {
@@ -72,7 +62,7 @@ describe('RoomContext', () => {
     render(
       <MemoryRouter initialEntries={['/test']}>
         <Routes>
-          <Route path="/test" element={<RoomContext />}>
+          <Route path="/test" element={<RoomContext appConfigValue={defaultAppConfigValue} />}>
             <Route index element={<TestComponent />} />
           </Route>
         </Routes>
@@ -98,7 +88,7 @@ describe('RoomContext', () => {
     render(
       <MemoryRouter initialEntries={['/test']}>
         <Routes>
-          <Route path="/test" element={<RoomContext />}>
+          <Route path="/test" element={<RoomContext appConfigValue={defaultAppConfigValue} />}>
             <Route index element={<TestComponent />} />
           </Route>
         </Routes>

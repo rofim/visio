@@ -1,13 +1,14 @@
-import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
-import { Tooltip } from '@mui/material';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import useRoomName from '../../../hooks/useRoomName';
+import useRoomName from '@hooks/useRoomName';
+import { startArchiving, stopArchiving } from '@api/archiving';
+import useSessionContext from '@hooks/useSessionContext';
+import useAppConfig from '@Context/AppConfig/hooks/useAppConfig';
 import ToolbarButton from '../ToolbarButton';
 import PopupDialog, { DialogTexts } from '../PopupDialog';
-import { startArchiving, stopArchiving } from '../../../api/archiving';
-import useSessionContext from '../../../hooks/useSessionContext';
-import useConfigContext from '../../../hooks/useConfigContext';
+import Tooltip from '@ui/Tooltip';
+import useTheme from '@ui/theme';
+import VividIcon from '@components/VividIcon';
 
 export type ArchivingButtonProps = {
   isOverflowButton?: boolean;
@@ -31,15 +32,17 @@ const ArchivingButton = ({
 }: ArchivingButtonProps): ReactElement | false => {
   const { t } = useTranslation();
   const roomName = useRoomName();
+  const theme = useTheme();
   const { archiveId } = useSessionContext();
-  const config = useConfigContext();
+  const allowArchiving = useAppConfig(
+    ({ meetingRoomSettings }) => meetingRoomSettings.allowArchiving
+  );
   const isRecording = !!archiveId;
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const title = isRecording ? t('recording.stop.title') : t('recording.start.title');
   const handleButtonClick = () => {
     setIsModalOpen((prev) => !prev);
   };
-  const { allowArchiving } = config.meetingRoomSettings;
 
   const startRecordingText: DialogTexts = {
     title: t('recording.start.dialog.title'),
@@ -93,12 +96,19 @@ const ArchivingButton = ({
             onClick={handleButtonClick}
             data-testid="archiving-button"
             icon={
-              <RadioButtonCheckedIcon
-                style={{ color: `${isRecording ? 'rgb(239 68 68)' : 'white'}` }}
+              <VividIcon
+                name={isRecording ? 'radio-checked-2-line' : 'radio-checked-2-solid'}
+                customSize={-5}
+                style={{
+                  color: theme.colors.onSecondary,
+                }}
               />
             }
             sx={{
               marginTop: isOverflowButton ? '0px' : '4px',
+              backgroundColor: isRecording
+                ? `${theme.colors.onSecondary}55`
+                : theme.colors.darkGrey,
             }}
             isOverflowButton={isOverflowButton}
           />

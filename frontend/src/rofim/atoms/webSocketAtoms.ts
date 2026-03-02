@@ -1,4 +1,3 @@
-/* eslint-disable @cspell/spellchecker */
 import { atom } from 'jotai';
 
 export const socketConnectionStatusAtom = atom(false);

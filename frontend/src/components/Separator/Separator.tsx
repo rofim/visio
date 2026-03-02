@@ -1,7 +1,10 @@
+import Box from '@ui/Box';
 import { ReactElement } from 'react';
+import useTheme from '@ui/theme';
 
 export type SeparatorProps = {
   orientation?: 'left' | 'right';
+  width?: string;
 };
 
 /**
@@ -10,13 +13,20 @@ export type SeparatorProps = {
  * This component renders a horizontal line with customizable orientation that is set to left by default.
  * @param {SeparatorProps} props - the props for the component.
  *  @property {'left' | 'right'} orientation - whether the separator is oriented to the left or right
+ *  @property {string} width - the width of the separator.
  * @returns {ReactElement} The separator component.
  */
-const Separator = ({ orientation = 'left' }: SeparatorProps): ReactElement => {
+const Separator = ({ orientation = 'left', width = '50%' }: SeparatorProps): ReactElement => {
+  const theme = useTheme();
   return (
-    <div
+    <Box
       data-testid="separator"
-      className={`w-6/12 border-b-2 border-solid border-slate-200 ${orientation === 'left' ? 'mr-4' : 'ml-4'}`}
+      sx={{
+        width: width,
+        borderBottom: '1px solid',
+        borderColor: theme.colors.border,
+        ...(orientation === 'left' ? { marginRight: 1 } : { marginLeft: 1 }),
+      }}
     />
   );
 };

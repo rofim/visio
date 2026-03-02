@@ -1,15 +1,10 @@
 import ReactDOM from 'react-dom/client';
-import App from './App.js';
+import { registerIcon } from '@vonage/vivid';
+import App from './App.jsx';
 import './i18n.js';
-import './css/global.css';
 
-// eslint-disable-next-line @cspell/spellchecker
-// Declare for Matomo
-declare global {
-  interface Window {
-    _paq: unknown[];
-  }
-}
+// Register Vivid icons for use throughout the application
+registerIcon();
 
 /**
  * The root HTML element where the React application is rendered.
@@ -17,7 +12,4 @@ declare global {
  */
 const rootElement = document.getElementById('root')!;
 
-/**
- * Initializes and renders the React application into the root element.
- */
 ReactDOM.createRoot(rootElement).render(<App />);

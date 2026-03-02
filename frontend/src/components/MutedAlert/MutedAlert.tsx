@@ -1,6 +1,6 @@
-import Fade from '@mui/material/Fade';
+import Fade from '@ui/Fade';
+import Alert from '@ui/Alert';
 import { useState, useEffect, ReactElement } from 'react';
-import { Alert } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import useSpeakingDetector from '../../hooks/useSpeakingDetector';
 import usePublisherContext from '../../hooks/usePublisherContext';
@@ -26,6 +26,7 @@ const MutedAlert = (): ReactElement => {
     : t('mutedAlert.message.muted');
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setOpen(isForceMuted || isSpeakingWhileMuted);
   }, [isForceMuted, isSpeakingWhileMuted]);
 

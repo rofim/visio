@@ -5,6 +5,7 @@ import { defineConfig as defineVitestConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import replace from '@rollup/plugin-replace';
 import checker from 'vite-plugin-checker';
+import * as path from 'node:path';
 
 const vitestConfig: VitestUserConfigInterface = defineVitestConfig({
   test: {
@@ -28,7 +29,9 @@ const vitestConfig: VitestUserConfigInterface = defineVitestConfig({
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd());
+  const env = loadEnv(mode, __dirname, '');
+
+  const isDevelopment = mode === 'development';
 
   return mergeConfig(vitestConfig, {
     server: {
@@ -45,10 +48,14 @@ export default defineConfig(({ mode }) => {
         'process.env.CI': process.env.CI,
         preventAssignment: true,
       }),
-      checker({
-        typescript: true,
-        terminal: true,
-      }),
+      ...(isDevelopment
+        ? [
+            checker({
+              typescript: true,
+              terminal: true,
+            }),
+          ]
+        : []),
     ],
     resolve: {
       alias: {
@@ -62,7 +69,15 @@ export default defineConfig(({ mode }) => {
         '@app-types': '/src/types',
         '@utils': '/src/utils',
         '@test': '/src/test',
+        '@ui': path.resolve(__dirname, '../libs/ui/src'),
+        '@common': path.resolve(__dirname, '../libs/common/src'),
+        '@core': path.resolve(__dirname, '../libs/core/src'),
       },
+    },
+
+    build: {
+      outDir: path.resolve(__dirname, 'dist'),
+      emptyOutDir: true,
     },
   });
 });

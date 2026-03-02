@@ -1,12 +1,6 @@
-button[data-testid='captions-button'],
-button[data-testid='archiving-button'],
-button[data-testid='emoji-grid-button'],
-div[data-testid='emoji-grid-mobile'] {
-  display: none;
-}
-
 /* cache le lien de partage de la visio scrum-2872 */
 div[data-testid='meetingUrlHeader'],
-div[data-testid='smallViewportHeader'] {
+div[data-testid='smallViewportHeader'],
+div[data-testid='meetingSearchParticipant'] {
   display: none;
 }

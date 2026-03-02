@@ -1,19 +1,21 @@
 import { afterEach, beforeEach, describe, expect, it, Mock, vi } from 'vitest';
-import { cleanup, screen, render } from '@testing-library/react';
+import { cleanup, screen, render as renderBase } from '@testing-library/react';
+import { ReactElement } from 'react';
+import useDevices from '@hooks/useDevices';
+import { AllMediaDevices } from '@app-types/room';
+import { allMediaDevices } from '@utils/mockData/device';
+import { AppConfigProviderWrapperOptions, makeAppConfigProviderWrapper } from '@test/providers';
+import backgroundEffectsDialog$ from '@Context/BackgroundEffectsDialog';
+import precallNetworkTestDialog$ from '@Context/PrecallNetworkTestDialog';
 import ControlPanel from '.';
-import useDevices from '../../../hooks/useDevices';
-import { AllMediaDevices } from '../../../types';
-import { allMediaDevices } from '../../../utils/mockData/device';
-import useConfigContext from '../../../hooks/useConfigContext';
-import { ConfigContextType } from '../../../Context/ConfigProvider';
+import composeProviders from '@utils/composeProviders';
 
-vi.mock('../../../hooks/useDevices.tsx');
-vi.mock('../../../hooks/useConfigContext');
+vi.mock('@hooks/useDevices.tsx');
+
 const mockUseDevices = useDevices as Mock<
   [],
   { allMediaDevices: AllMediaDevices; getAllMediaDevices: () => void }
 >;
-const mockUseConfigContext = useConfigContext as Mock<[], ConfigContextType>;
 
 describe('ControlPanel', () => {
   beforeEach(() => {
@@ -21,11 +23,6 @@ describe('ControlPanel', () => {
       getAllMediaDevices: vi.fn(),
       allMediaDevices,
     });
-    mockUseConfigContext.mockReturnValue({
-      waitingRoomSettings: {
-        allowDeviceSelection: true,
-      },
-    } as Partial<ConfigContextType> as ConfigContextType);
   });
 
   afterEach(() => {
@@ -139,27 +136,21 @@ describe('ControlPanel', () => {
     );
     expect(screen.getByTestId('audioOutput-menu')).toBeVisible();
   });
-
-  it('is not rendered when allowDeviceSelection is false', () => {
-    mockUseConfigContext.mockReturnValue({
-      waitingRoomSettings: {
-        allowDeviceSelection: false,
-      },
-    } as Partial<ConfigContextType> as ConfigContextType);
-
-    render(
-      <ControlPanel
-        handleAudioInputOpen={() => {}}
-        handleVideoInputOpen={() => {}}
-        handleAudioOutputOpen={() => {}}
-        handleClose={() => {}}
-        openAudioInput={false}
-        openVideoInput={false}
-        openAudioOutput={false}
-        anchorEl={null}
-      />
-    );
-
-    expect(screen.queryByTestId('ControlPanel')).not.toBeInTheDocument();
-  });
 });
+
+function render(
+  ui: ReactElement,
+  options?: {
+    appConfigOptions?: AppConfigProviderWrapperOptions;
+  }
+) {
+  const { AppConfigWrapper } = makeAppConfigProviderWrapper(options?.appConfigOptions);
+
+  const wrapper = composeProviders(
+    AppConfigWrapper,
+    backgroundEffectsDialog$.Provider,
+    precallNetworkTestDialog$.Provider
+  );
+
+  return renderBase(ui, { ...options, wrapper });
+}

@@ -1,5 +1,7 @@
 import { ReactElement } from 'react';
-import Banner from '../../components/Banner';
+import PageLayout from '@ui/PageLayout';
+import Banner from '@components/Banner';
+import Footer from '@components/Footer/Footer';
 import SupportedBrowsers from '../../components/UnsupportedBrowser/SupportedBrowsers';
 import UnsupportedBrowserMessage from '../../components/UnsupportedBrowser/UnsupportedBrowserMessage';
 
@@ -14,14 +16,20 @@ import UnsupportedBrowserMessage from '../../components/UnsupportedBrowser/Unsup
  */
 const UnsupportedBrowserPage = (): ReactElement => {
   return (
-    <div className="flex size-full flex-col justify-between bg-white">
-      <Banner />
-
-      <div className="flex size-full flex-col items-center bg-white md:flex-row md:justify-center">
+    <PageLayout>
+      <PageLayout.Banner>
+        <Banner />
+      </PageLayout.Banner>
+      <PageLayout.Left>
         <UnsupportedBrowserMessage />
+      </PageLayout.Left>
+      <PageLayout.Right>
         <SupportedBrowsers />
-      </div>
-    </div>
+      </PageLayout.Right>
+      <PageLayout.Footer>
+        <Footer />
+      </PageLayout.Footer>
+    </PageLayout>
   );
 };
 

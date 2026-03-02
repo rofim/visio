@@ -1,10 +1,11 @@
-import { Tooltip } from '@mui/material';
-import { EmojiEmotions } from '@mui/icons-material';
+import Tooltip from '@ui/Tooltip';
 import { Dispatch, ReactElement, SetStateAction, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import useAppConfig from '@Context/AppConfig/hooks/useAppConfig';
+import useTheme from '@ui/theme';
 import ToolbarButton from '../ToolbarButton';
 import EmojiGrid from '../EmojiGrid/EmojiGrid';
-import useConfigContext from '../../../hooks/useConfigContext';
+import VividIcon from '@components/VividIcon';
 
 export type EmojiGridProps = {
   isEmojiGridOpen: boolean;
@@ -30,13 +31,13 @@ const EmojiGridButton = ({
   isParentOpen,
   isOverflowButton = false,
 }: EmojiGridProps): ReactElement | false => {
-  const { meetingRoomSettings } = useConfigContext();
+  const allowEmojis = useAppConfig(({ meetingRoomSettings }) => meetingRoomSettings.allowEmojis);
   const { t } = useTranslation();
+  const theme = useTheme();
   const anchorRef = useRef<HTMLButtonElement>(null);
   const handleToggle = () => {
     setIsEmojiGridOpen((prevOpen) => !prevOpen);
   };
-  const { allowEmojis } = meetingRoomSettings;
 
   return (
     allowEmojis && (
@@ -45,8 +46,12 @@ const EmojiGridButton = ({
           <ToolbarButton
             onClick={handleToggle}
             icon={
-              <EmojiEmotions
-                style={{ color: `${!isEmojiGridOpen ? 'white' : 'rgb(138, 180, 248)'}` }}
+              <VividIcon
+                name="emoji-solid"
+                customSize={-5}
+                sx={{
+                  color: isEmojiGridOpen ? theme.colors.secondary : theme.colors.onSecondary,
+                }}
               />
             }
             ref={anchorRef}

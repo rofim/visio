@@ -15,6 +15,8 @@ import RofimInit from './context/RofimContext';
 import ErrorPage from './pages/ErrorPage';
 import GoodBye from './pages/GoodBye';
 import initMatomo from './matomo';
+import { ThemeProvider } from '@ui/theme';
+import getTokensByMode from '@ui/theme/helpers/getTokensByMode';
 
 const App = () => {
   React.useEffect(() => {
@@ -56,4 +58,17 @@ const App = () => {
   );
 };
 
-export default App;
+const AppWrapper = () => {
+  return (
+    <ThemeProvider
+      theme={{
+        lightMode: getTokensByMode('light'),
+        darkMode: getTokensByMode('light'),
+      }}
+    >
+      <App />
+    </ThemeProvider>
+  );
+};
+
+export default AppWrapper;

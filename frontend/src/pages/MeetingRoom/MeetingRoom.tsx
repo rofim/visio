@@ -1,6 +1,8 @@
-import { useEffect, ReactElement, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, ReactElement, useState, useEffectEvent } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import Box from '@ui/Box';
+import useTheme from '@ui/theme';
 import usePublisherContext from '../../hooks/usePublisherContext';
 import ConnectionAlert from '../../components/MeetingRoom/ConnectionAlert';
 import Toolbar from '../../components/MeetingRoom/Toolbar';
@@ -19,8 +21,9 @@ import CaptionsError from '../../components/MeetingRoom/CaptionsError';
 import useBackgroundPublisherContext from '../../hooks/useBackgroundPublisherContext';
 import { DEVICE_ACCESS_STATUS } from '../../utils/constants';
 import type { PublishingErrorType } from '../../Context/PublisherProvider/usePublisher/usePublisher';
-
-const height = '@apply h-[calc(100dvh_-_80px)]';
+import useUserContext from '../../hooks/useUserContext';
+import env from '../../env';
+import useMountEffect from '@common/hooks/useMountEffect';
 
 /**
  * MeetingRoom Component
@@ -33,7 +36,15 @@ const height = '@apply h-[calc(100dvh_-_80px)]';
  */
 const MeetingRoom = (): ReactElement => {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const navigate = useNavigate();
+  const location = useLocation();
   const roomName = useRoomName();
+  const {
+    user: {
+      defaultSettings: { name },
+    },
+  } = useUserContext();
   const { publisher, publish, quality, initializeLocalPublisher, publishingError, isVideoEnabled } =
     usePublisherContext();
 
@@ -70,7 +81,21 @@ const MeetingRoom = (): ReactElement => {
     setCaptionsErrorResponse,
   };
 
+  const hasValidUsername = name && name.trim() !== '';
+  const searchParams = new URLSearchParams(location.search);
+  const bypass = searchParams.get('bypass') === 'true' || env.VITE_BYPASS_WAITING_ROOM; // Testing purpose
+
+  useMountEffect(() => {
+    if (!hasValidUsername && !bypass) {
+      navigate(`/waiting-room/${roomName}`);
+    }
+  });
+
   useEffect(() => {
+    if (!hasValidUsername && !bypass) {
+      return;
+    }
+
     if (joinRoom && isValidRoomName(roomName)) {
       joinRoom(roomName);
     }
@@ -79,7 +104,7 @@ const MeetingRoom = (): ReactElement => {
       disconnect?.();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roomName]);
+  }, [roomName, hasValidUsername, bypass]);
 
   useEffect(() => {
     if (!publisherOptions) {
@@ -110,14 +135,19 @@ const MeetingRoom = (): ReactElement => {
     }
   }, [accessStatus]);
 
-  // eslint-disable-next-line @typescript-eslint/no-use-before-define
-  useRedirectOnPublisherError(publishingError);
+  useRedirectOnPublisherError({ publishingError, reconnecting });
 
-  // eslint-disable-next-line @typescript-eslint/no-use-before-define
-  useRedirectOnSubscriberError(subscriptionError);
+  useRedirectOnSubscriberError({ subscriberError: subscriptionError, reconnecting });
 
   return (
-    <div data-testid="meetingRoom" className={`${height} w-screen bg-darkGray-100`}>
+    <Box
+      data-testid="meetingRoom"
+      sx={{
+        height: 'calc(100dvh - 80px)',
+        width: '100vw',
+        backgroundColor: theme.colors.darkBackground,
+      }}
+    >
       {isSmallViewport && <SmallViewportHeader />}
       <VideoTileCanvas
         isSharingScreen={isSharingScreen}
@@ -162,7 +192,7 @@ const MeetingRoom = (): ReactElement => {
           severity="warning"
         />
       )}
-    </div>
+    </Box>
   );
 };
 
@@ -171,17 +201,33 @@ const MeetingRoom = (): ReactElement => {
  * This prevents users from subscribing to other participants in the room, and being unable to communicate with them.
  * @param {PublishingErrorType | null} publishingError - The publishing error object or null if no error.
  */
-function useRedirectOnPublisherError(publishingError: PublishingErrorType | null) {
+function useRedirectOnPublisherError({
+  publishingError,
+  reconnecting,
+}: {
+  publishingError: PublishingErrorType | null;
+  reconnecting: boolean | null;
+}) {
   const navigate = useNavigate();
   const roomName = useRoomName();
-  const { t } = useTranslation();
 
-  useEffect(() => {
+  const maybeRedirect = useEffectEvent(() => {
     if (!publishingError) {
       return;
     }
 
+    const isBrowserOnline = (() => {
+      if (typeof navigator === 'undefined') return true;
+      return navigator.onLine;
+    })();
+
+    if (reconnecting === true || isBrowserOnline === false) {
+      // Network changes are often transient; don't redirect during reconnection/offline.
+      return;
+    }
+
     const { header, caption } = publishingError;
+
     navigate('/goodbye', {
       state: {
         header,
@@ -189,7 +235,11 @@ function useRedirectOnPublisherError(publishingError: PublishingErrorType | null
         roomName,
       },
     });
-  }, [publishingError, navigate, roomName, t]);
+  });
+
+  useEffect(() => {
+    maybeRedirect();
+  }, [publishingError, reconnecting]);
 }
 
 /**
@@ -197,13 +247,28 @@ function useRedirectOnPublisherError(publishingError: PublishingErrorType | null
  * This prevents users from subscribing to other participants in the room, and being unable to communicate with them.
  * @param {Error | null} subscriberError - The subscriber error object or null if no error.
  */
-function useRedirectOnSubscriberError(subscriberError: Error | null) {
+function useRedirectOnSubscriberError({
+  subscriberError,
+  reconnecting,
+}: {
+  subscriberError: Error | null;
+  reconnecting: boolean | null;
+}) {
   const navigate = useNavigate();
   const roomName = useRoomName();
   const { t } = useTranslation();
 
-  useEffect(() => {
+  const maybeRedirect = useEffectEvent(() => {
     if (!subscriberError) {
+      return;
+    }
+
+    const isBrowserOnline = (() => {
+      if (typeof navigator === 'undefined') return true;
+      return navigator.onLine;
+    })();
+
+    if (reconnecting === true || isBrowserOnline === false) {
       return;
     }
 
@@ -214,7 +279,11 @@ function useRedirectOnSubscriberError(subscriberError: Error | null) {
         roomName,
       },
     });
-  }, [subscriberError, navigate, roomName, t]);
+  });
+
+  useEffect(() => {
+    maybeRedirect();
+  }, [subscriberError, reconnecting]);
 }
 
 export default MeetingRoom;

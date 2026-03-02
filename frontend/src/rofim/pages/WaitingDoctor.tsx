@@ -1,20 +1,26 @@
 /* eslint-disable @cspell/spellchecker */
 import { ReactElement, useEffect, useState } from 'react';
-import WarningIcon from '@mui/icons-material/Warning';
 import LocalPhoneIcon from '@mui/icons-material/LocalPhone';
 import { useNavigate } from 'react-router-dom';
 import { Trans, useTranslation } from 'react-i18next';
 import { useAtom } from 'jotai';
-import { Alert, Fade } from '@mui/material';
 import { getRofimSession } from '../utils/session';
 import rofimApiService, { WaitingRoomStatus } from '../api/rofimApi';
 import { getFormattedTime } from '../../utils/dateTime';
 import { canJoinVisioAtom, doctorDelayAtom, tcStartTimeAtom } from '../atoms/webSocketAtoms';
 import useWebSocket from '../hooks/useWebSocket';
 import useNetworkStatus from '../hooks/useNetworkStatus';
+import Box from '@ui/Box';
+import PageLayout from '@ui/PageLayout';
+import Typography from '@ui/Typography';
+import useTheme from '@ui/theme';
+import Fade from '@ui/Fade';
+import Alert from '@ui/Alert';
 
 const WaitingRoom = (): ReactElement => {
   const { t, i18n } = useTranslation();
+  const theme = useTheme();
+
   const navigate = useNavigate();
   const [doctorDelayInMinute, setDoctorDelayInMinute] = useAtom(doctorDelayAtom);
   const [startTime, setStartTime] = useAtom(tcStartTimeAtom);
@@ -29,6 +35,7 @@ const WaitingRoom = (): ReactElement => {
   const waitingRoom = session?.waitingRoom;
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setConnectionLost(!isOnline || !isSocketConnected);
   }, [isOnline, isSocketConnected]);
 
@@ -37,8 +44,8 @@ const WaitingRoom = (): ReactElement => {
       const updateTCStatus = async () => {
         const tc = await rofimApiService.updateTeleconsultationStatus(WaitingRoomStatus.Wait);
         if (tc.doctorDelayInMinute && tc.startTime) {
-          setDoctorDelayInMinute(tc.doctorDelayInMinute);
-          setStartTime(new Date(tc.startTime).getTime());
+          setDoctorDelayInMinute(tc.doctorDelayInMinute as number);
+          setStartTime(new Date(tc.startTime as string).getTime());
         }
 
         // Redirection vers la room s'il y a déjà un participant (le docteur est le premier participant)
@@ -73,61 +80,137 @@ const WaitingRoom = (): ReactElement => {
   }, [canJoinVisio, waitingRoom, room, navigate]);
 
   return (
-    <div className="flex size-full flex-col bg-[#F5F6F8]" data-testid="waitingDoctor">
-      <Fade in={alertConnectionLost}>
-        <Alert severity="warning" className="m-8 ml-auto w-full max-w-96 text-left">
-          {t('waitingRoom.connectionLost')}
-        </Alert>
-      </Fade>
-      <div className="flex w-full flex-col items-center justify-center p-4">
-        <h1 className="mb-8 text-center text-[32px] font-bold text-black">
-          {t('waitingRoom.title')}
-        </h1>
-        <div className="w-full max-w-4xl rounded-lg bg-white p-14 shadow-sm">
-          <div className="flex flex-col items-center space-y-6">
-            {!!doctorDelayInMinute && startTime && (
-              <div className="mb-4 flex rounded bg-[#fff1cf] p-4 shadow-md">
-                <div className="flex-1">
-                  <div className="flex gap-4">
-                    <WarningIcon sx={{ color: '#efc100', fontSize: 20 }} />
-                    <div className="w-full text-left">
-                      <strong>{t('waitingRoom.doctorDelayed.title')}</strong>
-                      <p>
-                        <Trans
-                          i18nKey="waitingRoom.doctorDelayed.message"
-                          values={{
-                            doctorDelayInMinute,
-                            startTime: getFormattedTime(
-                              i18n.language,
-                              startTime + doctorDelayInMinute * 60 * 1000
-                            ),
-                          }}
-                        />
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+    <Box data-testid="waitingDoctor">
+      <PageLayout>
+        <PageLayout.Left>
+          <Box
+            sx={{
+              maxWidth: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignSelf: 'start',
+              gap: 4,
+            }}
+          >
+            <Fade in={alertConnectionLost}>
+              <Alert
+                severity="warning"
+                className="ml-auto w-full max-w-96"
+                sx={{
+                  backgroundColor: '#fff1cf',
+                  textAlign: 'start',
+                  borderRadius: theme.shapes.borderRadiusLarge,
+                }}
+              >
+                <Typography
+                  sx={{
+                    color: theme.colors.warning,
+                  }}
+                >
+                  {t('waitingRoom.connectionLost')}
+                </Typography>
+              </Alert>
+            </Fade>
 
-            <img src="images/medecin.png" alt="doctor" className="size-[120px]" />
+            <Typography
+              variant="h1"
+              sx={{
+                color: theme.colors.textSecondary,
+                fontSize: '2rem',
+              }}
+            >
+              {t('waitingRoom.title')}
+            </Typography>
 
-            <h2 className="text-center text-2xl font-bold text-primary">
-              {t('waitingRoom.message')}
-            </h2>
+            <Box
+              sx={{
+                p: 7,
+                backgroundColor: theme.colors.background,
+                borderRadius: theme.shapes.borderRadiusLarge,
+              }}
+            >
+              {!!doctorDelayInMinute && startTime && (
+                <Alert
+                  severity="warning"
+                  sx={{
+                    backgroundColor: '#fff1cf',
+                    borderRadius: theme.shapes.borderRadiusLarge,
+                    mb: 2,
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      color: theme.colors.warning,
+                      fontWeight: theme.typography.weight['caption-semibold'].value,
+                      textAlign: 'start',
+                    }}
+                  >
+                    {t('waitingRoom.doctorDelayed.title')}
+                  </Typography>
+                  <Typography
+                    sx={{
+                      color: theme.colors.warning,
+                      textAlign: 'start',
+                    }}
+                  >
+                    <Trans
+                      i18nKey="waitingRoom.doctorDelayed.message"
+                      values={{
+                        doctorDelayInMinute,
+                        startTime: getFormattedTime(
+                          i18n.language,
+                          startTime + doctorDelayInMinute * 60 * 1000
+                        ),
+                      }}
+                    />
+                  </Typography>
+                </Alert>
+              )}
 
-            <div className="text-center text-xl text-grey-b">
-              <p>{t('waitingRoom.redirection')}</p>
-              <p>{t('waitingRoom.pleaseWait')}</p>
-            </div>
-          </div>
-        </div>
-        <p className="w-full max-w-4xl p-16 text-left text-xl">
-          <LocalPhoneIcon sx={{ fontSize: 20, display: 'inline' }} className="mr-1" />
-          {t('waitingRoom.disclaimer')}
-        </p>
-      </div>
-    </div>
+              <img src="images/medecin.png" alt="doctor" className="size-[120px]" />
+
+              <Typography
+                variant="h2"
+                sx={{
+                  color: theme.colors.textPrimary,
+                  fontSize: '1.5rem',
+                }}
+              >
+                {t('waitingRoom.message')}
+              </Typography>
+
+              <Typography
+                variant="h6"
+                sx={{
+                  color: theme.colors.textTertiary,
+                  textAlign: 'start',
+                }}
+              >
+                {t('waitingRoom.redirection')}
+              </Typography>
+              <Typography
+                variant="h6"
+                sx={{
+                  color: theme.colors.textTertiary,
+                  textAlign: 'start',
+                }}
+              >
+                {t('waitingRoom.pleaseWait')}
+              </Typography>
+            </Box>
+
+            <Typography
+              sx={{
+                color: theme.colors.textSecondary,
+              }}
+            >
+              <LocalPhoneIcon sx={{ fontSize: 20, display: 'inline' }} className="mr-1" />
+              {t('waitingRoom.disclaimer')}
+            </Typography>
+          </Box>
+        </PageLayout.Left>
+      </PageLayout>
+    </Box>
   );
 };
 

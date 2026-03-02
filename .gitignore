@@ -1,11 +1,11 @@
 # ignore techdocs output folder
 generated-docs/
 
-backend/node_modules/*
-frontend/node_modules/*
+**/node_modules/*
 
-backend/.env
-backend/dist/*
+**/.env
+dist/
+**/dist/
 
 lib-cov
 *.seed
@@ -27,7 +27,6 @@ npm-debug.log
 bower_components
 
 public/js/*
-config.json
 
 server.key
 server.crt
@@ -45,12 +44,23 @@ sauce-connect.log
 .tern-project
 
 /.vscode
+!/.vscode/extensions.json
 
 build
 
 /scripts/allLicenseResults.json
 
 vcr.yml
+.scannerwork/
+
+.nx/cache
+.nx/workspace-data
+.cursor/rules/nx-rules.mdc
+.github/instructions/nx.instructions.md
+vite.config.*.timestamp*
+vitest.config.*.timestamp*
+*.tsbuildinfo
+vcr-dev.yml
 
 # IDE - VSCode
 .vscode/*

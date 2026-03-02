@@ -19,7 +19,13 @@ describe('SelectableOption', () => {
 
   it('renders with image when image is provided', () => {
     render(
-      <SelectableOption isSelected={false} onClick={() => {}} id="img-option" image="/test.jpg" />
+      <SelectableOption
+        isSelected={false}
+        onClick={() => {}}
+        title="background"
+        id="img-option"
+        image="/test.jpg"
+      />
     );
     expect(screen.getByTestId('background-img-option')).toBeInTheDocument();
     expect(screen.getByAltText('background')).toHaveAttribute('src', '/test.jpg');
@@ -45,20 +51,6 @@ describe('SelectableOption', () => {
     );
     const option = screen.getByTestId('background-selected');
     expect(option).toHaveAttribute('aria-pressed', 'true');
-  });
-
-  it('is disabled when isDisabled is true', () => {
-    render(
-      <SelectableOption
-        isSelected={false}
-        onClick={() => {}}
-        id="disabled"
-        icon={<span>Disabled</span>}
-        isDisabled
-      />
-    );
-    const option = screen.getByTestId('background-disabled');
-    expect(option).toHaveAttribute('aria-disabled', 'true');
   });
 
   it('shows the title in the tooltip', async () => {

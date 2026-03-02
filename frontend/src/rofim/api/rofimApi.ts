@@ -28,6 +28,7 @@ const updateTeleconsultationStatus = async (type: WaitingRoomStatus) => {
     throw new Error(`Erreur API: ${response.status} ${response.statusText}`);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return response.json();
 };
 
@@ -42,6 +43,7 @@ const countParticipants = async (): Promise<number> => {
     throw new Error(`Erreur API: ${response.status} ${response.statusText}`);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return response.json();
 };
 

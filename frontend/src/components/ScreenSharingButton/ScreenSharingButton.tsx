@@ -1,12 +1,12 @@
-import ScreenOff from '@mui/icons-material/StopScreenShare';
-import ScreenShare from '@mui/icons-material/ScreenShare';
-import Tooltip from '@mui/material/Tooltip';
+import Tooltip from '@ui/Tooltip';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import useAppConfig from '@Context/AppConfig/hooks/useAppConfig';
+import { isMobile } from '@utils/util';
 import ToolbarButton from '../MeetingRoom/ToolbarButton';
 import PopupDialog, { DialogTexts } from '../MeetingRoom/PopupDialog';
-import { isMobile } from '../../utils/util';
-import useConfigContext from '../../hooks/useConfigContext';
+import VividIcon from '@components/VividIcon';
+import useTheme from '@ui/theme';
 
 export type ScreenShareButtonProps = {
   toggleScreenShare: () => void;
@@ -32,11 +32,13 @@ const ScreenSharingButton = ({
   isViewingScreenShare,
   isOverflowButton = false,
 }: ScreenShareButtonProps): ReactElement | false => {
-  const { meetingRoomSettings } = useConfigContext();
+  const allowScreenShare = useAppConfig(
+    ({ meetingRoomSettings }) => meetingRoomSettings.allowScreenShare
+  );
   const { t } = useTranslation();
+  const theme = useTheme();
   const title = isSharingScreen ? t('screenSharing.title.stop') : t('screenSharing.title.start');
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const { allowScreenShare } = meetingRoomSettings;
 
   // Screensharing relies on the getDisplayMedia browser API which is unsupported on mobile devices
   // See: https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia#browser_compatibility
@@ -70,14 +72,27 @@ const ScreenSharingButton = ({
             data-testid="screensharing-button"
             icon={
               !isSharingScreen ? (
-                <ScreenShare className="text-white" />
+                <VividIcon
+                  name="screen-share-solid"
+                  customSize={-5}
+                  sx={{ color: theme.colors.onSecondary }}
+                  data-testid="ScreenShareIcon"
+                />
               ) : (
-                <ScreenOff className="text-red-500" />
+                <VividIcon
+                  name="screen-share-off-solid"
+                  customSize={-5}
+                  sx={{ color: theme.colors.onSecondary }}
+                  data-testid="ScreenShareIcon"
+                />
               )
             }
             sx={{
               marginTop: isOverflowButton ? '0px' : '4px',
               marginLeft: isOverflowButton ? '12px' : '0px',
+              backgroundColor: isSharingScreen
+                ? `${theme.colors.onSecondary}55`
+                : theme.colors.darkGrey,
             }}
             isOverflowButton={isOverflowButton}
           />

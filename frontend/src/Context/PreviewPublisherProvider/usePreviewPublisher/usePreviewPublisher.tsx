@@ -7,6 +7,7 @@ import {
   hasMediaProcessorSupport,
   PublisherProperties,
 } from '@vonage/client-sdk-video';
+import useAppConfig from '@Context/AppConfig/hooks/useAppConfig';
 import setMediaDevices from '../../../utils/mediaDeviceUtils';
 import useDevices from '../../../hooks/useDevices';
 import usePermissions from '../../../hooks/usePermissions';
@@ -17,7 +18,7 @@ import { AccessDeniedEvent } from '../../PublisherProvider/usePublisher/usePubli
 import DeviceStore from '../../../utils/DeviceStore';
 import { setStorageItem, STORAGE_KEYS } from '../../../utils/storage';
 import applyBackgroundFilter from '../../../utils/backgroundFilter/applyBackgroundFilter/applyBackgroundFilter';
-import useConfigContext from '../../../hooks/useConfigContext';
+import handlePublisherAccessDenied from '../../../utils/publisher/handlePublisherAccessDenied';
 
 type PublisherVideoElementCreatedEvent = Event<'videoElementCreated', Publisher> & {
   element: HTMLVideoElement | HTMLObjectElement;
@@ -32,7 +33,7 @@ export type PreviewPublisherContextType = {
   destroyPublisher: () => void;
   toggleAudio: () => void;
   toggleVideo: () => void;
-  changeBackground: (backgroundSelected: string) => void;
+  changeBackground: (backgroundSelected: string) => Promise<void>;
   backgroundFilter: VideoFilter | undefined;
   localAudioSource: string | undefined;
   localVideoSource: string | undefined;
@@ -42,6 +43,22 @@ export type PreviewPublisherContextType = {
   initLocalPublisher: () => Promise<void>;
   speechLevel: number;
 };
+
+export type PreviewPublisherInitialValue = Partial<
+  Pick<
+    PreviewPublisherContextType,
+    | 'publisherVideoElement'
+    | 'isAudioEnabled'
+    | 'isPublishing'
+    | 'isVideoEnabled'
+    | 'speechLevel'
+    | 'backgroundFilter'
+    | 'localAudioSource'
+    | 'localVideoSource'
+    | 'accessStatus'
+    | 'publisher'
+  >
+>;
 
 /**
  * Hook wrapper for creation, interaction with, and state for local video preview publisher.
@@ -65,29 +82,38 @@ export type PreviewPublisherContextType = {
  * @property {number} speechLevel - Current speech level for audio visualization
  * @returns {PreviewPublisherContextType} preview context
  */
-const usePreviewPublisher = (): PreviewPublisherContextType => {
+const usePreviewPublisher = (
+  initialValue?: PreviewPublisherInitialValue
+): PreviewPublisherContextType => {
   const { setUser, user } = useUserContext();
-  const config = useConfigContext();
+  const defaultResolution = useAppConfig(({ videoSettings }) => videoSettings.defaultResolution);
   const { allMediaDevices, getAllMediaDevices } = useDevices();
   const [publisherVideoElement, setPublisherVideoElement] = useState<
-    HTMLVideoElement | HTMLObjectElement
-  >();
-  const [speechLevel, setSpeechLevel] = useState(0);
+    HTMLVideoElement | HTMLObjectElement | undefined
+  >(initialValue?.publisherVideoElement ?? undefined);
+  const [speechLevel, setSpeechLevel] = useState(initialValue?.speechLevel ?? 0);
   const { setAccessStatus, accessStatus } = usePermissions();
   const publisherRef = useRef<Publisher | null>(null);
-  const [isPublishing, setIsPublishing] = useState(false);
+  const [isPublishing, setIsPublishing] = useState<boolean>(initialValue?.isPublishing ?? false);
   const initialBackgroundRef = useRef<VideoFilter | undefined>(
     user.defaultSettings.backgroundFilter
   );
   const [backgroundFilter, setBackgroundFilter] = useState<VideoFilter | undefined>(
-    user.defaultSettings.backgroundFilter
+    () => initialValue?.backgroundFilter ?? user.defaultSettings.backgroundFilter
   );
-  const [isVideoEnabled, setIsVideoEnabled] = useState(true);
-  const [isAudioEnabled, setIsAudioEnabled] = useState(true);
-  const [localVideoSource, setLocalVideoSource] = useState<string | undefined>(undefined);
-  const [localAudioSource, setLocalAudioSource] = useState<string | undefined>(undefined);
+  const [isVideoEnabled, setIsVideoEnabled] = useState<boolean>(
+    initialValue?.isVideoEnabled ?? true
+  );
+  const [isAudioEnabled, setIsAudioEnabled] = useState<boolean>(
+    initialValue?.isAudioEnabled ?? true
+  );
+  const [localVideoSource, setLocalVideoSource] = useState<string | undefined>(
+    initialValue?.localVideoSource ?? undefined
+  );
+  const [localAudioSource, setLocalAudioSource] = useState<string | undefined>(
+    initialValue?.localAudioSource ?? undefined
+  );
   const deviceStoreRef = useRef<DeviceStore>(new DeviceStore());
-  const { defaultResolution } = config.videoSettings;
 
   /* This sets the default devices in use so that the user knows what devices they are using */
   useEffect(() => {
@@ -105,7 +131,7 @@ const usePreviewPublisher = (): PreviewPublisherContextType => {
    */
   const changeBackground = useCallback(
     (backgroundSelected: string) => {
-      applyBackgroundFilter({
+      return applyBackgroundFilter({
         publisher: publisherRef.current,
         backgroundSelected,
         setUser,
@@ -132,10 +158,7 @@ const usePreviewPublisher = (): PreviewPublisherContextType => {
       if (setUser) {
         setUser((prevUser: UserType) => ({
           ...prevUser,
-          defaultSettings: {
-            ...prevUser.defaultSettings,
-            audioSource: deviceId,
-          },
+          defaultSettings: { ...prevUser.defaultSettings, audioSource: deviceId },
         }));
       }
     },
@@ -157,40 +180,16 @@ const usePreviewPublisher = (): PreviewPublisherContextType => {
       if (setUser) {
         setUser((prevUser: UserType) => ({
           ...prevUser,
-          defaultSettings: {
-            ...prevUser.defaultSettings,
-            videoSource: deviceId,
-          },
+          defaultSettings: { ...prevUser.defaultSettings, videoSource: deviceId },
         }));
       }
     },
     [setUser]
   );
 
-  /**
-   * Handle device permissions denial
-   * used to inform the user they need to give permissions to devices to access the call
-   * after a user grants permissions to the denied device, trigger a reload.
-   * @returns {void}
-   */
   const handleAccessDenied = useCallback(
     async (event: AccessDeniedEvent) => {
-      const deviceDeniedAccess = event.message?.startsWith('Microphone') ? 'microphone' : 'camera';
-
-      setAccessStatus(DEVICE_ACCESS_STATUS.REJECTED);
-
-      try {
-        const permissionStatus = await window.navigator.permissions.query({
-          name: deviceDeniedAccess,
-        });
-        permissionStatus.onchange = () => {
-          if (permissionStatus.state === 'granted') {
-            setAccessStatus(DEVICE_ACCESS_STATUS.ACCESS_CHANGED);
-          }
-        };
-      } catch (error) {
-        console.error(`Failed to query device permission for ${deviceDeniedAccess}: ${error}`);
-      }
+      await handlePublisherAccessDenied(event, setAccessStatus);
     },
     [setAccessStatus]
   );
@@ -230,8 +229,8 @@ const usePreviewPublisher = (): PreviewPublisherContextType => {
       return;
     }
     // We reset user preferences as we want to start with both devices enabled
-    setStorageItem(STORAGE_KEYS.AUDIO_SOURCE_ENABLED, JSON.stringify(true));
-    setStorageItem(STORAGE_KEYS.VIDEO_SOURCE_ENABLED, JSON.stringify(true));
+    setStorageItem(STORAGE_KEYS.AUDIO_SOURCE_ENABLED, 'true');
+    setStorageItem(STORAGE_KEYS.VIDEO_SOURCE_ENABLED, 'true');
 
     // Set videoFilter based on user's selected background
     let videoFilter: VideoFilter | undefined;
@@ -286,15 +285,12 @@ const usePreviewPublisher = (): PreviewPublisherContextType => {
       return;
     }
     publisherRef.current.publishVideo(!isVideoEnabled);
-    setStorageItem(STORAGE_KEYS.VIDEO_SOURCE_ENABLED, JSON.stringify(!isVideoEnabled));
+    setStorageItem(STORAGE_KEYS.VIDEO_SOURCE_ENABLED, (!isVideoEnabled).toString());
     setIsVideoEnabled(!isVideoEnabled);
     if (setUser) {
       setUser((prevUser: UserType) => ({
         ...prevUser,
-        defaultSettings: {
-          ...prevUser.defaultSettings,
-          publishVideo: !isVideoEnabled,
-        },
+        defaultSettings: { ...prevUser.defaultSettings, publishVideo: !isVideoEnabled },
       }));
     }
   };
@@ -311,14 +307,11 @@ const usePreviewPublisher = (): PreviewPublisherContextType => {
     }
     publisherRef.current.publishAudio(!isAudioEnabled);
     setIsAudioEnabled(!isAudioEnabled);
-    setStorageItem(STORAGE_KEYS.AUDIO_SOURCE_ENABLED, JSON.stringify(!isAudioEnabled));
+    setStorageItem(STORAGE_KEYS.AUDIO_SOURCE_ENABLED, (!isAudioEnabled).toString());
     if (setUser) {
       setUser((prevUser: UserType) => ({
         ...prevUser,
-        defaultSettings: {
-          ...prevUser.defaultSettings,
-          publishAudio: !isAudioEnabled,
-        },
+        defaultSettings: { ...prevUser.defaultSettings, publishAudio: !isAudioEnabled },
       }));
     }
   };
@@ -329,6 +322,7 @@ const usePreviewPublisher = (): PreviewPublisherContextType => {
     isPublishing,
     isVideoEnabled,
     destroyPublisher,
+
     publisher: publisherRef.current,
     publisherVideoElement,
     toggleAudio,

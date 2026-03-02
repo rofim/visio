@@ -12,7 +12,4 @@ registerIcon();
  */
 const rootElement = document.getElementById('root')!;
 
-/**
- * Initializes and renders the React application into the root element.
- */
 ReactDOM.createRoot(rootElement).render(<App />);

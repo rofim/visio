@@ -1,18 +1,20 @@
 import { useState, useEffect, MouseEvent, ReactElement } from 'react';
-import { Box, MenuItem, MenuList, Typography } from '@mui/material';
-import CheckIcon from '@mui/icons-material/Check';
-import VideocamIcon from '@mui/icons-material/Videocam';
 import { Device } from '@vonage/client-sdk-video';
 import { useTranslation } from 'react-i18next';
-import useDevices from '../../../hooks/useDevices';
-import usePublisherContext from '../../../hooks/usePublisherContext';
-import { setStorageItem, STORAGE_KEYS } from '../../../utils/storage';
-import useConfigContext from '../../../hooks/useConfigContext';
-import cleanAndDedupeDeviceLabels from '../../../utils/cleanAndDedupeDeviceLabels';
+import useAppConfig from '@Context/AppConfig/hooks/useAppConfig';
+import useTheme from '@ui/theme';
+import useDevices from '@hooks/useDevices';
+import usePublisherContext from '@hooks/usePublisherContext';
+import { setStorageItem, STORAGE_KEYS } from '@utils/storage';
+import cleanAndDedupeDeviceLabels from '@utils/cleanAndDedupeDeviceLabels';
+import Box from '@ui/Box';
+import Typography from '@ui/Typography';
+import MenuList from '@ui/MenuList';
+import MenuItem from '@ui/MenuItem';
+import VividIcon from '@components/VividIcon';
 
 export type VideoDevicesProps = {
   handleToggle: () => void;
-  customLightBlueColor: string;
 };
 
 /**
@@ -21,20 +23,20 @@ export type VideoDevicesProps = {
  * This component is responsible for rendering the list of video output devices (i.e. web cameras).
  * @param {VideoDevicesProps} props - the props for this component.
  *  @property {() => void} handleToggle - the function that handles the toggle of video output device.
- *  @property {string} customLightBlueColor - the custom color used for the toggled icon.
  * @returns {ReactElement | false} - the video output devices component.
  */
-const VideoDevices = ({
-  handleToggle,
-  customLightBlueColor,
-}: VideoDevicesProps): ReactElement | false => {
+const VideoDevices = ({ handleToggle }: VideoDevicesProps): ReactElement | false => {
   const { t } = useTranslation();
+  const theme = useTheme();
   const { isPublishing, publisher } = usePublisherContext();
-  const { meetingRoomSettings } = useConfigContext();
+
+  const allowDeviceSelection = useAppConfig(
+    ({ meetingRoomSettings }) => meetingRoomSettings.allowDeviceSelection
+  );
+
   const { allMediaDevices } = useDevices();
   const [devicesAvailable, setDevicesAvailable] = useState<Device[]>([]);
   const [options, setOptions] = useState<{ deviceId: string; label: string }[]>([]);
-  const { allowDeviceSelection } = meetingRoomSettings;
 
   const changeVideoSource = (videoDeviceId: string) => {
     publisher?.setVideoSource(videoDeviceId);
@@ -76,10 +78,11 @@ const VideoDevices = ({
             ml: 2,
             mt: 1,
             mb: 0.5,
+            color: theme.colors.tertiary,
           }}
         >
-          <VideocamIcon sx={{ fontSize: 24, mr: 2 }} />
-          <Typography>{t('devices.video.camera.full')}</Typography>
+          <VividIcon name="video-line" customSize={-5} />
+          <Typography sx={{ ml: 2 }}>{t('devices.video.camera.full')}</Typography>
         </Box>
         <MenuList id="split-button-menu">
           {options.map((option) => {
@@ -93,24 +96,34 @@ const VideoDevices = ({
                   backgroundColor: 'transparent',
                   '&.Mui-selected': {
                     backgroundColor: 'transparent',
-                    color: customLightBlueColor,
+                    color: theme.colors.onBackground,
                   },
                   '&:hover': {
-                    backgroundColor: 'rgba(25, 118, 210, 0.12)',
+                    backgroundColor: theme.colors.background,
                   },
                 }}
               >
                 <Box
+                  key={`${option.deviceId}-video-device`}
                   sx={{
+                    color: isSelected ? theme.colors.textPrimary : theme.colors.textSecondary,
                     display: 'flex',
                     mb: 0.5,
                     overflow: 'hidden',
                   }}
                 >
                   {isSelected ? (
-                    <CheckIcon sx={{ color: customLightBlueColor, fontSize: 24, mr: 2 }} />
+                    <Box key={'video-devices-check'} sx={{ mr: 2.5 }}>
+                      <VividIcon
+                        name="check-line"
+                        customSize={-6}
+                        sx={{
+                          color: isSelected ? theme.colors.textPrimary : theme.colors.textSecondary,
+                        }}
+                      />
+                    </Box>
                   ) : (
-                    <Box sx={{ width: 40 }} /> // Placeholder when CheckIcon is not displayed
+                    <Box sx={{ minWidth: 36 }} /> // Placeholder when CheckIcon is not displayed
                   )}
                   <Typography noWrap>{option.label}</Typography>
                 </Box>

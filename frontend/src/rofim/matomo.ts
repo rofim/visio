@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 /* eslint-disable @cspell/spellchecker */
 import environment from './environments';
 

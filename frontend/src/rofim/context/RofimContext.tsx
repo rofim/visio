@@ -19,7 +19,7 @@ const RofimInit = ({ children }: PropsWithChildren) => {
       console.error('Cannot load rofim session token', error);
       navigate('/error');
     }
-
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsInit(true);
   }, [navigate, initSocket]);
 

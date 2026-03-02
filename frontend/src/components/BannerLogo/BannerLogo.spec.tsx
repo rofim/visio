@@ -11,31 +11,20 @@ describe('BannerLogo', () => {
       </MemoryRouter>
     );
 
-    const vonageLogo = screen.getByAltText('Vonage-desktop-logo') as HTMLImageElement;
+    const vonageLogo = screen.getByAltText<HTMLImageElement>('Vonage-desktop-logo');
     expect(vonageLogo).toBeInTheDocument();
     expect(vonageLogo.src).toContain('/images/vonage-logo-desktop.svg');
   });
 
-  it('renders the vonage mobile logo', () => {
+  it('renders clickable logo with cursor pointer', () => {
     render(
       <MemoryRouter>
         <BannerLogo />
       </MemoryRouter>
     );
 
-    const vonageLogo = screen.getByAltText('Vonage-mobile-logo') as HTMLImageElement;
-    expect(vonageLogo).toBeInTheDocument();
-    expect(vonageLogo.src).toContain('/images/vonage-logo-mobile.svg');
-  });
-
-  it('wraps logos in a Link pointing to the landing page', () => {
-    render(
-      <MemoryRouter>
-        <BannerLogo />
-      </MemoryRouter>
-    );
-
-    const link = screen.getByRole('link');
-    expect(link).toHaveAttribute('href', '/');
+    const logo = screen.getByTestId('banner-logo-image');
+    expect(logo).toBeInTheDocument();
+    expect(logo).toHaveStyle({ cursor: 'pointer' });
   });
 });

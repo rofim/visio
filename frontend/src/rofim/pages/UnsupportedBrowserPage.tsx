@@ -1,6 +1,7 @@
 import { ReactElement } from 'react';
 import SupportedBrowsers from '../../components/UnsupportedBrowser/SupportedBrowsers';
 import UnsupportedBrowserMessage from '../../components/UnsupportedBrowser/UnsupportedBrowserMessage';
+import PageLayout from '@ui/PageLayout';
 
 /**
  * UnsupportedBrowserPage
@@ -13,12 +14,12 @@ import UnsupportedBrowserMessage from '../../components/UnsupportedBrowser/Unsup
  */
 const UnsupportedBrowserPage = (): ReactElement => {
   return (
-    <div className="flex size-full flex-col justify-between bg-white">
-      <div className="flex size-full flex-col items-center bg-white md:flex-row md:justify-center">
+    <PageLayout>
+      <PageLayout.Left>
         <UnsupportedBrowserMessage />
         <SupportedBrowsers />
-      </div>
-    </div>
+      </PageLayout.Left>
+    </PageLayout>
   );
 };
 

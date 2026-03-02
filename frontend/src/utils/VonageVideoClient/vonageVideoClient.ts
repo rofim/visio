@@ -21,7 +21,7 @@ import {
 } from '../../types/session';
 import logOnConnect from '../logOnConnect';
 import createMovingAvgAudioLevelTracker from '../movingAverageAudioLevelTracker';
-import idempotentCallbackWithRetry from '../idempotentCallbackWithRetry/idempotentCallbackWithRetry';
+import idempotentCallbackWithRetry from '@common/execution/idempotentCallbackWithRetry';
 
 type VonageVideoClientEvents = {
   archiveStarted: [string];
@@ -55,6 +55,7 @@ type VonageVideoClientEvents = {
 class VonageVideoClient extends EventEmitter<VonageVideoClientEvents> {
   public clientSession: Session | null;
   private readonly credential: Credential;
+  private hiddenSubscriber: Subscriber | null = null;
 
   /**
    * Creates an instance of VonageVideoClient.
@@ -139,12 +140,30 @@ class VonageVideoClient extends EventEmitter<VonageVideoClientEvents> {
           });
         });
 
+      console.warn('[SUBSCRIBER] Subscribing attempt for stream:', streamId);
+
       await idempotentCallbackWithRetry(() => subscribe());
+
+      console.warn('[SUBSCRIBER] Subscribing succeeded for stream:', streamId);
       if (isScreenshare) {
         this.emit('screenshareStreamCreated');
       }
     } catch (syncError) {
-      this.disconnect();
+      // Check if this is a recoverable error that should not disconnect the user
+      const isRecoverableError = this.isRecoverableSubscriptionError(syncError);
+
+      if (isRecoverableError) {
+        console.warn(
+          '[SUBSCRIBER] Recoverable subscription error - stream likely destroyed:',
+          syncError
+        );
+        // Don't emit subscriptionError for recoverable errors
+        // The stream was likely destroyed before subscription completed (e.g., user refreshed)
+        return;
+      }
+
+      // Only emit subscriptionError for critical errors
+      console.error('[SUBSCRIBER] Critical subscription error:', syncError);
       this.handleSubscriptionError(syncError);
     }
   }
@@ -190,6 +209,55 @@ class VonageVideoClient extends EventEmitter<VonageVideoClientEvents> {
       const { logMovingAvg } = getMovingAverageAudioLevel(audioLevel);
       this.emit('subscriberAudioLevelUpdated', { movingAvg: logMovingAvg, subscriberId: streamId });
     });
+  };
+
+  /**
+   * Determines if a subscription error is recoverable and should not disconnect the user.
+   * @param {unknown} error - The subscription error
+   * @returns {boolean} True if the error is recoverable
+   * @private
+   */
+  private isRecoverableSubscriptionError = (error: unknown): boolean => {
+    if (!error || typeof error !== 'object') {
+      return false;
+    }
+
+    const otError = error as { name?: string; message?: string; code?: number };
+
+    // Check by error code
+    const recoverableErrorCodes = [
+      1501, // OT_STREAM_NOT_FOUND
+      1600, // OT_STREAM_DESTROYED
+    ];
+    if (typeof otError.code === 'number' && recoverableErrorCodes.includes(otError.code)) {
+      return true;
+    }
+
+    // Check by error name
+    const recoverableErrorNames = ['OT_STREAM_NOT_FOUND', 'OT_STREAM_DESTROYED'];
+    if (otError.name && recoverableErrorNames.includes(otError.name)) {
+      return true;
+    }
+
+    // Check by error message patterns
+    if (otError.message) {
+      const recoverableMessagePatterns = [
+        'stream not found',
+        'Stream was destroyed before it could be subscribed',
+        'stream was destroyed',
+      ];
+
+      const messageLC = otError.message.toLowerCase();
+      const isRecoverable = recoverableMessagePatterns.some((pattern) =>
+        messageLC.includes(pattern)
+      );
+
+      if (isRecoverable) {
+        return true;
+      }
+    }
+
+    return false;
   };
 
   /**
@@ -294,6 +362,12 @@ class VonageVideoClient extends EventEmitter<VonageVideoClientEvents> {
    * Disconnects from the current session and cleans up the session object.
    */
   disconnect = () => {
+    // Clean up the hidden subscriber used for captions
+    if (this.hiddenSubscriber) {
+      this.clientSession?.unsubscribe(this.hiddenSubscriber);
+      this.hiddenSubscriber = null;
+    }
+
     this.clientSession?.disconnect();
     this.clientSession = null;
   };
@@ -313,23 +387,29 @@ class VonageVideoClient extends EventEmitter<VonageVideoClientEvents> {
    */
   publish = (publisher: Publisher): Promise<void> => {
     return new Promise((resolve, reject) => {
+      if (!this.clientSession) {
+        reject(new Error('Session is not initialized.'));
+        return;
+      }
+
       this.clientSession?.publish(publisher, (error) => {
         if (error) {
-          reject(new Error(`${error.name}: ${error.message}`));
+          const errorName = error.name || 'OTError';
+          const errorMessage = error.message || 'Unknown publish error';
+          reject(new Error(`${errorName}: ${errorMessage}`));
+          return;
         }
 
         // the following is needed for the local subscriber to be able to receive captions
         // More information: https://developer.vonage.com/en/video/guides/live-caption#receiving-your-own-live-captions
         if (publisher.stream) {
-          const hiddenSubscriber = this.clientSession?.subscribe(
-            publisher.stream,
-            document.createElement('div'),
-            {
+          console.warn('[PUBLISHER] autosubscribe user to own captions stream');
+          this.hiddenSubscriber =
+            this.clientSession?.subscribe(publisher.stream, document.createElement('div'), {
               audioVolume: 0,
-            }
-          );
+            }) ?? null;
 
-          hiddenSubscriber?.on('captionReceived', (captionEvent) => {
+          this.hiddenSubscriber?.on('captionReceived', (captionEvent) => {
             this.emit('localCaptionReceived', captionEvent);
           });
         }
@@ -352,6 +432,12 @@ class VonageVideoClient extends EventEmitter<VonageVideoClientEvents> {
    * @param {Publisher} publisher - The publisher object to be unpublished.
    */
   unpublish = (publisher: Publisher) => {
+    // Clean up the hidden subscriber used for captions
+    if (this.hiddenSubscriber) {
+      this.clientSession?.unsubscribe(this.hiddenSubscriber);
+      this.hiddenSubscriber = null;
+    }
+
     this.clientSession?.unpublish(publisher);
   };
 

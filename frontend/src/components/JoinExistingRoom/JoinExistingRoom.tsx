@@ -1,5 +1,6 @@
 import { ReactElement, useState } from 'react';
-import JoinButton from '../JoinButton';
+import Stack from '@ui/Stack';
+import JoinWaitRoomButton from '../JoinWaitRoomButton';
 import RoomNameInput from '../RoomNameInput';
 
 /**
@@ -13,7 +14,7 @@ const JoinExistingRoom = (): ReactElement => {
   const [hasError, setHasError] = useState(false);
 
   return (
-    <form className="mt-[35px] w-72 flex-row" data-testid="JoinExistingRoom">
+    <Stack direction="column" data-testid="JoinExistingRoom" spacing={3} sx={{ width: '100%' }}>
       <RoomNameInput
         setRoomName={setRoomName}
         roomName={roomName}
@@ -21,8 +22,8 @@ const JoinExistingRoom = (): ReactElement => {
         setHasError={setHasError}
       />
 
-      <JoinButton roomName={roomName} isDisabled={hasError} />
-    </form>
+      <JoinWaitRoomButton roomName={roomName} isDisabled={false} setHasError={setHasError} />
+    </Stack>
   );
 };
 

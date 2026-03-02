@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 /* eslint-disable @cspell/spellchecker */
 import { useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
@@ -14,6 +13,15 @@ import {
 } from '../atoms/webSocketAtoms';
 
 let socket: Socket | null = null;
+
+declare global {
+  interface Window {
+    _paq: {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      push: (args: any[]) => void;
+    };
+  }
+}
 
 const sendMatomoReconnectEvent = () => {
   window?._paq.push(['trackEvent', 'Websocket', 'Reconnected', 'TLC Patient - Vonage']);
@@ -53,8 +61,8 @@ const useWebSocket = (shouldLogToMatomo: boolean = false) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onMessage = (event: any, rofimSesion: RofimSession) => {
     if (event.channel === 'teleconsultation:doctor:add-delay') {
-      setDoctorDelayInMinute(event.content.doctorDelayInMinute);
-      setStartTime(new Date(event.content.startTime).getTime());
+      setDoctorDelayInMinute(event.content.doctorDelayInMinute as number);
+      setStartTime(new Date(event.content.startTime as string).getTime());
     }
 
     if (

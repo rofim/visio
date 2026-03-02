@@ -14,7 +14,6 @@
     "project": [
       "./backend/tsconfig.json",
       "./frontend/tsconfig.json",
-      "./integration-tests/tsconfig.json"
     ]
   },
   "plugins": [

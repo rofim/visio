@@ -1,5 +1,8 @@
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
+import Stack from '@ui/Stack';
+import Typography from '@ui/Typography';
+import useTheme from '@ui/theme';
 import Separator from '../Separator';
 
 /**
@@ -10,12 +13,22 @@ import Separator from '../Separator';
  */
 const JoinContainerSeparator = (): ReactElement => {
   const { t } = useTranslation();
+  const theme = useTheme();
+
   return (
-    <div className="flex w-full items-center">
+    <Stack direction="row" alignItems="center" width="100%" sx={{ my: 4 }}>
       <Separator orientation="left" />
-      {t('common.or')}
+      <Typography
+        variant="body2"
+        sx={{
+          color: theme.colors.textTertiary,
+          mx: 2,
+        }}
+      >
+        {t('common.or')}
+      </Typography>
       <Separator orientation="right" />
-    </div>
+    </Stack>
   );
 };
 
