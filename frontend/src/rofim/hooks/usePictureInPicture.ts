@@ -1,6 +1,7 @@
 /* eslint @cspell/spellchecker: 0 */
+/* eslint @typescript-eslint/no-floating-promises: 0 */
 import { RefObject, useEffect, useRef, useState } from 'react';
-import html2canvas from 'html2canvas';
+import html2canvas from 'html2canvas-pro';
 import useSessionContext from '../../hooks/useSessionContext';
 import usePublisherContext from '../../hooks/usePublisherContext';
 import { SubscriberWrapper } from '../../types/session';
@@ -20,7 +21,7 @@ const drawAvatarToCanvas = async (
       // On copie l'élement dans une nouvelle div qu'on va resize et afficher en arrière plan (z-index -1000)
       const copy = document.createElement('div');
       copy.appendChild(avatarElement?.cloneNode(true));
-      copy.classList.add('avatar-canvas', 'bg-notVeryGray-100');
+      copy.classList.add('avatar-canvas');
       document.body.appendChild(copy);
 
       // On transforme ce composant en canvas
@@ -47,7 +48,6 @@ const usePictureInPicture = () => {
     null
   );
   const [isSuscriberVideoEnabled, setIsSuscriberVideoEnabled] = useState(false);
-
   const [isPipActive, setIsPipActive] = useState(false);
 
   const pipVideoRef = useRef(document.createElement('video'));

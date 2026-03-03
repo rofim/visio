@@ -8,8 +8,8 @@
   .publisher {
     margin: 0px !important;
     position: absolute !important;
-    top: 0px !important;
-    left: 0px !important;
+    top: -4px !important;
+    left: -4px !important;
     width: 100% !important;
     height: 100% !important;
   }
@@ -22,16 +22,6 @@
 
   div .text-sm {
     font-size: 20px;
-  }
-
-  /* Replace outlines by borders so canvas can capture active speacker visual */
-  .outline,
-  .outline-2 {
-    @apply border-4 outline-none;
-  }
-
-  .outline-sky-500 {
-    @apply border-sky-500;
   }
 
   /* Replace border radius to match PiP Window */

@@ -1,7 +1,7 @@
 {
   "name": "frontend",
-  "version": "1.4.0",
-  "type": "module",
+  "version": "1.4.1",
   "private": true,
-  "description": "React reference application for the Vonage Video web client SDK."
+  "description": "React reference application for the Vonage Video web client SDK.",
+  "type": "module"
 }

@@ -1,13 +1,10 @@
-import { afterEach, beforeEach, describe, expect, it, Mock, vi } from 'vitest';
-import { cleanup, render, screen, within } from '@testing-library/react';
-import { SessionContextType } from '../../../Context/SessionProvider/session';
-import useSessionContext from '../../../hooks/useSessionContext';
+import { afterEach, describe, expect, it } from 'vitest';
+import { cleanup, render as renderBase, screen, within } from '@testing-library/react';
+import { ReactElement } from 'react';
 import Chat from './Chat';
 import { ChatMessageType } from '../../../types/chat';
-
-vi.mock('../../../hooks/useSessionContext.tsx');
-vi.mock('../../../hooks/useUserContext');
-const mockUseSessionContext = useSessionContext as Mock<[], SessionContextType>;
+import { makeTestProvider, providers, ProviderOptions } from '@test/providers';
+import { SessionContextType } from '../../../Context/SessionProvider/session';
 
 const testMessages: ChatMessageType[] = [
   {
@@ -33,20 +30,20 @@ const testMessages: ChatMessageType[] = [
 ];
 
 describe('Chat', () => {
-  let sessionContext: SessionContextType;
-
-  beforeEach(() => {
-    sessionContext = {
-      messages: testMessages,
-    } as unknown as SessionContextType;
-    mockUseSessionContext.mockReturnValue(sessionContext as unknown as SessionContextType);
-  });
   afterEach(() => {
     cleanup();
   });
 
   it('should display messages', () => {
-    render(<Chat handleClose={() => {}} isOpen />);
+    render(<Chat handleClose={() => {}} isOpen />, {
+      sessionContext: {
+        __interceptor: (context: SessionContextType) => {
+          if (context) {
+            context.messages = testMessages;
+          }
+        },
+      },
+    });
 
     const chatMessages = screen.getAllByTestId('chat-message');
     expect(chatMessages.length).toBe(4);
@@ -60,3 +57,28 @@ describe('Chat', () => {
     expect(chatMessages[0].textContent).toMatch('Hello all');
   });
 });
+
+type RenderOptions = {
+  sessionContext?: ProviderOptions['SessionContext'];
+  appConfigContext?: ProviderOptions['AppConfigContext'];
+  userContext?: ProviderOptions['UserContext'];
+};
+
+function render(
+  ui: ReactElement,
+  { sessionContext, appConfigContext, userContext }: RenderOptions = {}
+) {
+  const { wrapper, ...context } = makeTestProvider(
+    [providers.appConfig, providers.user, providers.session],
+    {
+      sessionContext,
+      appConfigContext,
+      userContext,
+    }
+  );
+
+  return {
+    ...context,
+    ...renderBase(ui, { wrapper }),
+  };
+}

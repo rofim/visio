@@ -1,85 +1,132 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render as renderBase, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { ReactElement } from 'react';
 import EffectOptionButtons from './EffectOptionButtons';
-import useBackgroundPublisherContext from '@hooks/useBackgroundPublisherContext';
-
-vi.mock('@hooks/useBackgroundPublisherContext');
+import { makeTestProvider, providers, type ProviderOptions } from '@test/providers';
+import { setupWindowNavigatorMock, makeMediaStreamMock } from '@web-test/fixtures';
 
 describe('EffectOptionButtons', () => {
   const mockHandleBackgroundChange = vi.fn();
-  const mockHandleAddCustomImage = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useBackgroundPublisherContext).mockReturnValue({
-      backgroundSelected: 'none',
-      handleBackgroundChange: mockHandleBackgroundChange,
-      handleAddCustomImage: mockHandleAddCustomImage,
-      customImages: [],
-      deleteCustomImage: vi.fn(),
-      isPublishing: false,
-      isVideoEnabled: true,
-      publisher: null,
-      publisherVideoElement: undefined,
-      destroyBackgroundPublisher: vi.fn(),
-      toggleVideo: vi.fn(),
-      changeBackground: vi.fn(),
-      backgroundFilter: undefined,
-      localVideoSource: undefined,
-      accessStatus: null,
-      changeVideoSource: vi.fn(),
-      initBackgroundLocalPublisher: vi.fn(),
-      addCustomImage: vi.fn(),
-      setBackgroundSelected: vi.fn(),
+
+    setupWindowNavigatorMock({
+      mediaDevices: {
+        addEventListener: vi.fn(),
+        enumerateDevices: Promise.resolve([]),
+        getUserMedia: Promise.resolve(
+          makeMediaStreamMock({
+            getVideoTracks: [],
+            getAudioTracks: [],
+          })
+        ),
+      },
+    });
+
+    const { permissions } = globalThis.navigator;
+
+    vi.spyOn(permissions, 'query').mockResolvedValue({ state: 'granted' } as PermissionStatus);
+  });
+
+  it('renders all effect options', async () => {
+    render(<EffectOptionButtons />);
+    await waitFor(() => {
+      expect(screen.getByTestId('vivid-icon-remove-line')).toBeInTheDocument();
+      expect(screen.getByTestId('vivid-icon-blur-line')).toBeInTheDocument();
+      expect(screen.getByTestId('vivid-icon-blur-solid')).toBeInTheDocument();
     });
   });
 
-  it('renders all effect options', () => {
-    render(<EffectOptionButtons />);
-    expect(screen.getByTestId('vivid-icon-remove-line')).toBeInTheDocument();
-    expect(screen.getByTestId('vivid-icon-blur-line')).toBeInTheDocument();
-    expect(screen.getByTestId('vivid-icon-blur-solid')).toBeInTheDocument();
-  });
-
-  it('marks the selected option as selected', () => {
-    vi.mocked(useBackgroundPublisherContext).mockReturnValue({
-      backgroundSelected: 'low-blur',
-      handleBackgroundChange: mockHandleBackgroundChange,
-      handleAddCustomImage: mockHandleAddCustomImage,
-      customImages: [],
-      deleteCustomImage: vi.fn(),
-      isPublishing: false,
-      isVideoEnabled: true,
-      publisher: null,
-      publisherVideoElement: undefined,
-      destroyBackgroundPublisher: vi.fn(),
-      toggleVideo: vi.fn(),
-      changeBackground: vi.fn(),
-      backgroundFilter: undefined,
-      localVideoSource: undefined,
-      accessStatus: null,
-      changeVideoSource: vi.fn(),
-      initBackgroundLocalPublisher: vi.fn(),
-      addCustomImage: vi.fn(),
-      setBackgroundSelected: vi.fn(),
+  it('marks the selected option as selected', async () => {
+    render(<EffectOptionButtons />, {
+      backgroundPublisherContext: {
+        __onCreated: (context) => {
+          context.backgroundSelected = 'low-blur';
+        },
+      },
     });
-    render(<EffectOptionButtons />);
-    const selectedOption = screen.getByTestId('background-low-blur');
-    expect(selectedOption).toBeInTheDocument();
+    await waitFor(() => {
+      const selectedOption = screen.getByTestId('background-low-blur');
+      expect(selectedOption).toBeInTheDocument();
+    });
   });
 
   it('sets the selected background', async () => {
-    render(<EffectOptionButtons />);
+    render(<EffectOptionButtons />, {
+      backgroundPublisherContext: {
+        __interceptor: (context) => {
+          context.handleBackgroundChange = mockHandleBackgroundChange;
+        },
+      },
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('background-low-blur')).toBeInTheDocument();
+    });
     const lowBlur = screen.getByTestId('background-low-blur');
     await userEvent.click(lowBlur);
-    expect(mockHandleBackgroundChange).toHaveBeenCalledWith('low-blur');
+    await waitFor(() => {
+      expect(mockHandleBackgroundChange).toHaveBeenCalledWith('low-blur');
+    });
   });
 
-  it('sets the selected background with high blur', async () => {
-    render(<EffectOptionButtons />);
+  it('sets the selected background with high blur-sm', async () => {
+    render(<EffectOptionButtons />, {
+      backgroundPublisherContext: {
+        __interceptor: (context) => {
+          context.handleBackgroundChange = mockHandleBackgroundChange;
+        },
+      },
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('background-high-blur')).toBeInTheDocument();
+    });
     const highBlur = screen.getByTestId('background-high-blur');
     await userEvent.click(highBlur);
-    expect(mockHandleBackgroundChange).toHaveBeenCalledWith('high-blur');
+    await waitFor(() => {
+      expect(mockHandleBackgroundChange).toHaveBeenCalledWith('high-blur');
+    });
   });
 });
+
+type RenderOptions = {
+  appConfigContext?: ProviderOptions['AppConfigContext'];
+  userContext?: ProviderOptions['UserContext'];
+  sessionContext?: ProviderOptions['SessionContext'];
+  publisherContext?: ProviderOptions['PublisherContext'];
+  backgroundPublisherContext?: ProviderOptions['BackgroundPublisherContext'];
+};
+
+function render(
+  ui: ReactElement,
+  {
+    appConfigContext,
+    userContext,
+    sessionContext,
+    publisherContext,
+    backgroundPublisherContext,
+  }: RenderOptions = {}
+) {
+  const { wrapper, ...context } = makeTestProvider(
+    [
+      providers.appConfig,
+      providers.user,
+      providers.session,
+      providers.publisher,
+      providers.backgroundPublisher,
+    ],
+    {
+      appConfigContext,
+      userContext,
+      sessionContext,
+      publisherContext,
+      backgroundPublisherContext,
+    }
+  );
+
+  return {
+    ...context,
+    ...renderBase(ui, { wrapper }),
+  };
+}

@@ -25,7 +25,7 @@ export const DEVICE_ACCESS_STATUS = {
 /**
  * @constant {string} TEXT_SHADOW - The text shadow style used for display purposes.
  */
-export const TEXT_SHADOW = '[text-shadow:_0_1px_2px_rgb(0_0_0_/_60%)]';
+export const TEXT_SHADOW = '[text-shadow:0_1px_2px_rgb(0_0_0/60%)]';
 
 /**
  * @constant {number} EMOJI_DISPLAY_DURATION - The duration in milliseconds for which emojis are displayed.
@@ -124,7 +124,7 @@ export const TABLET_VIEWPORT = 899;
 /*
  * @constant {number} VIDEO_CONTAINER_HEIGHT_WR - The fixed height for the video container in the waiting room.
  */
-export const VIDEO_CONTAINER_HEIGHT_WR = 335;
+export const VIDEO_CONTAINER_HEIGHT_WR = 360;
 
 /*
  * @constant {number} VIDEO_CONTAINER_BUTTON_SIZE_WR - The fixed height for the video container buttons in the waiting room.
@@ -177,3 +177,8 @@ export const MAX_ZOOM = 5;
  * This value determines how much the zoom level changes with each zoom action (e.g., mouse wheel event).
  */
 export const ZOOM_STEP = 0.25;
+
+/** @constant {number} ABSOLUTE_DISTANCE_THRESHOLD_REM_VALUE - The distance threshold used for absolute positioning of subscriber/publisher UI indicators.
+ * This value is defined in rem units to ensure responsiveness across different screen sizes.
+ */
+export const ABSOLUTE_DISTANCE_THRESHOLD_REM_VALUE = 0.75;

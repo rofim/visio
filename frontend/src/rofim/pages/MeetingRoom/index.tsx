@@ -1,4 +1,6 @@
 /* eslint-disable @cspell/spellchecker */
+/* eslint @typescript-eslint/no-floating-promises: 0 */
+
 import { useEffect } from 'react';
 import VonageRoom from '../../../pages/MeetingRoom';
 import RofimApiService, { WaitingRoomStatus } from '../../api/rofimApi';

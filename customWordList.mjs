@@ -1,4 +1,7 @@
 const customWordList = [
+  'Rofim',
+  'preprod',
+  'visio',
   'Opentok',
   'Vonage',
   'screensharing',
@@ -12,10 +15,12 @@ const customWordList = [
   'applinks',
   'precall',
   'Precall',
-  'supportedLngs',
-  'Rofim',
-  'preprod',
-  'visio',
+  'Rendererable',
+  'Hydrateable',
+  'firefoxUserPrefs',
+  'gollum',
+  'PWDEBUG',
+  'unstub',
 ];
 
 export default customWordList;

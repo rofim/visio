@@ -1,3 +1,4 @@
+/* eslint @typescript-eslint/no-floating-promises: 0 */
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
@@ -13,6 +14,10 @@ i18n
     fallbackLng: environment.i18n.defaultLanguage ?? 'fr',
     supportedLngs: environment.i18n.supportedLanguages ?? ['fr'],
     resources,
+    /**
+     * Suppress the warning about using the fallback language when a translation key is missing in the current language.
+     */
+    showSupportNotice: false,
   });
 
 export default i18n;

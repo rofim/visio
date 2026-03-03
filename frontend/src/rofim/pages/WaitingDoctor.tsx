@@ -1,4 +1,6 @@
 /* eslint-disable @cspell/spellchecker */
+/* eslint @typescript-eslint/no-floating-promises: 0 */
+
 import { ReactElement, useEffect, useState } from 'react';
 import LocalPhoneIcon from '@mui/icons-material/LocalPhone';
 import { useNavigate } from 'react-router-dom';
@@ -10,12 +12,12 @@ import { getFormattedTime } from '../../utils/dateTime';
 import { canJoinVisioAtom, doctorDelayAtom, tcStartTimeAtom } from '../atoms/webSocketAtoms';
 import useWebSocket from '../hooks/useWebSocket';
 import useNetworkStatus from '../hooks/useNetworkStatus';
-import Box from '@ui/Box';
+import Box from '@mui/material/Box';
 import PageLayout from '@ui/PageLayout';
-import Typography from '@ui/Typography';
+import Typography from '@mui/material/Typography';
 import useTheme from '@ui/theme';
-import Fade from '@ui/Fade';
-import Alert from '@ui/Alert';
+import Fade from '@mui/material/Fade';
+import Alert from '@mui/material/Alert';
 
 const WaitingRoom = (): ReactElement => {
   const { t, i18n } = useTranslation();
@@ -167,7 +169,7 @@ const WaitingRoom = (): ReactElement => {
                 </Alert>
               )}
 
-              <img src="images/medecin.png" alt="doctor" className="size-[120px]" />
+              <img src="images/medecin.png" alt="doctor" className="size-30 justify-self-center" />
 
               <Typography
                 variant="h2"

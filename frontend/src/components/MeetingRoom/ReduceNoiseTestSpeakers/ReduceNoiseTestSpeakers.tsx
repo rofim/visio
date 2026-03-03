@@ -3,19 +3,19 @@ import { hasMediaProcessorSupport } from '@vonage/client-sdk-video';
 import ToggleOffIcon from '@mui/icons-material/ToggleOff';
 import ToggleOnIcon from '@mui/icons-material/ToggleOn';
 import { useTranslation } from 'react-i18next';
-import useAppConfig from '@Context/AppConfig/hooks/useAppConfig';
+import appConfig$ from '@stores/appConfig';
 import useTheme from '@ui/theme';
 import usePublisherContext from '@hooks/usePublisherContext';
 import { setStorageItem, STORAGE_KEYS } from '@utils/storage';
 import DropdownSeparator from '../DropdownSeparator';
 import SoundTest from '../../SoundTest';
-import MenuList from '@ui/MenuList';
-import MenuItem from '@ui/MenuItem';
-import IconButton from '@ui/IconButton';
-import Typography from '@ui/Typography';
-import Grow from '@ui/Grow';
+import MenuList from '@mui/material/MenuList';
+import MenuItem from '@mui/material/MenuItem';
+import IconButton from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
+import Grow from '@mui/material/Grow';
 import VividIcon from '@components/VividIcon';
-import Box from '@ui/Box';
+import Box from '@mui/material/Box';
 
 /**
  * ReduceNoiseTestSpeakers Component
@@ -29,7 +29,7 @@ const ReduceNoiseTestSpeakers = (): ReactElement | false => {
   const theme = useTheme();
   const { publisher, isPublishing } = usePublisherContext();
 
-  const allowAdvancedNoiseSuppression = useAppConfig(
+  const allowAdvancedNoiseSuppression = appConfig$.use.select(
     ({ audioSettings }) => audioSettings.allowAdvancedNoiseSuppression
   );
 
@@ -50,6 +50,7 @@ const ReduceNoiseTestSpeakers = (): ReactElement | false => {
   useEffect(() => {
     if (isPublishing) {
       const audioFilter = publisher?.getAudioFilter();
+
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsToggled(audioFilter !== null);
     }

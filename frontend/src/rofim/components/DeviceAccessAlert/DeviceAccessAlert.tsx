@@ -1,10 +1,10 @@
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DEVICE_ACCESS_STATUS } from '../../../utils/constants';
-import Alert from '@ui/Alert';
-import Dialog from '@ui/Dialog';
-import Stack from '@ui/Stack';
-import AlertTitle from '@ui/AlertTitle';
+import Alert from '@mui/material/Alert';
+import Dialog from '@mui/material/Dialog';
+import Stack from '@mui/material/Stack';
+import AlertTitle from '@mui/material/AlertTitle';
 
 export type DeviceAccessAlertProps = {
   accessStatus: string | null;
@@ -43,7 +43,7 @@ const DeviceAccessAlert = ({ accessStatus }: DeviceAccessAlertProps): ReactEleme
     >
       {accessStatus && (
         <Dialog open>
-          <Alert severity={severity} variant="outlined" sx={{ width: '100%' }}>
+          <Alert severity={severity} sx={{ width: '100%' }}>
             <AlertTitle>{messageToDisplay}</AlertTitle>
           </Alert>
         </Dialog>

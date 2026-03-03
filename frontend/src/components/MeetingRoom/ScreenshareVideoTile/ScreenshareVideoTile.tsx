@@ -14,7 +14,7 @@ import getBoxStyle from '../../../utils/helpers/getBoxStyle';
 import ZoomIndicator from '../ZoomIndicator';
 import { MAX_ZOOM, MIN_ZOOM, ZOOM_STEP } from '../../../utils/constants';
 import useTheme from '@ui/theme';
-import CustomBox from '@ui/Box';
+import CustomBox from '@mui/material/Box';
 
 export type ScreenshareVideoTileProps = {
   'data-testid': string;
@@ -168,7 +168,6 @@ const ScreenshareVideoTile = forwardRef(
         data-testid={dataTestId}
         sx={{
           position: 'absolute',
-          m: 1,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -191,7 +190,7 @@ const ScreenshareVideoTile = forwardRef(
           sx={{
             position: 'relative',
             left: 0,
-            top: 0,
+            top: '-4px',
             width: '100%',
             height: '100%',
             overflow: 'hidden',

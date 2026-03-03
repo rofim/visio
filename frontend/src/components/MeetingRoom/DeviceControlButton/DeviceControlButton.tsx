@@ -1,18 +1,17 @@
 import { useState, useRef, useCallback, ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
-import useIsMicrophoneControlAllowed from '@Context/AppConfig/hooks/useIsMicrophoneControlAllowed';
-import useIsCameraControlAllowed from '@Context/AppConfig/hooks/useIsCameraControlAllowed';
+import appConfig$ from '@stores/appConfig';
 import usePublisherContext from '@hooks/usePublisherContext';
 import useBackgroundPublisherContext from '@hooks/useBackgroundPublisherContext';
 import getControlButtonTooltip from '@utils/getControlButtonTooltip';
 import useTheme from '@ui/theme';
 import DeviceSettingsMenu from '../DeviceSettingsMenu';
 import MutedAlert from '../../MutedAlert';
-import ButtonGroup from '@ui/ButtonGroup';
-import IconButton from '@ui/IconButton';
-import Tooltip from '@ui/Tooltip';
+import ButtonGroup from '@mui/material/ButtonGroup';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
 import VividIcon from '@components/VividIcon';
-import Box from '@ui/Box';
+import Box from '@mui/material/Box';
 import usePushToTalk from '@hooks/usePushToTalk';
 
 export type DeviceControlButtonProps = {
@@ -39,8 +38,8 @@ const DeviceControlButton = ({
   const { toggleVideo: toggleBackgroundVideoPublisher } = useBackgroundPublisherContext();
   const theme = useTheme();
 
-  const isMicrophoneControlAllowed = useIsMicrophoneControlAllowed();
-  const isCameraControlAllowed = useIsCameraControlAllowed();
+  const isMicrophoneControlAllowed = appConfig$.useIsMicrophoneControlAllowed();
+  const isCameraControlAllowed = appConfig$.useIsCameraControlAllowed();
 
   const isAudio = deviceType === 'audio';
   const [open, setOpen] = useState<boolean>(false);

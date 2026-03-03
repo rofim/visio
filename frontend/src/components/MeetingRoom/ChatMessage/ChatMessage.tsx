@@ -2,10 +2,10 @@ import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getFormattedTime } from '../../../utils/dateTime';
 import FormattedMessageBody from '../FormattedMessageBody';
-import ListItem from '@ui/ListItem';
-import ListItemText from '@ui/ListItemText';
-import Avatar from '@ui/Avatar';
-import Typography from '@ui/Typography';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import Avatar from '@mui/material/Avatar';
+import Typography from '@mui/material/Typography';
 import useTheme from '@ui/theme';
 
 export type ChatMessageProps = {
@@ -76,6 +76,7 @@ const ChatMessage = ({
         secondary={
           <Typography
             variant="body2"
+            component="span"
             sx={{ color: theme.colors.textSecondary, overflowWrap: 'break-word' }}
             data-testid="chat-msg-content"
           >

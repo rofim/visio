@@ -1,5 +1,5 @@
 /* eslint-disable @cspell/spellchecker */
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, FutureConfig } from 'react-router-dom';
 import '../css/App.css';
 import './css/index.css';
 import React from 'react';
@@ -10,65 +10,98 @@ import SessionProvider from '../Context/SessionProvider/session';
 import { PreviewPublisherProvider } from '../Context/PreviewPublisherProvider';
 import { PublisherProvider } from '../Context/PublisherProvider';
 import UnsupportedBrowserPage from './pages/UnsupportedBrowserPage';
-import RoomContext from '../Context/RoomContext';
 import RofimInit from './context/RofimContext';
 import ErrorPage from './pages/ErrorPage';
 import GoodBye from './pages/GoodBye';
 import initMatomo from './matomo';
-import { ThemeProvider } from '@ui/theme';
-import getTokensByMode from '@ui/theme/helpers/getTokensByMode';
+import RedirectToUnsupportedBrowserPage from '@components/RedirectToUnsupportedBrowserPage';
+import AppContextProvider from '../AppContextProvider';
+import { DeepPartial } from '@app-types';
+import { AppConfig } from '@stores/appConfig';
+import useTheme from '@ui/theme';
+import { Box } from '@mui/material';
+import SuspenseBoundary from '@web/components/SuspenseBoundary';
+import WaitingRoomSkeleton from '@pages/WaitingRoom/WaitingRoom.skeleton';
+import RoomProvider from '@Context/RoomProvider';
+import MeetingRoomSkeleton from '@pages/MeetingRoom/MeetingRoom.skeleton';
 
-const App = () => {
+const futureConfig: Partial<FutureConfig> = {
+  /**
+   * Enable relative splat paths to ensure that dynamic imports in the app work correctly regardless of the base path.
+   */
+  v7_relativeSplatPath: true,
+  v7_startTransition: true,
+};
+
+const InnerApp = () => {
+  const theme = useTheme();
+
   React.useEffect(() => {
     initMatomo();
   }, []);
 
   return (
-    <Router>
-      <RofimInit>
-        <Routes>
-          <Route element={<RoomContext />}>
-            <Route
-              path="/"
-              element={
-                <PreviewPublisherProvider>
-                  <EquipmentsTestRoom />
-                </PreviewPublisherProvider>
-              }
-            />
-            <Route path="/waiting-room" element={<WaitingRoom />} />
-            <Route
-              path="/room/:roomName"
-              element={
-                <SessionProvider>
-                  <PublisherProvider>
-                    <Room />
-                  </PublisherProvider>
-                </SessionProvider>
-              }
-            />
-          </Route>
-          <Route path="*" element={<Navigate to="/" replace />} />
-          <Route path="/goodbye" element={<GoodBye />} />
-          <Route path="/unsupported-browser" element={<UnsupportedBrowserPage />} />
-          <Route path="/error" element={<ErrorPage />} />
-        </Routes>
-      </RofimInit>
-    </Router>
-  );
-};
-
-const AppWrapper = () => {
-  return (
-    <ThemeProvider
-      theme={{
-        lightMode: getTokensByMode('light'),
-        darkMode: getTokensByMode('light'),
+    <Box
+      sx={{
+        backgroundColor: theme.colors.surface,
+        position: 'relative',
+        overflowX: 'hidden',
+        overflowY: 'auto',
+        height: '100dvh',
       }}
     >
-      <App />
-    </ThemeProvider>
+      <Router future={futureConfig}>
+        <RofimInit>
+          <Routes>
+            <Route element={<RedirectToUnsupportedBrowserPage />}>
+              <Route
+                path="/"
+                element={
+                  <SuspenseBoundary fallback={<WaitingRoomSkeleton />}>
+                    <RoomProvider>
+                      <PreviewPublisherProvider>
+                        <EquipmentsTestRoom />
+                      </PreviewPublisherProvider>
+                    </RoomProvider>
+                  </SuspenseBoundary>
+                }
+              />
+              <Route path="/waiting-room" element={<WaitingRoom />} />
+              <Route
+                path="/room/:roomName"
+                element={
+                  <SuspenseBoundary fallback={<MeetingRoomSkeleton />}>
+                    <RoomProvider>
+                      <SessionProvider>
+                        <PublisherProvider>
+                          <Room />
+                        </PublisherProvider>
+                      </SessionProvider>
+                    </RoomProvider>
+                  </SuspenseBoundary>
+                }
+              />
+            </Route>
+            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="/goodbye" element={<GoodBye />} />
+            <Route path="/unsupported-browser" element={<UnsupportedBrowserPage />} />
+            <Route path="/error" element={<ErrorPage />} />
+          </Routes>
+        </RofimInit>
+      </Router>
+    </Box>
   );
 };
 
-export default AppWrapper;
+/**
+ * The wrapper is necessary temporarily since app also need to have access to theme context.
+ */
+const App = ({ appConfigValue }: { appConfigValue?: DeepPartial<AppConfig> }) => {
+  return (
+    <AppContextProvider appConfigValue={appConfigValue}>
+      <InnerApp />
+    </AppContextProvider>
+  );
+};
+
+export default App;

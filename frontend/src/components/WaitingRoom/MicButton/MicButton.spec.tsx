@@ -1,49 +1,97 @@
-import { render as renderBase, screen, fireEvent } from '@testing-library/react';
+import { render as renderBase, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ReactElement } from 'react';
-import { AppConfigProviderWrapperOptions, makeAppConfigProviderWrapper } from '@test/providers';
+import { makeTestProvider, providers, ProviderOptions } from '@test/providers';
 import MicButton from './MicButton';
+import SuspenseBoundary from '@web/components/SuspenseBoundary/SuspenseBoundary';
+import composeProviders from '@web/helpers/composeProviders';
+import {
+  setupWindowNavigatorMock,
+  makeMediaStreamMock,
+  makeMediaDeviceInfos,
+} from '@web-test/fixtures';
+import { mediaDevices$ } from '@core/stores';
 
-let isAudioEnabled = true;
-const toggleAudioMock = vi.fn();
-
-vi.mock('../../../hooks/usePreviewPublisherContext', () => {
-  return {
-    default: () => ({
-      get isAudioEnabled() {
-        return isAudioEnabled;
-      },
-      toggleAudio: toggleAudioMock,
-    }),
-  };
-});
+const mockDevices = makeMediaDeviceInfos();
 
 describe('MicButton', () => {
   beforeEach(() => {
-    isAudioEnabled = true;
+    vi.clearAllMocks();
+
+    setupWindowNavigatorMock({
+      mediaDevices: {
+        addEventListener: vi.fn(),
+        enumerateDevices: Promise.resolve(mockDevices),
+        getUserMedia: Promise.resolve(makeMediaStreamMock({})),
+      },
+    });
+
+    // Initialize the mediaDevices$ store with mock devices to prevent useSyncPublisherDevices from disabling audio
+    mediaDevices$.setState((state) => ({
+      ...state,
+      mediaDeviceInfo: mockDevices,
+    }));
+
+    const { permissions } = globalThis.navigator;
+
+    vi.spyOn(permissions, 'query').mockResolvedValue({ state: 'granted' } as PermissionStatus);
   });
 
-  it('renders the mic on icon when audio is enabled', () => {
-    render(<MicButton />);
-    expect(screen.getByTestId('vivid-icon-microphone-line')).toBeInTheDocument();
-  });
-
-  it('renders the mic off icon when audio is disabled', () => {
-    isAudioEnabled = false;
-    render(<MicButton />);
-    expect(screen.getByTestId('vivid-icon-mic-mute-line')).toBeInTheDocument();
-  });
-
-  it('calls toggleAudio when clicked', () => {
-    render(<MicButton />);
-    fireEvent.click(screen.getByRole('button'));
-    expect(toggleAudioMock).toHaveBeenCalled();
-  });
-
-  it('is not rendered when allowMicrophoneControl is false', () => {
+  it('renders the mic on icon when audio is enabled', async () => {
     render(<MicButton />, {
-      appConfigOptions: {
+      previewPublisherContext: {
+        __onCreated: (context) => {
+          context.isAudioEnabled = true;
+        },
+      },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('vivid-icon-microphone-line')).toBeInTheDocument();
+    });
+  });
+
+  it('renders the mic off icon when audio is disabled', async () => {
+    render(<MicButton />, {
+      previewPublisherContext: {
+        __onCreated: (context) => {
+          context.isAudioEnabled = false;
+        },
+      },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('vivid-icon-mic-mute-line')).toBeInTheDocument();
+    });
+  });
+
+  it('calls toggleAudio when clicked', async () => {
+    const toggleAudioMock = vi.fn();
+    render(<MicButton />, {
+      previewPublisherContext: {
+        __onCreated: (context) => {
+          context.isAudioEnabled = true;
+          const originalToggle = context.toggleAudio.bind(context);
+          context.toggleAudio = () => {
+            toggleAudioMock();
+            return originalToggle();
+          };
+        },
+      },
+    });
+
+    fireEvent.click(screen.getByRole('button'));
+
+    await waitFor(() => {
+      expect(toggleAudioMock).toHaveBeenCalled();
+    });
+  });
+
+  it('is not rendered when allowMicrophoneControl is false', async () => {
+    render(<MicButton />, {
+      appConfigContext: {
         value: {
+          isAppConfigLoaded: true,
           audioSettings: {
             allowMicrophoneControl: false,
           },
@@ -51,17 +99,35 @@ describe('MicButton', () => {
       },
     });
 
-    expect(screen.queryByTestId('vivid-icon-microphone-line')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByTestId('vivid-icon-microphone-line')).not.toBeInTheDocument();
+    });
   });
 });
 
+type RenderOptions = {
+  appConfigContext?: ProviderOptions['AppConfigContext'];
+  userContext?: ProviderOptions['UserContext'];
+  previewPublisherContext?: ProviderOptions['PreviewPublisherContext'];
+};
+
 function render(
   ui: ReactElement,
-  options?: {
-    appConfigOptions?: AppConfigProviderWrapperOptions;
-  }
+  { appConfigContext, userContext, previewPublisherContext }: RenderOptions = {}
 ) {
-  const { AppConfigWrapper } = makeAppConfigProviderWrapper(options?.appConfigOptions);
+  const { wrapper: MainWrapper, ...context } = makeTestProvider(
+    [providers.appConfig, providers.user, providers.previewPublisher],
+    {
+      appConfigContext,
+      userContext,
+      previewPublisherContext,
+    }
+  );
 
-  return renderBase(ui, { ...options, wrapper: AppConfigWrapper });
+  const wrapper = composeProviders(SuspenseBoundary, MainWrapper);
+
+  return {
+    ...context,
+    ...renderBase(ui, { wrapper }),
+  };
 }

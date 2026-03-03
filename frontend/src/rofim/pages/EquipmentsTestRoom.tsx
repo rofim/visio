@@ -1,25 +1,31 @@
 /* eslint-disable @cspell/spellchecker */
+/* eslint @typescript-eslint/no-floating-promises: 0 */
 
-import { useState, useEffect, MouseEvent, ReactElement, TouchEvent } from 'react';
-import Box from '@ui/Box';
+import { useState, useEffect, MouseEvent, TouchEvent, FC } from 'react';
+import Box from '@mui/material/Box';
+import { BoxProps } from '@mui/material';
 import PageLayout from '@ui/PageLayout';
 import usePreviewPublisherContext from '../../hooks/usePreviewPublisherContext';
 import ControlPanel from '../../components/WaitingRoom/ControlPanel';
 import VideoContainer from '../../components/WaitingRoom/VideoContainer';
 import { DEVICE_ACCESS_STATUS } from '../../utils/constants';
-import DeviceAccessAlert from '../../components/DeviceAccessAlert';
+import DeviceAccessAlert from '../components/DeviceAccessAlert';
 import { getStorageItem, STORAGE_KEYS } from '../../utils/storage';
 import useBackgroundPublisherContext from '../../hooks/useBackgroundPublisherContext';
 import backgroundEffectsDialog$ from '../../Context/BackgroundEffectsDialog';
 import precallNetworkTestDialog$ from '@Context/PrecallNetworkTestDialog';
-import Button from '@ui/Button';
+import Button from '@mui/material/Button';
 import { useTranslation } from 'react-i18next';
 import { getRofimSession } from '../utils/session';
 import RofimApiService, { WaitingRoomStatus } from '../api/rofimApi';
 import { useNavigate } from 'react-router-dom';
-import CircularProgress from '@ui/CircularProgress';
+import CircularProgress from '@mui/material/CircularProgress';
 import useNetworkStatus from '../hooks/useNetworkStatus';
 import useWebSocket from '../hooks/useWebSocket';
+import appConfig$ from '@stores/appConfig';
+import VideoContainerSkeleton from '@components/WaitingRoom/VideoContainer/VideoContainer.skeleton';
+
+type EquipmentsTestRoomProps = Omit<BoxProps, 'sx'>;
 
 /**
  * WaitingRoom Component from vonage
@@ -36,9 +42,9 @@ import useWebSocket from '../hooks/useWebSocket';
  * - The meeting room name and a button to join the room.
  * @returns {ReactElement} - The waiting room.
  */
-const EquipmentsTestRoom = (): ReactElement => {
+const EquipmentsTestRoom: FC<EquipmentsTestRoomProps> = () => {
   const { t } = useTranslation();
-  const { initLocalPublisher, publisher, accessStatus, destroyPublisher } =
+  const { initLocalPublisher, publisher, accessStatus, destroyPublisher, isVideoLoading } =
     usePreviewPublisherContext();
 
   const { initBackgroundLocalPublisher, publisher: backgroundPublisher } =
@@ -129,10 +135,12 @@ const EquipmentsTestRoom = (): ReactElement => {
   const handleJoinRoom = async (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     if (patientId && waitingRoom) {
+      console.log('azeaze');
       try {
         // Start visio if there is someone in the room (doctor enter first)
         setIsLoading(true);
         const hasParticipantCount = await RofimApiService.countParticipants();
+        console.log('const hasParticipantCount', hasParticipantCount);
         if (!hasParticipantCount) {
           return navigate('/waiting-room');
         }
@@ -143,8 +151,17 @@ const EquipmentsTestRoom = (): ReactElement => {
         setIsLoading(false);
       }
     }
+
+    console.log('go to room');
     return navigate(`/room/${room}`);
   };
+
+  const allowDeviceSelection = appConfig$.use.select(
+    ({ waitingRoomSettings }) => waitingRoomSettings.allowDeviceSelection
+  );
+
+  const isRoomReady =
+    allowDeviceSelection && accessStatus === DEVICE_ACCESS_STATUS.ACCEPTED && !isVideoLoading;
 
   return (
     <backgroundEffectsDialog$.Provider>
@@ -152,17 +169,10 @@ const EquipmentsTestRoom = (): ReactElement => {
         <Box data-testid="EquipmentsTestRoom">
           <PageLayout>
             <PageLayout.Left>
-              <Box
-                sx={{
-                  maxWidth: '100%',
-                  display: 'inline-flex',
-                  flexDirection: 'column',
-                  height: { xs: 'auto', sm: '400px' },
-                }}
-              >
-                <VideoContainer username={username} />
-                {accessStatus === DEVICE_ACCESS_STATUS.ACCEPTED && (
+              <Box className="relative flex flex-col sm:inline-flex h-auto sm:h-100 animate-fade-in">
+                {isRoomReady && (
                   <>
+                    <VideoContainer username={username} />
                     <ControlPanel
                       handleAudioInputOpen={handleAudioInputOpen}
                       handleVideoInputOpen={handleVideoInputOpen}
@@ -173,7 +183,13 @@ const EquipmentsTestRoom = (): ReactElement => {
                       openAudioOutput={openAudioOutput}
                       anchorEl={anchorEl}
                     />
-                    <Button onClick={handleJoinRoom} disabled={!username && isLoading}>
+                    <Button
+                      onClick={handleJoinRoom}
+                      disabled={!username && isLoading}
+                      variant="contained"
+                      color="primary"
+                      type="submit"
+                    >
                       {t('button.join')}
                       {isLoading && (
                         <CircularProgress
@@ -188,6 +204,7 @@ const EquipmentsTestRoom = (): ReactElement => {
                     </Button>
                   </>
                 )}
+                {!isRoomReady && <VideoContainerSkeleton />}
               </Box>
             </PageLayout.Left>
           </PageLayout>

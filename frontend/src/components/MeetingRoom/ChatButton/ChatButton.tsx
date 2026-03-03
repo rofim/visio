@@ -1,9 +1,9 @@
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
-import useIsMeetingChatAllowed from '@Context/AppConfig/hooks/useIsMeetingChatAllowed';
+import appConfig$ from '@stores/appConfig';
 import ToolbarButton from '../ToolbarButton';
 import UnreadMessagesBadge from '../UnreadMessagesBadge';
-import Tooltip from '@ui/Tooltip';
+import Tooltip from '@mui/material/Tooltip';
 import useTheme from '@ui/theme';
 import VividIcon from '@components/VividIcon';
 
@@ -29,7 +29,7 @@ const ChatButton = ({
   isOpen,
   isOverflowButton = false,
 }: ChatButtonProps): ReactElement | false => {
-  const isMeetingChatAllowed = useIsMeetingChatAllowed();
+  const isMeetingChatAllowed = appConfig$.useIsMeetingChatAllowed();
   const theme = useTheme();
   const { t } = useTranslation();
 

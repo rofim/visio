@@ -1,11 +1,13 @@
 import { MouseEvent, ReactElement, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import isMouseEventInsideBox from '../../../utils/isMouseEventInsideBox';
-import Tooltip from '@ui/Tooltip';
-import IconButton from '@ui/IconButton';
+import Tooltip from '@mui/material/Tooltip';
+import IconButton from '@mui/material/IconButton';
 import VividIcon from '@components/VividIcon';
-import Box from '@ui/Box';
+import Box from '@mui/material/Box';
 import useTheme from '@ui/theme';
+import { ABSOLUTE_DISTANCE_THRESHOLD_REM_VALUE } from '@utils/constants';
+import toRemValue from '@common/helpers/toRemValue';
 
 export type PinButtonProps = {
   isMaxPinned: boolean;
@@ -72,14 +74,18 @@ const PinButton = ({
   };
 
   const shouldShowIcon = isTileHovered || isPinned;
+  const pinButtonHorizontalOffsetRemValue = 0.3;
+  const pinButtonLeftOffsetRemValue =
+    ABSOLUTE_DISTANCE_THRESHOLD_REM_VALUE + pinButtonHorizontalOffsetRemValue;
+
   return (
     shouldShowIcon && (
       <Box
         ref={anchorRef}
         sx={{
           position: 'absolute',
-          left: 3,
-          top: 3,
+          left: toRemValue(pinButtonLeftOffsetRemValue),
+          top: toRemValue(ABSOLUTE_DISTANCE_THRESHOLD_REM_VALUE),
           margin: 'auto',
           display: 'flex',
           width: '24px',
