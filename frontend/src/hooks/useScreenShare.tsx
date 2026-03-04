@@ -55,11 +55,30 @@ const useScreenShare = (): UseScreenShareType => {
   const toggleShareScreen = useCallback(async () => {
     if (vonageVideoClient) {
       if (!isSharingScreen) {
+        let screenTrack: MediaStreamTrack | 'screen' = 'screen';
+
+        if (navigator?.mediaDevices?.getDisplayMedia) {
+          const media = await navigator.mediaDevices.getDisplayMedia({
+            // Pre-select the "Window" pane in the media picker.
+            video: { displaySurface: 'monitor' },
+          });
+          const tracks = media?.getVideoTracks?.();
+          // In some rare cases, multiple tracks can be returned
+          // To avoid issues, instead of selecting the first track arbitrarily,
+          // We fallback to the default behavior, letting the user manually select the track
+          if (tracks?.length === 1) {
+            const [track] = tracks;
+            screenTrack = track;
+          }
+        }
+
         // Initializing the publisher for screen sharing
         screenSharingPub.current = initPublisher(
           undefined,
           {
-            videoSource: 'screen',
+            videoSource: screenTrack,
+            audioSource: null,
+            publishAudio: false,
             insertDefaultUI: false,
             videoContentHint: 'detail',
             name: t('participants.screen', { participantName: user.defaultSettings.name }),
@@ -77,19 +96,23 @@ const useScreenShare = (): UseScreenShareType => {
         // Handling stream creation event
         screenSharingPub.current?.on('streamCreated', () => {
           setIsSharingScreen(true);
+          console.log('streamCreated');
         });
 
         screenSharingPub.current?.on('videoElementCreated', (e) => {
           setScreenshareVideoElement(e.element);
+          console.log('videoElementCreated');
         });
 
         screenSharingPub.current?.on('streamDestroyed', () => {
           onScreenShareStopped();
+          console.log('streamDestroyed');
         });
 
         // Handling media stopped event
         screenSharingPub.current?.on('mediaStopped', () => {
           onScreenShareStopped();
+          console.log('mediaStopped');
         });
 
         // Publishing the screen sharing stream
