@@ -46,6 +46,7 @@ export const initRofimSession = () => {
     // keep previous storage when user refresh the page
     resetStorage();
     setStorageItem('token', token);
+    // Remove queryParams from URL
     window.history.replaceState(
       {},
       document.title,

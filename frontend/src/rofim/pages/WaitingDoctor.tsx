@@ -185,7 +185,6 @@ const WaitingRoom = (): ReactElement => {
                 variant="h6"
                 sx={{
                   color: theme.colors.textTertiary,
-                  textAlign: 'start',
                 }}
               >
                 {t('waitingRoom.redirection')}
@@ -194,7 +193,6 @@ const WaitingRoom = (): ReactElement => {
                 variant="h6"
                 sx={{
                   color: theme.colors.textTertiary,
-                  textAlign: 'start',
                 }}
               >
                 {t('waitingRoom.pleaseWait')}

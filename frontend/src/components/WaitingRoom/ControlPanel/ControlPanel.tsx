@@ -180,7 +180,13 @@ const ControlPanel = ({
           }}
         />
 
-        <ButtonBase onClick={handleOpenMoreOptions} sx={buttonSx}>
+        <ButtonBase
+          onClick={handleOpenMoreOptions}
+          sx={{
+            ...buttonSx,
+            display: 'none',
+          }}
+        >
           <VividIcon name="more-vertical-solid" customSize={-5} />
         </ButtonBase>
         <MenuMoreOptions

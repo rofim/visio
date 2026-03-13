@@ -2,13 +2,13 @@ import { PropsWithChildren, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAtom } from 'jotai';
 import { initRofimSession } from '../utils/session';
-import { socketConnectionStatusAtom } from '../atoms/webSocketAtoms';
+import { isAppInitAtom } from '../atoms/webSocketAtoms';
 import useWebSocket from '../hooks/useWebSocket';
 
 const RofimInit = ({ children }: PropsWithChildren) => {
-  const [isSocketConnectionReady] = useAtom(socketConnectionStatusAtom);
+  const [isAppInit] = useAtom(isAppInitAtom);
   const { initSocket } = useWebSocket(true);
-  const [isInit, setIsInit] = useState(false);
+  const [isContextInit, setIsContextInit] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -20,12 +20,12 @@ const RofimInit = ({ children }: PropsWithChildren) => {
       navigate('/error');
     }
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsInit(true);
+    setIsContextInit(true);
   }, [navigate, initSocket]);
 
   // To avoid blinking page when no token set
   // and accessing waiting-room page, which start camera
-  return isInit && isSocketConnectionReady ? children : null;
+  return isContextInit && isAppInit ? children : null;
 };
 
 export default RofimInit;

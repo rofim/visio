@@ -4,7 +4,7 @@ import environment from './environments';
 /**
  * Init Matomo
  */
-export default function initMatomo(): void {
+export default function initMatomo(patientId?: string): void {
   const config = environment.matomo;
   if (!config) {
     return;
@@ -20,6 +20,9 @@ export default function initMatomo(): void {
   const u = config.url;
   paq.push(['setTrackerUrl', `${u}matomo.php`]);
   paq.push(['setSiteId', config.siteId]);
+  if (patientId) {
+    paq.push(['setUserId', patientId]);
+  }
   paq.push(['trackPageView']);
   paq.push(['enableLinkTracking']);
   const d = document;

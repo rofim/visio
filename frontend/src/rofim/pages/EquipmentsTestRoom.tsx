@@ -24,6 +24,8 @@ import useNetworkStatus from '../hooks/useNetworkStatus';
 import useWebSocket from '../hooks/useWebSocket';
 import appConfig$ from '@stores/appConfig';
 import VideoContainerSkeleton from '@components/WaitingRoom/VideoContainer/VideoContainer.skeleton';
+import useUserContext from '@hooks/useUserContext';
+import { UserType } from '@Context/user';
 
 type EquipmentsTestRoomProps = Omit<BoxProps, 'sx'>;
 
@@ -50,6 +52,7 @@ const EquipmentsTestRoom: FC<EquipmentsTestRoomProps> = () => {
   const { initBackgroundLocalPublisher, publisher: backgroundPublisher } =
     useBackgroundPublisherContext();
   const navigate = useNavigate();
+  const { setUser } = useUserContext();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [openAudioInput, setOpenAudioInput] = useState<boolean>(false);
@@ -134,13 +137,18 @@ const EquipmentsTestRoom: FC<EquipmentsTestRoomProps> = () => {
 
   const handleJoinRoom = async (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+    setUser((prevUser: UserType) => ({
+      ...prevUser,
+      defaultSettings: {
+        ...prevUser.defaultSettings,
+        name: username,
+      },
+    }));
     if (patientId && waitingRoom) {
-      console.log('azeaze');
       try {
         // Start visio if there is someone in the room (doctor enter first)
         setIsLoading(true);
         const hasParticipantCount = await RofimApiService.countParticipants();
-        console.log('const hasParticipantCount', hasParticipantCount);
         if (!hasParticipantCount) {
           return navigate('/waiting-room');
         }
@@ -152,7 +160,6 @@ const EquipmentsTestRoom: FC<EquipmentsTestRoomProps> = () => {
       }
     }
 
-    console.log('go to room');
     return navigate(`/room/${room}`);
   };
 

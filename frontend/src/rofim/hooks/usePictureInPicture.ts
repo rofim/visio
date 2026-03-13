@@ -51,6 +51,8 @@ const usePictureInPicture = () => {
   const [isPipActive, setIsPipActive] = useState(false);
 
   const pipVideoRef = useRef(document.createElement('video'));
+  pipVideoRef.current.muted = true;
+
   const canvasRef = useRef(document.createElement('canvas'));
   canvasRef.current.width = 640;
   canvasRef.current.height = 360;

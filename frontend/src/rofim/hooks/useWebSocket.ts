@@ -8,7 +8,7 @@ import {
   canJoinVisioAtom,
   doctorDelayAtom,
   isSocketConnectedAtom,
-  socketConnectionStatusAtom,
+  isAppInitAtom,
   tcStartTimeAtom,
 } from '../atoms/webSocketAtoms';
 
@@ -33,7 +33,7 @@ const sendMatomoDisconnectEvent = () => {
 const useWebSocket = (shouldLogToMatomo: boolean = false) => {
   const [isSocketInit, setIsSocketInit] = useState(false);
   const [isSocketConnected, setIsSocketConnected] = useAtom(isSocketConnectedAtom);
-  const [, setSocketConnectionReady] = useAtom(socketConnectionStatusAtom);
+  const [, setAppIsInit] = useAtom(isAppInitAtom);
   const [, setDoctorDelayInMinute] = useAtom(doctorDelayAtom);
   const [, setStartTime] = useAtom(tcStartTimeAtom);
   const [, setCanJoinVisio] = useAtom(canJoinVisioAtom);
@@ -47,7 +47,7 @@ const useWebSocket = (shouldLogToMatomo: boolean = false) => {
 
   const onConnectionError = (error: Error) => {
     console.error('Socket.IO connection error:', error);
-    setSocketConnectionReady(true);
+    setAppIsInit(true);
     setConnectionCount((prev) => {
       if (prev === 0) {
         // Si jamais la première connection échoue
@@ -76,7 +76,7 @@ const useWebSocket = (shouldLogToMatomo: boolean = false) => {
 
   const onConnect = () => {
     setConnectionCount((prev) => prev + 1);
-    setSocketConnectionReady(true);
+    setAppIsInit(true);
     setIsSocketConnected(true);
   };
 
@@ -98,7 +98,7 @@ const useWebSocket = (shouldLogToMatomo: boolean = false) => {
 
     // bypass socket connection
     if (!shouldInitSocket) {
-      setSocketConnectionReady(true);
+      setAppIsInit(true);
       return;
     }
 

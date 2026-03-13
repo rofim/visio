@@ -24,6 +24,9 @@ import SuspenseBoundary from '@web/components/SuspenseBoundary';
 import WaitingRoomSkeleton from '@pages/WaitingRoom/WaitingRoom.skeleton';
 import RoomProvider from '@Context/RoomProvider';
 import MeetingRoomSkeleton from '@pages/MeetingRoom/MeetingRoom.skeleton';
+import { getRofimSession } from './utils/session';
+import { useAtom } from 'jotai';
+import { isAppInitAtom } from './atoms/webSocketAtoms';
 
 const futureConfig: Partial<FutureConfig> = {
   /**
@@ -35,10 +38,14 @@ const futureConfig: Partial<FutureConfig> = {
 
 const InnerApp = () => {
   const theme = useTheme();
+  const [isAppInit] = useAtom(isAppInitAtom);
 
   React.useEffect(() => {
-    initMatomo();
-  }, []);
+    if (isAppInit) {
+      const rofimSession = getRofimSession();
+      initMatomo(rofimSession?.patientId);
+    }
+  }, [isAppInit]);
 
   return (
     <Box
