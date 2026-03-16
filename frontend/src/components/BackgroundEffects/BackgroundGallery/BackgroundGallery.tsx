@@ -23,6 +23,26 @@ const BackgroundGallery = (): ReactElement => {
 
   const backgrounds = [
     {
+      id: 'bg-rofim-1',
+      file: 'rofim-1.png',
+      name: 'Rofim 1',
+    },
+    {
+      id: 'bg-rofim-2',
+      file: 'rofim-2.png',
+      name: 'Rofim 2',
+    },
+    {
+      id: 'bg-rofim-3',
+      file: 'rofim-3.png',
+      name: 'Rofim 3',
+    },
+    {
+      id: 'bg-rofim-4',
+      file: 'rofim-4.png',
+      name: 'Rofim 4',
+    },
+    {
       id: 'bg1',
       file: 'bookshelf-room.jpg',
       name: t('backgroundEffects.backgrounds.bookshelfRoom'),
@@ -98,6 +118,7 @@ const BackgroundGallery = (): ReactElement => {
         const path = `${BACKGROUNDS_PATH}/${bg.file}`;
         return (
           <SelectableOption
+            className="-scale-x-100" // bg images are saved as mirrored to be readable when streamed. Flip the image thumbnails to be readable in gallery picker
             key={bg.id}
             title={bg.name}
             id={bg.id}
