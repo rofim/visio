@@ -14,6 +14,7 @@ export type SelectableOptionProps = {
   size?: number;
   isDisabled?: boolean;
   children?: ReactNode;
+  className?: string;
 };
 
 /**
@@ -41,12 +42,14 @@ const SelectableOption = ({
   image,
   size = DEFAULT_SELECTABLE_OPTION_WIDTH,
   children,
+  className,
   ...otherProps
 }: SelectableOptionProps): ReactElement => {
   const theme = useTheme();
 
   return (
     <Box
+      className={className}
       key={id}
       sx={{
         position: 'relative',
