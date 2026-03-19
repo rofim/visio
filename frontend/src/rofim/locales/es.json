@@ -1,5 +1,6 @@
 {
   "button.join": "Unirse a la videollamada",
+  "equipmentsTestRoom.patient.disclaimer": "Después de hacer clic en “<strong>Unirse a la videollamada</strong>”, se le conectará a la consulta. Por favor, permanezca conectado, su médico se unirá en unos momentos.",
   "pip.ariaLabel": "activar imagen en imagen",
   "pip.state.on": "Activar el modo PIP",
   "pip.state.off": "Desactivar el modo PIP",

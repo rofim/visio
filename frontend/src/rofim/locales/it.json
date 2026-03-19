@@ -1,5 +1,6 @@
 {
   "button.join": "Partecipa alla videochiamata",
+  "equipmentsTestRoom.patient.disclaimer": "Dopo aver cliccato su “<strong>Partecipa alla videochiamata</strong>“, verrai collegato alla consulenza. Ti preghiamo di rimanere connesso, il tuo medico si collegherà tra pochi istanti.",
   "pip.ariaLabel": "attiva picture-in-picture",
   "pip.state.on": "Attiva la modalità PIP",
   "pip.state.off": "Disattiva la modalità PIP",

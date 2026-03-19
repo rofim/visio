@@ -1,8 +1,8 @@
 /* eslint-disable @cspell/spellchecker */
 import { useState, useEffect, MouseEvent, ReactElement, TouchEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { CircularProgress } from '@mui/material';
+import { Trans, useTranslation } from 'react-i18next';
+import { Alert, CircularProgress } from '@mui/material';
 import usePreviewPublisherContext from '../../hooks/usePreviewPublisherContext';
 import ControlPanel from '../../components/WaitingRoom/ControlPanel';
 import VideoContainer from '../../components/WaitingRoom/VideoContainer';
@@ -51,8 +51,7 @@ const EquipmentsTestRoom = (): ReactElement => {
   const waitingRoom = rofimSession?.waitingRoom;
 
   useEffect(() => {
-    if (patientId && isOnline && isSocketConnected) {
-      // TODO: a refacto quand on aura plus vonageV1
+    if (patientId && isOnline) {
       // Pour laisser le temps au WS de se reconnecter avant d'appeler l'API
       const timeout = setTimeout(() => {
         RofimApiService.updateTeleconsultationStatus(WaitingRoomStatus.CheckingEquipment);
@@ -152,6 +151,13 @@ const EquipmentsTestRoom = (): ReactElement => {
                     openAudioOutput={openAudioOutput}
                     anchorEl={anchorEl}
                   />
+
+                  {!!patientId && waitingRoom === false && (
+                    <Alert severity="warning" className="mb-4 max-w-[584px]">
+                      <Trans i18nKey="equipmentsTestRoom.patient.disclaimer" />
+                    </Alert>
+                  )}
+
                   <Button onClick={handleJoinRoom} disabled={!username && isLoading}>
                     {t('button.join')}
                     {isLoading && (

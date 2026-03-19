@@ -1,5 +1,6 @@
 {
   "button.join": "An Videoanruf teilnehmen",
+  "equipmentsTestRoom.patient.disclaimer": "Nachdem Sie auf “<strong>An Videoanruf teilnehmen</strong>“ geklickt haben, werden Sie mit der Konsultation verbunden. Bitte bleiben Sie verbunden, Ihr Arzt wird in Kürze dazukommen.",
   "pip.ariaLabel": "bild-in-bild aktivieren",
   "pip.state.on": "PIP modus aktivieren",
   "pip.state.off": "PIP modus deaktivieren",
