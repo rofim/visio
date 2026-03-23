@@ -3,7 +3,7 @@
 
 import { useState, useEffect, MouseEvent, TouchEvent, FC } from 'react';
 import Box from '@mui/material/Box';
-import { BoxProps } from '@mui/material';
+import { Alert, BoxProps } from '@mui/material';
 import PageLayout from '@ui/PageLayout';
 import usePreviewPublisherContext from '../../hooks/usePreviewPublisherContext';
 import ControlPanel from '../../components/WaitingRoom/ControlPanel';
@@ -15,7 +15,7 @@ import useBackgroundPublisherContext from '../../hooks/useBackgroundPublisherCon
 import backgroundEffectsDialog$ from '../../Context/BackgroundEffectsDialog';
 import precallNetworkTestDialog$ from '@Context/PrecallNetworkTestDialog';
 import Button from '@mui/material/Button';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { getRofimSession } from '../utils/session';
 import RofimApiService, { WaitingRoomStatus } from '../api/rofimApi';
 import { useNavigate } from 'react-router-dom';
@@ -26,6 +26,7 @@ import appConfig$ from '@stores/appConfig';
 import VideoContainerSkeleton from '@components/WaitingRoom/VideoContainer/VideoContainer.skeleton';
 import useUserContext from '@hooks/useUserContext';
 import { UserType } from '@Context/user';
+import useTheme from '@ui/theme';
 
 type EquipmentsTestRoomProps = Omit<BoxProps, 'sx'>;
 
@@ -45,6 +46,7 @@ type EquipmentsTestRoomProps = Omit<BoxProps, 'sx'>;
  * @returns {ReactElement} - The waiting room.
  */
 const EquipmentsTestRoom: FC<EquipmentsTestRoomProps> = () => {
+  const theme = useTheme();
   const { t } = useTranslation();
   const { initLocalPublisher, publisher, accessStatus, destroyPublisher, isVideoLoading } =
     usePreviewPublisherContext();
@@ -70,8 +72,7 @@ const EquipmentsTestRoom: FC<EquipmentsTestRoomProps> = () => {
   const waitingRoom = rofimSession?.waitingRoom;
 
   useEffect(() => {
-    if (patientId && isOnline && isSocketConnected) {
-      // TODO: a refacto quand on aura plus vonageV1
+    if (patientId && isOnline) {
       // Pour laisser le temps au WS de se reconnecter avant d'appeler l'API
       const timeout = setTimeout(() => {
         RofimApiService.updateTeleconsultationStatus(WaitingRoomStatus.CheckingEquipment);
@@ -190,6 +191,23 @@ const EquipmentsTestRoom: FC<EquipmentsTestRoomProps> = () => {
                       openAudioOutput={openAudioOutput}
                       anchorEl={anchorEl}
                     />
+
+                    {!!patientId && waitingRoom === false && (
+                      <Alert
+                        icon={false}
+                        sx={{
+                          color: theme.colors.tertiary,
+                          background: theme.colors.warning,
+                          border: '1px solid',
+                          borderColor: theme.colors.warningHover,
+                          marginBottom: 4,
+                          maxWidth: 584,
+                        }}
+                      >
+                        <Trans i18nKey="equipmentsTestRoom.patient.disclaimer" />
+                      </Alert>
+                    )}
+
                     <Button
                       onClick={handleJoinRoom}
                       disabled={!username && isLoading}

@@ -1,5 +1,6 @@
 {
   "button.join": "Join the video call",
+  "equipmentsTestRoom.patient.disclaimer": "After clicking on “<strong>Join the video call</strong>”, you will be connected to the consultation. Please stay connected, your doctor will join shortly.",
   "pip.ariaLabel": "activate picture-in-picture",
   "pip.state.on": "Activate PIP mode",
   "pip.state.off": "Desactivate PIP mode",

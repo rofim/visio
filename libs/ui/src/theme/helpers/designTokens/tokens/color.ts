@@ -61,11 +61,11 @@ const colorVariables = {
     900: '#3E0004',
   },
   warning: {
-    50: '#FFE9D7',
-    200: '#FACC4B',
-    300: '#FA9F00',
-    500: '#BE5702',
-    600: '#A64C03',
+    50: '#FFF6ED',
+    200: '#FED7AA',
+    300: '#FDBA74',
+    500: '#F97315',
+    600: '#EA580A',
   },
   success: {
     300: '#53CA6A',
@@ -199,7 +199,7 @@ const lightColors: ThemeTokens['colors'] = {
     description: 'Error color for hover states.',
   },
   warning: {
-    value: colorVariables.warning[500],
+    value: colorVariables.warning[50],
     type: 'color',
     description: 'Color representing warning states and cautionary messages.',
   },
@@ -209,7 +209,7 @@ const lightColors: ThemeTokens['colors'] = {
     description: 'Foreground color for text/icons on warning surfaces.',
   },
   'warning-hover': {
-    value: colorVariables.warning[600],
+    value: colorVariables.warning[300],
     type: 'color',
     description: 'Warning color for hover states.',
   },
