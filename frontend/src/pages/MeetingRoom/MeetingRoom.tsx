@@ -11,6 +11,7 @@ import CaptionsError from '../../components/MeetingRoom/CaptionsError';
 import classNames from 'classnames';
 import useMeetingRoom from '../../hooks/useMeetingRoom';
 import { twMerge } from 'tailwind-merge';
+import RecordingIndicator from '../../components/MeetingRoom/RecordingIndicator';
 
 /**
  * MeetingRoom Component
@@ -64,6 +65,15 @@ const MeetingRoom = ({
         }
       )}
     >
+      {isRecording && !isSmallViewport && (
+        <Box
+          data-testid="meetingRoomRecordingIndicatorContainer"
+          className="pointer-events-none absolute left-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-vera-dark-grey-opacity backdrop-blur-sm"
+        >
+          <RecordingIndicator />
+        </Box>
+      )}
+
       {isSmallViewport && <SmallViewportHeader />}
 
       <VideoTileCanvas
