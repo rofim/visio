@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import Box, { BoxProps } from '@mui/material/Box';
-import ConnectionAlert from '../../components/MeetingRoom/ConnectionAlert';
+import PopupAlert from '@components/MeetingRoom/PopupAlert';
 import Toolbar from '../../components/MeetingRoom/Toolbar';
 import VideoTileCanvas from '../../components/MeetingRoom/VideoTileCanvas';
 import SmallViewportHeader from '../../components/MeetingRoom/SmallViewportHeader';
@@ -12,6 +12,8 @@ import classNames from 'classnames';
 import useMeetingRoom from '../../hooks/useMeetingRoom';
 import { twMerge } from 'tailwind-merge';
 import RecordingIndicator from '../../components/MeetingRoom/RecordingIndicator';
+import RecordingPopUpIndicator from '@components/MeetingRoom/RecordingPopupIndicator';
+import { RECORDING_POPUP_TIMEOUT_MS } from '@utils/constants';
 
 /**
  * MeetingRoom Component
@@ -53,6 +55,12 @@ const MeetingRoom = ({
     captionsErrorResponse,
     setCaptionsErrorResponse,
     captionsState,
+    recordingAlreadyNotified,
+    archiveIdStartedBySelf,
+    archiveId,
+    shouldPromptRecordingConsent,
+    latestNotifiedArchiveId,
+    handleRecordingNotified,
   } = useMeetingRoom();
 
   return (
@@ -93,6 +101,12 @@ const MeetingRoom = ({
           setCaptionsErrorResponse={setCaptionsErrorResponse}
         />
       )}
+      {!recordingAlreadyNotified && (
+        <RecordingPopUpIndicator
+          shouldPromptRecordingConsent={shouldPromptRecordingConsent}
+          onNotified={handleRecordingNotified}
+        />
+      )}
       <Toolbar
         isSharingScreen={isSharingScreen}
         toggleShareScreen={toggleShareScreen}
@@ -106,15 +120,26 @@ const MeetingRoom = ({
         }
         captionsState={captionsState}
       />
+      {recordingAlreadyNotified &&
+        !archiveIdStartedBySelf &&
+        isRecording &&
+        archiveId !== latestNotifiedArchiveId && (
+          <PopupAlert
+            title={t('recording.popup.title')}
+            message={t('recording.popup.subtitle')}
+            severity="info"
+            timeout={RECORDING_POPUP_TIMEOUT_MS}
+          />
+        )}
       {reconnecting && (
-        <ConnectionAlert
+        <PopupAlert
           title={t('connectionAlert.reconnecting.title')}
           message={t('connectionAlert.reconnecting.message')}
           severity="error"
         />
       )}
       {!reconnecting && quality !== 'good' && isVideoEnabled && (
-        <ConnectionAlert
+        <PopupAlert
           closable
           title={t('connectionAlert.quality.title')}
           message={t('connectionAlert.quality.message')}
