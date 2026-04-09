@@ -182,6 +182,7 @@
   "screenSharing.dialog.action": "Commencer le partage d’écran",
   "screenSharing.dialog.content": "Il semble qu’une autre personne partage déjà son écran. Si vous continuez, son partage sera arrêté.",
   "screenSharing.dialog.title": "Voulez-vous partager votre écran ?",
+  "screenSharing.dialog.hiddenMessage": "Vous partagez votre écran.",
   "screenSharing.title.start": "Démarrer le partage d’écran",
   "screenSharing.title.stop": "Arrêter le partage d’écran",
   "screenSharing.tooltip.ariaLabel": "Démarrer ou arrêter le partage d’écran",

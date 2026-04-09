@@ -28,15 +28,12 @@ type MeetingRoomProps = BoxProps & {
   fullSize?: boolean;
 };
 
-const MeetingRoom = ({
-  fullSize = false,
-  className,
-  // ...props
-}: MeetingRoomProps): ReactElement => {
+const MeetingRoom = ({ fullSize = false, className }: MeetingRoomProps): ReactElement => {
   const {
     t,
     isSmallViewport,
     isSharingScreen,
+    isEntireScreen,
     screensharingPublisher,
     screenshareVideoElement,
     toggleShareScreen,
@@ -86,6 +83,7 @@ const MeetingRoom = ({
 
       <VideoTileCanvas
         isSharingScreen={isSharingScreen}
+        isEntireScreen={isEntireScreen}
         screensharingPublisher={screensharingPublisher}
         screenshareVideoElement={screenshareVideoElement}
         isRightPanelOpen={rightPanelActiveTab !== 'closed'}
