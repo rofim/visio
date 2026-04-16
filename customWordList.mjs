@@ -19,6 +19,8 @@ const customWordList = [
   'PWDEBUG',
   'unstub',
   'vonageAPIURL',
+  'customfield',
+  'VIDSOL',
 ];
 
 export default customWordList;
