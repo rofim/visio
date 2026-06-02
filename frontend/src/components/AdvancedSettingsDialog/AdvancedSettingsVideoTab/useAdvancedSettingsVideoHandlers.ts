@@ -1,12 +1,14 @@
 import usePublisherContext from '@hooks/usePublisherContext';
 import usePreviewPublisherContext from '@hooks/usePreviewPublisherContext';
 import advancedSettings$ from '@Context/AdvancedSettings';
-import tryCatch from '@common/execution/tryCatch';
+import { makeApplicationErrorMapper } from '@core/errors';
+import { handleClientApplicationError } from '@ui/helpers';
 import {
   applyFrameRate,
   applyResolution,
   applyBitrate,
 } from '@Context/PublisherProvider/useApplyAdvancedSettings';
+import { t } from 'i18next';
 import type {
   AdvancedSettingsBitrateMode,
   AdvancedSettingsCustomVideoBitrate,
@@ -24,10 +26,10 @@ type UseAdvancedSettingsVideoHandlersArgs = {
 };
 
 type UseAdvancedSettingsVideoHandlers = {
-  handleFrameRateChange: (value: AdvancedSettingsFrameRate) => void;
-  handleResolutionChange: (value: AdvancedSettingsResolution) => void;
-  handleBitrateModeChange: (value: AdvancedSettingsBitrateMode) => void;
-  handleCustomVideoBitrateChange: (value: AdvancedSettingsCustomVideoBitrate) => void;
+  handleFrameRateChange: (value: AdvancedSettingsFrameRate) => Promise<void>;
+  handleResolutionChange: (value: AdvancedSettingsResolution) => Promise<void>;
+  handleBitrateModeChange: (value: AdvancedSettingsBitrateMode) => Promise<void>;
+  handleCustomVideoBitrateChange: (value: AdvancedSettingsCustomVideoBitrate) => Promise<void>;
 };
 
 const useAdvancedSettingsVideoHandlers = ({
@@ -38,38 +40,42 @@ const useAdvancedSettingsVideoHandlers = ({
   const { publisher: previewPublisher } = usePreviewPublisherContext();
   const publisher = meetingRoomPublisher ?? previewPublisher ?? null;
 
-  const handleFrameRateChange = (value: AdvancedSettingsFrameRate) => {
-    void (async () => {
-      const { error } = await tryCatch(() => applyFrameRate(publisher, value));
-      if (error) return;
+  const handleFrameRateChange = async (value: AdvancedSettingsFrameRate) => {
+    try {
+      await applyFrameRate(publisher, value);
       setFrameRate(value);
-    })();
+    } catch (error) {
+      handleClientApplicationError(makeApplicationErrorMapper(t('errors.unknown'))(error));
+    }
   };
 
-  const handleResolutionChange = (value: AdvancedSettingsResolution) => {
-    void (async () => {
-      const { error } = await tryCatch(() => applyResolution(publisher, value));
-      if (error) return;
+  const handleResolutionChange = async (value: AdvancedSettingsResolution) => {
+    try {
+      await applyResolution(publisher, value);
       setResolution(value);
-    })();
+    } catch (error) {
+      handleClientApplicationError(makeApplicationErrorMapper(t('errors.unknown'))(error));
+    }
   };
 
-  const handleBitrateModeChange = (value: AdvancedSettingsBitrateMode) => {
-    void (async () => {
-      const { error } = await tryCatch(() => applyBitrate(publisher, value, customVideoBitrate));
-      if (error) return;
+  const handleBitrateModeChange = async (value: AdvancedSettingsBitrateMode) => {
+    try {
+      await applyBitrate(publisher, value, customVideoBitrate);
       setBitrateMode(value);
-    })();
+    } catch (error) {
+      handleClientApplicationError(makeApplicationErrorMapper(t('errors.unknown'))(error));
+    }
   };
 
-  const handleCustomVideoBitrateChange = (value: AdvancedSettingsCustomVideoBitrate) => {
-    void (async () => {
+  const handleCustomVideoBitrateChange = async (value: AdvancedSettingsCustomVideoBitrate) => {
+    try {
       if (bitrateMode === ADVANCED_SETTINGS_BITRATE_MODE.custom) {
-        const { error } = await tryCatch(() => applyBitrate(publisher, bitrateMode, value));
-        if (error) return;
+        await applyBitrate(publisher, bitrateMode, value);
       }
       setCustomVideoBitrate(value);
-    })();
+    } catch (error) {
+      handleClientApplicationError(makeApplicationErrorMapper(t('errors.unknown'))(error));
+    }
   };
 
   return {

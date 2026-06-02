@@ -15,6 +15,8 @@ import useSyncPublisherDevices from '@Context/PublisherProvider/usePublisher/hoo
 import waitUntilPlaying from '@utils/waitUntilPlaying';
 import { attempt } from '@common/execution';
 import { useMountEffect } from '@web/hooks';
+import advancedSettings$ from '@Context/AdvancedSettings';
+import useApplyAdvancedSettings from '@Context/PublisherProvider/useApplyAdvancedSettings';
 import { env } from '../../../env';
 
 type PublisherVideoElementCreatedEvent = Event<'videoElementCreated', Publisher> & {
@@ -233,10 +235,14 @@ const usePreviewPublisher = (
       videoFilter = initialBackgroundRef.current;
     }
 
+    const { frameRate, codecMode, codecPriority } = advancedSettings$.getState();
+
     const publisherOptions: PublisherProperties = {
       insertDefaultUI: false,
       videoFilter,
-      resolution: env.DEFAULT_RESOLUTION,
+      resolution: env.PUBLISHER_MAX_RESOLUTION,
+      frameRate,
+      preferredVideoCodecs: codecMode === 'automatic' ? 'automatic' : codecPriority,
       publishAudio: isAudioEnabled,
       publishVideo: isVideoEnabled,
       audioSource: audioSourceId,
@@ -316,6 +322,8 @@ const usePreviewPublisher = (
       destroyPublisher();
     };
   });
+
+  useApplyAdvancedSettings(isPublishing ? publisherRef.current : null);
 
   return {
     isAudioEnabled,

@@ -84,6 +84,11 @@ const envSchema = z
       (v) => (v === undefined || v === null || v === '' ? undefined : v),
       z.enum([...RESOLUTIONS] as [Resolution, ...Resolution[]]).optional()
     ),
+    PUBLISHER_MAX_RESOLUTION: z.preprocess(
+      (v) => (v === undefined || v === null || v === '' ? '1920x1080' : v),
+      z.enum([...RESOLUTIONS] as [Resolution, ...Resolution[]])
+    ),
+    NOTIFICATION_DURATION_MS: positiveIntField(4_000),
     MIN_CUSTOM_VIDEO_BITRATE_BPS: positiveIntField(5_000),
     MAX_CUSTOM_VIDEO_BITRATE_BPS: positiveIntField(10_000_000),
     SUPPORTED_FRAME_RATES: intListField([30, 15, 7, 1]),
@@ -133,6 +138,8 @@ export class Env {
   public ALLOW_CAMERA_CONTROL!: boolean;
   public ALLOW_VIDEO_ON_JOIN!: boolean;
   public DEFAULT_RESOLUTION!: Resolution | undefined;
+  public PUBLISHER_MAX_RESOLUTION!: Resolution;
+  public NOTIFICATION_DURATION_MS!: number;
   public MIN_CUSTOM_VIDEO_BITRATE_BPS!: number;
   public MAX_CUSTOM_VIDEO_BITRATE_BPS!: number;
   public SUPPORTED_FRAME_RATES!: number[];
