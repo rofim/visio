@@ -38,7 +38,7 @@ describe('usePublisher', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.spyOn(console, 'warn').mockImplementation(vi.fn());
+    vi.spyOn(console, 'error').mockImplementation(vi.fn());
     setupWindowNavigatorMock({
       mediaDevices: {
         enumerateDevices: Promise.resolve(someDevices),
@@ -580,19 +580,17 @@ describe('usePublisher', () => {
 });
 
 type RenderOptions = {
-  appConfigContext?: ProviderOptions['AppConfigContext'];
   userContext?: ProviderOptions['UserContext'];
   sessionContext?: ProviderOptions['SessionContext'];
 };
 
 function renderHook<Result, Props>(
   render: (initialProps: Props) => Result,
-  { appConfigContext, userContext, sessionContext }: RenderOptions = {}
+  { userContext, sessionContext }: RenderOptions = {}
 ) {
   const { wrapper: MainWrapper, ...context } = makeTestProvider(
-    [providers.appConfig, providers.user, providers.session],
+    [providers.user, providers.session],
     {
-      appConfigContext,
       userContext: {
         ...userContext,
         value: {

@@ -39,16 +39,15 @@ const PageLayout = ({ children, sx, ...props }: PageLayoutProps): React.ReactNod
       {...props}
     >
       {banner}
-
       <Stack
         direction={{ xs: 'column', md: 'row' }}
         sx={{
           gap: { xs: 2, md: 0 },
-          display: 'flex',
           flex: 2,
           width: '100%',
           height: '100%',
           mt: 2,
+          marginTop: 0,
         }}
       >
         {left && (
@@ -59,7 +58,8 @@ const PageLayout = ({ children, sx, ...props }: PageLayoutProps): React.ReactNod
               alignItems: 'center',
               justifyContent: 'center',
               bgcolor: { xs: theme.colors.surface, md: theme.colors.surface },
-              px: { xs: 3, sm: 5 },
+              overflow: 'hidden',
+              p: { xs: 3, sm: 5 },
             }}
           >
             {left}
@@ -74,6 +74,7 @@ const PageLayout = ({ children, sx, ...props }: PageLayoutProps): React.ReactNod
               alignItems: 'center',
               justifyContent: 'center',
               bgcolor: { xs: theme.colors.surface, md: theme.colors.background },
+              py: 1,
               px: { xs: 3, sm: 5 },
             }}
           >
@@ -81,7 +82,6 @@ const PageLayout = ({ children, sx, ...props }: PageLayoutProps): React.ReactNod
           </Box>
         )}
       </Stack>
-
       {footer}
     </Box>
   );

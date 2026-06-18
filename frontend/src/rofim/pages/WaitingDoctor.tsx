@@ -99,18 +99,13 @@ const WaitingRoom = (): ReactElement => {
                 severity="warning"
                 className="ml-auto w-full max-w-96"
                 sx={{
-                  backgroundColor: '#fff1cf',
-                  textAlign: 'start',
+                  color: theme.colors.alertText,
+                  background: theme.colors.warning,
                   borderRadius: theme.shapes.borderRadiusLarge,
+                  textAlign: 'start',
                 }}
               >
-                <Typography
-                  sx={{
-                    color: theme.colors.warning,
-                  }}
-                >
-                  {t('waitingRoom.connectionLost')}
-                </Typography>
+                <Typography>{t('waitingRoom.connectionLost')}</Typography>
               </Alert>
             </Fade>
 

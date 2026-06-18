@@ -15,7 +15,7 @@ jobs:
           script: |
             const title = context.payload.pull_request.title;
 
-            const NORMAL_PR_PATTERN = /^\[(feat|fix|chore|docs|refactor|perf|test|build|ci|revert)\]:\s+((?:rofano|scrum|devops)-\d+)\s+-\s+.+$/;
+            const NORMAL_PR_PATTERN = /^\[(feat|fix|chore|docs|refactor|perf|test|build|ci|revert)\]:\s+((?:rofano|scrum|devops|von)-\d+)\s+-\s+.+$/;
             const RELEASE_PR_PATTERN = /^(MEP|MEPP)\s+\d{2}-\d{2}-\d{4}\s+-\s+V\d+\.\d+\.\d+$/;
 
             const isNormalTitle = NORMAL_PR_PATTERN.test(title);
@@ -37,6 +37,7 @@ jobs:
               - [type]: rofano-XXX - description
               - [type]: scrum-XXX - description
               - [type]: devops-XXX - description
+              - [type]: von-XXX - description
               Liste des types possibles : 
               - feat
               - fix

@@ -4,8 +4,11 @@ import { useAtom } from 'jotai';
 import { initRofimSession } from '../utils/session';
 import { isAppInitAtom } from '../atoms/webSocketAtoms';
 import useWebSocket from '../hooks/useWebSocket';
+// import useUserContext from '@hooks/useUserContext';
+// import { setStorageItem, STORAGE_KEYS } from '@utils/storage';
 
 const RofimInit = ({ children }: PropsWithChildren) => {
+  // const { setUser } = useUserContext();
   const [isAppInit] = useAtom(isAppInitAtom);
   const { initSocket } = useWebSocket(true);
   const [isContextInit, setIsContextInit] = useState(false);
@@ -19,6 +22,20 @@ const RofimInit = ({ children }: PropsWithChildren) => {
       console.error('Cannot load rofim session token', error);
       navigate('/error');
     }
+
+    // const rofimSession = getRofimSession();
+    // if (rofimSession?.username) {
+    //   setUser((prevUser) => ({
+    //     ...prevUser,
+    //     defaultSettings: {
+    //       ...prevUser.defaultSettings,
+    //       name: rofimSession.username,
+    //     },
+    //   }));
+
+    //   setStorageItem(STORAGE_KEYS.USERNAME, rofimSession.username);
+    // }
+
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsContextInit(true);
   }, [navigate, initSocket]);

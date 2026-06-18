@@ -1,5 +1,5 @@
 import { jwtDecode } from 'jwt-decode';
-import { getStorageItem, resetStorage, setStorageItem, STORAGE_KEYS } from '../../utils/storage';
+import { getStorageItem, resetStorage, setStorageItem } from '../../utils/storage';
 
 export type RofimSession = {
   username: string;
@@ -52,10 +52,6 @@ export const initRofimSession = () => {
       document.title,
       window.location.href.replace(window.location.search, '')
     );
-    const rofimSession = parseSession(token);
-    if (rofimSession?.username) {
-      setStorageItem(STORAGE_KEYS.USERNAME, rofimSession.username);
-    }
   }
 
   if (patientId) {

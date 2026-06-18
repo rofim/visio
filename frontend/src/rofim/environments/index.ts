@@ -5,7 +5,6 @@ import prodEnv from './environment.prod';
 
 const getEnvironment = () => {
   const mode = import.meta.env.MODE;
-  console.log('mode', mode);
   switch (mode) {
     case 'staging':
       return stagingEnv;

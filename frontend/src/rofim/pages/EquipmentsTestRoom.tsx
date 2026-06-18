@@ -1,37 +1,29 @@
 /* eslint-disable @cspell/spellchecker */
 /* eslint @typescript-eslint/no-floating-promises: 0 */
 
-import { useState, useEffect, MouseEvent, TouchEvent, FC } from 'react';
+import { FC, MouseEvent, useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
-import { Alert, BoxProps } from '@mui/material';
 import PageLayout from '@ui/PageLayout';
-import usePreviewPublisherContext from '../../hooks/usePreviewPublisherContext';
-import ControlPanel from '../../components/WaitingRoom/ControlPanel';
-import VideoContainer from '../../components/WaitingRoom/VideoContainer';
-import { DEVICE_ACCESS_STATUS } from '../../utils/constants';
+import ControlPanel from '@components/WaitingRoom/ControlPanel';
+import VideoContainer from '@components/WaitingRoom/VideoContainer';
 import DeviceAccessAlert from '../components/DeviceAccessAlert';
-import { getStorageItem, STORAGE_KEYS } from '../../utils/storage';
-import useBackgroundPublisherContext from '../../hooks/useBackgroundPublisherContext';
-import backgroundEffectsDialog$ from '../../Context/BackgroundEffectsDialog';
+import { DEVICE_ACCESS_STATUS } from '@utils/constants';
+import backgroundEffectsDialog$ from '@Context/BackgroundEffectsDialog';
 import precallNetworkTestDialog$ from '@Context/PrecallNetworkTestDialog';
-import Button from '@mui/material/Button';
-import { Trans, useTranslation } from 'react-i18next';
+import VideoContainerSkeleton from '@components/WaitingRoom/VideoContainer/VideoContainer.skeleton';
+import useWaitingRoom from '@hooks/useWaitingRoom';
+import useNetworkStatus from '../hooks/useNetworkStatus';
+import useWebSocket from '../hooks/useWebSocket';
 import { getRofimSession } from '../utils/session';
 import RofimApiService, { WaitingRoomStatus } from '../api/rofimApi';
 import { useNavigate } from 'react-router-dom';
-import CircularProgress from '@mui/material/CircularProgress';
-import useNetworkStatus from '../hooks/useNetworkStatus';
-import useWebSocket from '../hooks/useWebSocket';
-import appConfig$ from '@stores/appConfig';
-import VideoContainerSkeleton from '@components/WaitingRoom/VideoContainer/VideoContainer.skeleton';
-import useUserContext from '@hooks/useUserContext';
-import { UserType } from '@Context/user';
+import { Alert, CircularProgress } from '@mui/material';
+import { Trans, useTranslation } from 'react-i18next';
+import Button from '@mui/material/Button';
 import useTheme from '@ui/theme';
 
-type EquipmentsTestRoomProps = Omit<BoxProps, 'sx'>;
-
 /**
- * WaitingRoom Component from vonage
+ * WaitingRoom Component
  *
  * This component renders the waiting room page of the application, including:
  * - A banner containing a company logo, a date-time widget, and a navigable button to a GitHub repo.
@@ -45,23 +37,24 @@ type EquipmentsTestRoomProps = Omit<BoxProps, 'sx'>;
  * - The meeting room name and a button to join the room.
  * @returns {ReactElement} - The waiting room.
  */
-const EquipmentsTestRoom: FC<EquipmentsTestRoomProps> = () => {
+const WaitingRoom: FC = () => {
+  const {
+    anchorEl,
+    openAudioInput,
+    openVideoInput,
+    openAudioOutput,
+    username,
+    accessStatus,
+    isRoomReady,
+    handleAudioInputOpen,
+    handleVideoInputOpen,
+    handleAudioOutputOpen,
+    handleClose,
+  } = useWaitingRoom();
+
   const theme = useTheme();
   const { t } = useTranslation();
-  const { initLocalPublisher, publisher, accessStatus, destroyPublisher, isVideoLoading } =
-    usePreviewPublisherContext();
-
-  const { initBackgroundLocalPublisher, publisher: backgroundPublisher } =
-    useBackgroundPublisherContext();
   const navigate = useNavigate();
-  const { setUser } = useUserContext();
-
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [openAudioInput, setOpenAudioInput] = useState<boolean>(false);
-  const [openVideoInput, setOpenVideoInput] = useState<boolean>(false);
-  const [openAudioOutput, setOpenAudioOutput] = useState<boolean>(false);
-  const username = getStorageItem(STORAGE_KEYS.USERNAME) ?? '';
-
   const isOnline = useNetworkStatus();
   const { isSocketConnected } = useWebSocket();
   const [isLoading, setIsLoading] = useState(false);
@@ -82,69 +75,9 @@ const EquipmentsTestRoom: FC<EquipmentsTestRoomProps> = () => {
     return () => {};
   }, [patientId, isOnline, isSocketConnected]);
 
-  useEffect(() => {
-    if (!publisher) {
-      initLocalPublisher();
-    }
-
-    return () => {
-      // Ensure we destroy the publisher and release any media devices.
-      if (publisher) {
-        destroyPublisher();
-      }
-    };
-  }, [initLocalPublisher, publisher, destroyPublisher]);
-
-  useEffect(() => {
-    if (!backgroundPublisher) {
-      initBackgroundLocalPublisher();
-    }
-  }, [initBackgroundLocalPublisher, backgroundPublisher]);
-
-  // After changing device permissions, reload the page to reflect the device's permission change.
-  useEffect(() => {
-    if (accessStatus === DEVICE_ACCESS_STATUS.ACCESS_CHANGED) {
-      window.location.reload();
-    }
-  }, [accessStatus]);
-
-  const handleAudioInputOpen = (
-    event: MouseEvent<HTMLButtonElement> | TouchEvent<HTMLButtonElement>
-  ) => {
-    setAnchorEl(event.currentTarget);
-    setOpenAudioInput(true);
-  };
-
-  const handleVideoInputOpen = (
-    event: MouseEvent<HTMLButtonElement> | TouchEvent<HTMLButtonElement>
-  ) => {
-    setAnchorEl(event.currentTarget);
-    setOpenVideoInput(true);
-  };
-
-  const handleAudioOutputOpen = (
-    event: MouseEvent<HTMLButtonElement> | TouchEvent<HTMLButtonElement>
-  ) => {
-    setAnchorEl(event.currentTarget);
-    setOpenAudioOutput(true);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-    setOpenAudioInput(false);
-    setOpenAudioOutput(false);
-    setOpenVideoInput(false);
-  };
-
-  const handleJoinRoom = async (e: MouseEvent<HTMLButtonElement>) => {
+  const handleJoinClick = async (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    setUser((prevUser: UserType) => ({
-      ...prevUser,
-      defaultSettings: {
-        ...prevUser.defaultSettings,
-        name: username,
-      },
-    }));
+
     if (patientId && waitingRoom) {
       try {
         // Start visio if there is someone in the room (doctor enter first)
@@ -160,24 +93,16 @@ const EquipmentsTestRoom: FC<EquipmentsTestRoomProps> = () => {
         setIsLoading(false);
       }
     }
-
     return navigate(`/room/${room}`);
   };
-
-  const allowDeviceSelection = appConfig$.use.select(
-    ({ waitingRoomSettings }) => waitingRoomSettings.allowDeviceSelection
-  );
-
-  const isRoomReady =
-    allowDeviceSelection && accessStatus === DEVICE_ACCESS_STATUS.ACCEPTED && !isVideoLoading;
 
   return (
     <backgroundEffectsDialog$.Provider>
       <precallNetworkTestDialog$.Provider>
-        <Box data-testid="EquipmentsTestRoom">
+        <Box data-testid="waitingRoom" className="m-0">
           <PageLayout>
             <PageLayout.Left>
-              <Box className="relative flex flex-col sm:inline-flex h-auto sm:h-100 animate-fade-in">
+              <Box className="flex flex-col  max-w-full  animate-fade-in m-0">
                 {isRoomReady && (
                   <>
                     <VideoContainer username={username} />
@@ -191,15 +116,14 @@ const EquipmentsTestRoom: FC<EquipmentsTestRoomProps> = () => {
                       openAudioOutput={openAudioOutput}
                       anchorEl={anchorEl}
                     />
-
                     {!!patientId && waitingRoom === false && (
                       <Alert
                         icon={false}
                         sx={{
-                          color: theme.colors.tertiary,
+                          color: theme.colors.alertText,
                           background: theme.colors.warning,
-                          border: '1px solid',
                           borderColor: theme.colors.warningHover,
+                          border: '1px solid',
                           marginBottom: 4,
                           maxWidth: 584,
                         }}
@@ -209,18 +133,19 @@ const EquipmentsTestRoom: FC<EquipmentsTestRoomProps> = () => {
                     )}
 
                     <Button
-                      onClick={handleJoinRoom}
+                      onClick={handleJoinClick}
                       disabled={!username && isLoading}
                       variant="contained"
                       color="primary"
                       type="submit"
                     >
                       {t('button.join')}
-                      {isLoading && (
+                      {!!isLoading && (
                         <CircularProgress
                           className="ml-3"
                           sx={{
                             position: 'relative',
+                            color: theme.colors.onPrimary,
                           }}
                           size={25}
                           data-testid="CircularProgress"
@@ -229,6 +154,7 @@ const EquipmentsTestRoom: FC<EquipmentsTestRoomProps> = () => {
                     </Button>
                   </>
                 )}
+
                 {!isRoomReady && <VideoContainerSkeleton />}
               </Box>
             </PageLayout.Left>
@@ -242,4 +168,4 @@ const EquipmentsTestRoom: FC<EquipmentsTestRoomProps> = () => {
   );
 };
 
-export default EquipmentsTestRoom;
+export default WaitingRoom;

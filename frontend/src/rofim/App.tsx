@@ -1,32 +1,34 @@
 /* eslint-disable @cspell/spellchecker */
-import { BrowserRouter as Router, Route, Routes, Navigate, FutureConfig } from 'react-router-dom';
+
+import { BrowserRouter as Router, Route, Routes, FutureConfig, Navigate } from 'react-router-dom';
 import '../css/App.css';
-import './css/index.css';
-import React from 'react';
-import Room from './pages/MeetingRoom/index';
+import '../css/index.css';
+import GoodBye from './pages/GoodBye';
 import EquipmentsTestRoom from './pages/EquipmentsTestRoom';
-import WaitingRoom from './pages/WaitingDoctor';
-import SessionProvider from '../Context/SessionProvider/session';
 import { PreviewPublisherProvider } from '../Context/PreviewPublisherProvider';
 import { PublisherProvider } from '../Context/PublisherProvider';
-import UnsupportedBrowserPage from './pages/UnsupportedBrowserPage';
-import RofimInit from './context/RofimContext';
-import ErrorPage from './pages/ErrorPage';
-import GoodBye from './pages/GoodBye';
-import initMatomo from './matomo';
-import RedirectToUnsupportedBrowserPage from '@components/RedirectToUnsupportedBrowserPage';
-import AppContextProvider from '../AppContextProvider';
-import { DeepPartial } from '@app-types';
-import { AppConfig } from '@stores/appConfig';
+import RedirectToWaitingRoom from '../components/RedirectToWaitingRoom';
+import UnsupportedBrowserPage from '../pages/UnsupportedBrowserPage';
+import RoomProvider from '../Context/RoomProvider';
+import Box from '@mui/material/Box';
 import useTheme from '@ui/theme';
-import { Box } from '@mui/material';
-import SuspenseBoundary from '@web/components/SuspenseBoundary';
+import AppContextProvider from '../AppContextProvider';
+import RedirectToUnsupportedBrowserPage from '@components/RedirectToUnsupportedBrowserPage';
+import SuspenseBoundary from '@web/components/SuspenseBoundary/SuspenseBoundary';
 import WaitingRoomSkeleton from '@pages/WaitingRoom/WaitingRoom.skeleton';
-import RoomProvider from '@Context/RoomProvider';
 import MeetingRoomSkeleton from '@pages/MeetingRoom/MeetingRoom.skeleton';
-import { getRofimSession } from './utils/session';
-import { useAtom } from 'jotai';
+import SessionProvider from '@Context/SessionProvider/session';
+import ErrorBoundary from '../components/ErrorBoundary';
+import EnvGuard from '../components/EnvGuard';
+import { ErrorPage } from '../pages/ErrorBoundary';
+import RofimInit from './context/RofimContext';
+import WaitingRoom from './pages/WaitingDoctor';
+import Room from './pages/MeetingRoom/index';
 import { isAppInitAtom } from './atoms/webSocketAtoms';
+import { useAtom } from 'jotai';
+import { useEffect } from 'react';
+import initMatomo from './matomo';
+import { getRofimSession } from './utils/session';
 
 const futureConfig: Partial<FutureConfig> = {
   /**
@@ -38,9 +40,10 @@ const futureConfig: Partial<FutureConfig> = {
 
 const InnerApp = () => {
   const theme = useTheme();
+
   const [isAppInit] = useAtom(isAppInitAtom);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isAppInit) {
       const rofimSession = getRofimSession();
       initMatomo(rofimSession?.patientId);
@@ -50,7 +53,10 @@ const InnerApp = () => {
   return (
     <Box
       sx={{
-        backgroundColor: theme.colors.surface,
+        backgroundColor: {
+          xs: theme.colors.surface,
+          md: theme.colors.background,
+        },
         position: 'relative',
         overflowX: 'hidden',
         overflowY: 'auto',
@@ -77,22 +83,24 @@ const InnerApp = () => {
               <Route
                 path="/room/:roomName"
                 element={
-                  <SuspenseBoundary fallback={<MeetingRoomSkeleton />}>
-                    <RoomProvider>
-                      <SessionProvider>
-                        <PublisherProvider>
-                          <Room />
-                        </PublisherProvider>
-                      </SessionProvider>
-                    </RoomProvider>
-                  </SuspenseBoundary>
+                  <RedirectToWaitingRoom>
+                    <SuspenseBoundary fallback={<MeetingRoomSkeleton />}>
+                      <RoomProvider>
+                        <SessionProvider>
+                          <PublisherProvider>
+                            <Room />
+                          </PublisherProvider>
+                        </SessionProvider>
+                      </RoomProvider>
+                    </SuspenseBoundary>
+                  </RedirectToWaitingRoom>
                 }
               />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
             <Route path="/goodbye" element={<GoodBye />} />
             <Route path="/unsupported-browser" element={<UnsupportedBrowserPage />} />
-            <Route path="/error" element={<ErrorPage />} />
+            {/* <Route path="/error" element={<ErrorPage />} /> */}
           </Routes>
         </RofimInit>
       </Router>
@@ -103,10 +111,13 @@ const InnerApp = () => {
 /**
  * The wrapper is necessary temporarily since app also need to have access to theme context.
  */
-const App = ({ appConfigValue }: { appConfigValue?: DeepPartial<AppConfig> }) => {
+const App = () => {
   return (
-    <AppContextProvider appConfigValue={appConfigValue}>
-      <InnerApp />
+    <AppContextProvider>
+      <ErrorBoundary fallback={(error) => <ErrorPage error={error} />}>
+        <EnvGuard />
+        <InnerApp />
+      </ErrorBoundary>
     </AppContextProvider>
   );
 };
