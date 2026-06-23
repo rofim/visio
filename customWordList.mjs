@@ -2,6 +2,7 @@ const customWordList = [
   'Rofim',
   'preprod',
   'visio',
+  'Matomo',
   'Opentok',
   'Vonage',
   'screensharing',

@@ -22,8 +22,12 @@ const buildAll = () => {
 /**
  * Builds only the frontend project.
  */
-const buildFrontend = (env: string = 'localhost') => {
-  runCommand(`nx run frontend:build --mode ${env}`);
+const buildFrontend = (env?: string) => {
+  if (env) {
+    runCommand(`nx run frontend:build:${env}`);
+  } else {
+    runCommand('nx run frontend:build');
+  }
 };
 
 /**
@@ -57,7 +61,7 @@ const buildRoom = () => {
  */
 const main = () => {
   const [target, env] = args;
-
+  console.log('env', env);
   switch (target) {
     case 'frontend':
       buildFrontend(env);

@@ -49,7 +49,9 @@
       "@ui-test": ["../libs/ui/test"],
       "@ui-test/*": ["../libs/ui/test/*"],
       "@ui/*": ["../libs/ui/src/*"],
-      "@utils/*": ["./src/utils/*"]
+      "@utils/*": ["./src/utils/*"],
+      "@rofim": ["./src/rofim"],
+      "@rofim/*": ["./src/rofim/*"]
     },
     "types": ["vite/client", "node", "vitest", "vitest/globals"]
   },
