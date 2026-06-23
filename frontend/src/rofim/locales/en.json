@@ -1,6 +1,7 @@
 {
   "button.join": "Join the video call",
   "equipmentsTestRoom.patient.disclaimer": "After clicking on “<strong>Join the video call</strong>”, you will be connected to the consultation. Please stay connected, your doctor will join shortly.",
+  "errorPage.description": "The application could not be started. Please close this page and reconnect to your video call from Rofim. Please contact support if the problem persists.",
   "pip.ariaLabel": "activate picture-in-picture",
   "pip.state.on": "Activate PIP mode",
   "pip.state.off": "Desactivate PIP mode",

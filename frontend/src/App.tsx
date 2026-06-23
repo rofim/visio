@@ -1,11 +1,9 @@
-import { BrowserRouter as Router, Route, Routes, FutureConfig } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, FutureConfig, Navigate } from 'react-router-dom';
 import './css/App.css';
 import './css/index.css';
 import MeetingRoom from './pages/MeetingRoom';
-import GoodBye from './pages/GoodBye/index';
-import WaitingRoom from './pages/WaitingRoom';
+import EquipmentsTestRoom from './pages/WaitingRoom';
 import { PreviewPublisherProvider } from './Context/PreviewPublisherProvider';
-import LandingPage from './pages/LandingPage';
 import { PublisherProvider } from './Context/PublisherProvider';
 import RedirectToWaitingRoom from './components/RedirectToWaitingRoom';
 import UnsupportedBrowserPage from './pages/UnsupportedBrowserPage';
@@ -21,6 +19,9 @@ import SessionProvider from '@Context/SessionProvider/session';
 import ErrorBoundary from './components/ErrorBoundary';
 import EnvGuard from './components/EnvGuard';
 import { ErrorPage } from './pages/ErrorBoundary';
+import WaitingDoctorRoom from '@rofim/pages/WaitingDoctor';
+import RofimInit from '@rofim/context/RofimContext';
+import ExitPage from '@rofim/pages/ExitPage';
 
 const futureConfig: Partial<FutureConfig> = {
   /**
@@ -47,43 +48,47 @@ const InnerApp = () => {
       }}
     >
       <Router future={futureConfig}>
-        <Routes>
-          <Route element={<RedirectToUnsupportedBrowserPage />}>
-            <Route
-              path="/waiting-room/:roomName"
-              element={
-                <SuspenseBoundary fallback={<WaitingRoomSkeleton />}>
-                  <RoomProvider>
-                    <PreviewPublisherProvider>
-                      <WaitingRoom />
-                    </PreviewPublisherProvider>
-                  </RoomProvider>
-                </SuspenseBoundary>
-              }
-            />
-
-            <Route
-              path="/room/:roomName"
-              element={
-                <RedirectToWaitingRoom>
-                  <SuspenseBoundary fallback={<MeetingRoomSkeleton />}>
+        <RofimInit>
+          <Routes>
+            <Route element={<RedirectToUnsupportedBrowserPage />}>
+              <Route
+                path="/"
+                element={
+                  <SuspenseBoundary fallback={<WaitingRoomSkeleton />}>
                     <RoomProvider>
-                      <SessionProvider>
-                        <PublisherProvider>
-                          <MeetingRoom />
-                        </PublisherProvider>
-                      </SessionProvider>
+                      <PreviewPublisherProvider>
+                        <EquipmentsTestRoom />
+                      </PreviewPublisherProvider>
                     </RoomProvider>
                   </SuspenseBoundary>
-                </RedirectToWaitingRoom>
-              }
-            />
-          </Route>
+                }
+              />
+              <Route path="/waiting-room" element={<WaitingDoctorRoom />} />
 
-          <Route path="/goodbye" element={<GoodBye />} />
-          <Route path="*" element={<LandingPage />} />
-          <Route path="/unsupported-browser" element={<UnsupportedBrowserPage />} />
-        </Routes>
+              <Route
+                path="/room/:roomName"
+                element={
+                  <RedirectToWaitingRoom>
+                    <SuspenseBoundary fallback={<MeetingRoomSkeleton />}>
+                      <RoomProvider>
+                        <SessionProvider>
+                          <PublisherProvider>
+                            <MeetingRoom />
+                          </PublisherProvider>
+                        </SessionProvider>
+                      </RoomProvider>
+                    </SuspenseBoundary>
+                  </RedirectToWaitingRoom>
+                }
+              />
+            </Route>
+
+            <Route path="/goodbye" element={<ExitPage />} />
+            <Route path="/unsupported-browser" element={<UnsupportedBrowserPage />} />
+            <Route path="/error" element={<ErrorPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </RofimInit>
       </Router>
     </Box>
   );

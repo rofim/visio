@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import useTheme from '@ui/theme';
 
 type ErrorPageProps = {
-  error: Error;
+  error?: Error;
 };
 
 /**
@@ -40,12 +40,14 @@ const ErrorPage = ({ error }: ErrorPageProps): ReactElement => {
           {t('errorPage.description')}
         </p>
 
-        <pre
-          className="overflow-x-auto whitespace-pre-wrap break-words rounded-lg p-4 text-xs"
-          style={{ backgroundColor: theme.colors.background, color: theme.colors.error }}
-        >
-          {error.message}
-        </pre>
+        {!!error?.message && (
+          <pre
+            className="overflow-x-auto whitespace-pre-wrap break-words rounded-lg p-4 text-xs"
+            style={{ backgroundColor: theme.colors.background, color: theme.colors.error }}
+          >
+            {error.message}
+          </pre>
+        )}
       </div>
     </div>
   );

@@ -1,12 +1,6 @@
 import { ReactElement, useEffect } from 'react';
 
-/**
- * GoodBye Component
- *
- * This component automatically closes the window when mounted.
- * @returns {ReactElement} - the goodbye page (empty div while closing).
- */
-const GoodBye = (): ReactElement => {
+const ExitPage = (): ReactElement => {
   useEffect(() => {
     const closeWindow = () => {
       try {
@@ -29,4 +23,4 @@ const GoodBye = (): ReactElement => {
   return <div>GoodBye</div>;
 };
 
-export default GoodBye;
+export default ExitPage;

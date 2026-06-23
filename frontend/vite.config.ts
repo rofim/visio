@@ -62,6 +62,7 @@ export default defineConfig(({ mode }) => {
     'ALLOW_ARCHIVING',
     'ALLOW_CAPTIONS',
     'ALLOW_CHAT',
+    'ALLOW_PICTURE_IN_PICTURE',
     'MEETING_ROOM_ALLOW_DEVICE_SELECTION',
     'ALLOW_EMOJIS',
     'ALLOW_SCREEN_SHARE',
@@ -128,6 +129,7 @@ export default defineConfig(({ mode }) => {
         '@core-test': path.resolve(__dirname, '../libs/core/test'),
         '@ui-test': path.resolve(__dirname, '../libs/ui/test'),
         '@stores': '/src/stores',
+        '@rofim': '/src/rofim',
       },
     },
 

@@ -101,7 +101,7 @@ const Toolbar = ({
       key="LayoutButton"
       isPinningPresent={isPinningPresent}
     />,
-    'documentPictureInPicture' in window && <PictureInPictureButton key="PictureInPictureButton" />,
+    <PictureInPictureButton key="PictureInPictureButton" />,
     <EmojiGridButton
       isEmojiGridOpen={openEmojiGridDesktop}
       setIsEmojiGridOpen={setOpenEmojiGridDesktop}

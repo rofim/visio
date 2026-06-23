@@ -2,7 +2,7 @@ import { LAYOUT_MODES, type LayoutMode } from './types/session';
 
 declare const __APP_ENV__: Record<string, string | undefined>;
 
-export type Lang = 'en' | 'it' | 'es' | 'es-MX' | 'en-US' | 'de';
+export type Lang = 'en' | 'it' | 'es' | 'es-MX' | 'en-US' | 'de' | 'fr' | 'pt';
 
 export const RESOLUTIONS = [
   '1920x1080',
@@ -16,7 +16,7 @@ export const RESOLUTIONS = [
 
 export type Resolution = (typeof RESOLUTIONS)[number];
 
-export type Mode = 'development' | 'production' | 'test';
+export type Mode = 'development' | 'staging' | 'preprod' | 'production' | 'test';
 
 export type EnvArg = {
   [key: string]: unknown;
@@ -61,7 +61,7 @@ function parseOptionalString(value: unknown): string | undefined {
   return value;
 }
 
-const LANGS: Lang[] = ['en', 'it', 'es', 'es-MX', 'en-US', 'de'];
+const LANGS: Lang[] = ['en', 'it', 'es', 'es-MX', 'en-US', 'de', 'fr', 'pt'];
 
 function parseLang(value: unknown, fallback: Lang): Lang {
   if (value === undefined || value === null || value === '') return fallback;
@@ -124,8 +124,9 @@ function parseLayoutMode(value: unknown, fallback: LayoutMode): LayoutMode {
 }
 
 function parseMode(value: unknown): Mode {
-  if (value === 'development' || value === 'production' || value === 'test') {
-    return value;
+  const modes: Mode[] = ['development', 'staging', 'preprod', 'production', 'test'];
+  if (modes.includes(value as Mode)) {
+    return value as Mode;
   }
   throw new Error(`Invalid MODE: ${toDisplayString(value)}`);
 }
@@ -151,6 +152,7 @@ export class Env {
   public ALLOW_CHAT: boolean;
   public MEETING_ROOM_ALLOW_DEVICE_SELECTION: boolean;
   public ALLOW_EMOJIS: boolean;
+  public ALLOW_PICTURE_IN_PICTURE: boolean;
   public ALLOW_SCREEN_SHARE: boolean;
   public DEFAULT_LAYOUT_MODE: LayoutMode;
   public SHOW_PARTICIPANT_LIST: boolean;
@@ -193,6 +195,7 @@ export class Env {
       true
     );
     this.ALLOW_EMOJIS = parseBoolean(env.ALLOW_EMOJIS, true);
+    this.ALLOW_PICTURE_IN_PICTURE = parseBoolean(env.ALLOW_PICTURE_IN_PICTURE, false);
     this.ALLOW_SCREEN_SHARE = parseBoolean(env.ALLOW_SCREEN_SHARE, true);
     this.SHOW_PARTICIPANT_LIST = parseBoolean(env.SHOW_PARTICIPANT_LIST, true);
     this.BYPASS_WAITING_ROOM = parseBoolean(env.BYPASS_WAITING_ROOM, false);

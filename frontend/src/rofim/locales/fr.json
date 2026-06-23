@@ -1,6 +1,7 @@
 {
   "button.join": "Rejoindre la visio",
   "equipmentsTestRoom.patient.disclaimer": "Après avoir cliqué sur “<strong>Rejoindre la visio</strong>”, vous serez connecté à la consultation. Merci de rester connecté, votre médecin vous rejoindra dans quelques instants.",
+  "errorPage.description": "L’application n’a pas pu démarrer. Veuillez fermer cette page puis reconnectez-vous à votre visio depuis Rofim. Merci de contacter le support si le problème persiste.",
   "pip.ariaLabel": "activer picture in picture",
   "pip.state.on": "Activer le mode PIP",
   "pip.state.off": "Désactiver le mode PIP",

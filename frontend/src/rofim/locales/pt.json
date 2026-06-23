@@ -1,6 +1,7 @@
 {
   "button.join": "Participar na videochamada",
   "equipmentsTestRoom.patient.disclaimer": "Após clicar em “<strong>Participar na videochamada</strong>“, você será conectado à consulta. Por favor, permaneça conectado, seu médico entrará em instantes.",
+  "errorPage.description": "Não foi possível iniciar a aplicação. Feche esta página e volte a ligar-se à sua videochamada a partir do Rofim. Contacte o suporte se o problema persistir.",
   "pip.ariaLabel": "ativar imagem na imagem",
   "pip.state.on": "Ativar o modo PIP",
   "pip.state.off": "Desativar o modo PIP",

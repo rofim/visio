@@ -1,5 +1,5 @@
 /* eslint-disable @cspell/spellchecker */
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAtom } from 'jotai';
 import { getRofimSession, RofimSession } from '../utils/session';
@@ -87,7 +87,9 @@ const useWebSocket = (shouldLogToMatomo: boolean = false) => {
     setIsSocketConnected(false);
   };
 
-  const initSocket = () => {
+  // useCallback with empty deps: initSocket is designed to run once on mount.
+  // isSocketInit guards against double-init; atom setters from jotai are stable.
+  const initSocket = useCallback(() => {
     // Init socket only for TC patient with waitingRoom active
     const rofimSession = getRofimSession();
 
@@ -122,7 +124,8 @@ const useWebSocket = (shouldLogToMatomo: boolean = false) => {
 
       setIsSocketInit(true);
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return {
     initSocket,

@@ -2,19 +2,12 @@ import devEnv from './environment.local';
 import stagingEnv from './environment.staging';
 import preprodEnv from './environment.preprod';
 import prodEnv from './environment.prod';
+import type { IEnvironment } from './environment.interface';
 
-const getEnvironment = () => {
-  const mode = import.meta.env.MODE;
-  switch (mode) {
-    case 'staging':
-      return stagingEnv;
-    case 'preprod':
-      return preprodEnv;
-    case 'production':
-      return prodEnv;
-    default:
-      return devEnv;
-  }
+const environments: Record<string, IEnvironment> = {
+  staging: stagingEnv,
+  preprod: preprodEnv,
+  production: prodEnv,
 };
 
-export default getEnvironment();
+export default environments[import.meta.env.MODE] ?? devEnv;

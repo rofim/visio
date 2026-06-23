@@ -3,15 +3,15 @@ import PictureInPictureAltIcon from '@mui/icons-material/PictureInPictureAlt';
 import { useTranslation } from 'react-i18next';
 import ToolbarButton from '../../../components/MeetingRoom/ToolbarButton';
 import usePictureInPicture from '../../hooks/usePictureInPicture';
+import { env } from '../../../env';
 import './index.css';
 
 const PictureInPictureButton = ({ className }: { className?: string }) => {
   const { t } = useTranslation();
   const { isPipActive, togglePip } = usePictureInPicture();
   const title = isPipActive ? t('pip.state.off') : t('pip.state.on');
-  // Check if Picture-in-Picture is supported in browser
-  if (!('documentPictureInPicture' in window)) {
-    console.warn('Picture-in-Picture is not supported in this browser.');
+
+  if (!env.ALLOW_PICTURE_IN_PICTURE || !('documentPictureInPicture' in window)) {
     return null;
   }
 

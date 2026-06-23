@@ -1,10 +1,10 @@
-/* eslint-disable @cspell/spellchecker */
-import environment from './environments';
+import { useAtom } from 'jotai';
+import { useEffect } from 'react';
+import { isAppInitAtom } from '../atoms/webSocketAtoms';
+import { getRofimSession } from '../utils/session';
+import environment from '../environments';
 
-/**
- * Init Matomo
- */
-export default function initMatomo(patientId?: string): void {
+function initMatomo(patientId?: string): void {
   const config = environment.matomo;
   if (!config) {
     return;
@@ -12,7 +12,6 @@ export default function initMatomo(patientId?: string): void {
 
   window._paq = window._paq || [];
   const paq = window._paq;
-  // Configuration cross-domain
   paq.push(['setCookieDomain', config.cookieDomain]);
   paq.push(['setDomains', config.domains]);
   paq.push(['setCrossDomainLinkingTimeout', 30]);
@@ -32,3 +31,16 @@ export default function initMatomo(patientId?: string): void {
   g.src = `${u}matomo.js`;
   s.parentNode?.insertBefore(g, s);
 }
+
+const useMatomo = () => {
+  const [isAppInit] = useAtom(isAppInitAtom);
+
+  useEffect(() => {
+    if (isAppInit) {
+      const rofimSession = getRofimSession();
+      initMatomo(rofimSession?.patientId);
+    }
+  }, [isAppInit]);
+};
+
+export default useMatomo;

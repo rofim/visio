@@ -1,7 +1,5 @@
 import { ReactElement } from 'react';
 import PageLayout from '@ui/PageLayout';
-import Banner from '@components/Banner';
-import Footer from '@components/Footer/Footer';
 import SupportedBrowsers from '../../components/UnsupportedBrowser/SupportedBrowsers';
 import UnsupportedBrowserMessage from '../../components/UnsupportedBrowser/UnsupportedBrowserMessage';
 
@@ -17,18 +15,12 @@ import UnsupportedBrowserMessage from '../../components/UnsupportedBrowser/Unsup
 const UnsupportedBrowserPage = (): ReactElement => {
   return (
     <PageLayout>
-      <PageLayout.Banner>
-        <Banner />
-      </PageLayout.Banner>
       <PageLayout.Left>
         <UnsupportedBrowserMessage />
       </PageLayout.Left>
       <PageLayout.Right>
         <SupportedBrowsers />
       </PageLayout.Right>
-      <PageLayout.Footer>
-        <Footer />
-      </PageLayout.Footer>
     </PageLayout>
   );
 };

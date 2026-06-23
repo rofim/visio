@@ -1,8 +1,8 @@
 #!/bin/bash
 
 export ENABLE_REPORT_ISSUE=false
-export I18N_FALLBACK_LANGUAGE='en'
-export I18N_SUPPORTED_LANGUAGES='en|en-US|es|es-MX|it|de'
+export I18N_FALLBACK_LANGUAGE='fr'
+export I18N_SUPPORTED_LANGUAGES='de|en|es|fr|it|pt'
 export ALLOW_BACKGROUND_EFFECTS=true
 export ALLOW_CAMERA_CONTROL=true
 export ALLOW_VIDEO_ON_JOIN=true
@@ -15,6 +15,7 @@ export WAITING_ROOM_ALLOW_DEVICE_SELECTION=true
 export ALLOW_ARCHIVING=false
 export ALLOW_CAPTIONS=false
 export ALLOW_CHAT=true
+export ALLOW_PICTURE_IN_PICTURE=true
 export DEVICE_SELECTION=true
 export ALLOW_EMOJIS=false
 export ALLOW_SCREEN_SHARE=true
