@@ -128,6 +128,7 @@ export default defineConfig(({ mode }) => {
         '@core-test': path.resolve(__dirname, '../libs/core/test'),
         '@ui-test': path.resolve(__dirname, '../libs/ui/test'),
         '@stores': '/src/stores',
+        '@rofim': '/src/rofim',
       },
     },
 

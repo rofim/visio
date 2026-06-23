@@ -10,7 +10,18 @@
       "outputs": ["{projectRoot}/dist"],
       "options": {
         "cwd": "frontend",
-        "command": "vite build && nx run frontend:cp-build'"
+        "command": "bash -c 'source ../vcrBuild.env.sh && vite build'"
+      },
+      "configurations": {
+        "staging": {
+          "command": "bash -c 'source ../vcrBuild.env.sh && vite build --mode staging'"
+        },
+        "preprod": {
+          "command": "bash -c 'source ../vcrBuild.env.sh && vite build --mode preprod'"
+        },
+        "production": {
+          "command": "bash -c 'source ../vcrBuild.env.sh && vite build --mode production'"
+        }
       }
     },
     "build-room": {

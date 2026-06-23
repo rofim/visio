@@ -72,7 +72,7 @@ const SmallViewportHeader = (): ReactElement => {
   return (
     <Box
       data-testid="smallViewportHeader"
-      className="flex items-center justify-between bg-vera-dark-background px-4 pt-2 text-vera-on-dark-grey"
+      className="hidden items-center justify-between bg-vera-dark-background px-4 pt-2 text-vera-on-dark-grey"
     >
       <Box className="flex min-w-0 items-center gap-1 px-0.5">
         {isRecording && <RecordingIndicator isCompact />}

@@ -91,6 +91,7 @@ const ParticipantList = ({ handleClose, isOpen }: ParticipantListProps): ReactEl
           handleClose={handleClose}
         />
         <Box
+          className="hidden!"
           data-testid="meetingUrlHeader"
           sx={{
             display: 'flex',
@@ -141,7 +142,7 @@ const ParticipantList = ({ handleClose, isOpen }: ParticipantListProps): ReactEl
             </Tooltip>
           </IconButton>
         </Box>
-        <Box data-testid="meetingSearchParticipant" sx={{ px: 3, pt: 1, pb: 1 }}>
+        <Box className="hidden" data-testid="meetingSearchParticipant" sx={{ px: 3, pt: 1, pb: 1 }}>
           <TextField
             fullWidth
             size="small"

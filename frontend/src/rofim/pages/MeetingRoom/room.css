@@ -1,6 +1,0 @@
-/* cache le lien de partage de la visio scrum-2872 */
-div[data-testid='meetingUrlHeader'],
-div[data-testid='smallViewportHeader'],
-div[data-testid='meetingSearchParticipant'] {
-  display: none;
-}

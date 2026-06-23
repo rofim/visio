@@ -1,8 +1,8 @@
 #!/bin/bash
 
 export ENABLE_REPORT_ISSUE=false
-export I18N_FALLBACK_LANGUAGE='en'
-export I18N_SUPPORTED_LANGUAGES='en|en-US|es|es-MX|it|de'
+export I18N_FALLBACK_LANGUAGE='fr'
+export I18N_SUPPORTED_LANGUAGES='de|en|es|fr|it|pt'
 export ALLOW_BACKGROUND_EFFECTS=true
 export ALLOW_CAMERA_CONTROL=true
 export ALLOW_VIDEO_ON_JOIN=true
