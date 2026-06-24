@@ -2,7 +2,6 @@ import { FC, MouseEvent } from 'react';
 import Button from '@mui/material/Button';
 import { Alert, CircularProgress } from '@mui/material';
 import { Trans, useTranslation } from 'react-i18next';
-import useTheme from '@ui/theme';
 
 interface JoinRoomButtonProps {
   isLoading: boolean;
@@ -19,7 +18,6 @@ const JoinRoomButton: FC<JoinRoomButtonProps> = ({
   waitingRoom,
   onClick,
 }) => {
-  const theme = useTheme();
   const { t } = useTranslation();
 
   return (
@@ -28,9 +26,9 @@ const JoinRoomButton: FC<JoinRoomButtonProps> = ({
         <Alert
           icon={false}
           sx={{
-            color: theme.colors.alertText,
-            background: theme.colors.warning,
-            borderColor: theme.colors.warningHover,
+            // color: theme.colors.alertText,
+            // background: theme.colors.warning,
+            // borderColor: theme.colors.warningHover,
             border: '1px solid',
             marginBottom: 4,
             maxWidth: 584,
@@ -53,7 +51,7 @@ const JoinRoomButton: FC<JoinRoomButtonProps> = ({
             className="ml-3"
             sx={{
               position: 'relative',
-              color: theme.colors.onPrimary,
+              // color: theme.colors.onPrimary,
             }}
             size={25}
             data-testid="CircularProgress"

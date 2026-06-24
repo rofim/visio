@@ -1,19 +1,12 @@
 import React, { type PropsWithChildren } from 'react';
 import UserProvider from '@Context/user';
-import { ThemeProvider } from '@ui/theme';
-import { ThemeProviderPropsBase } from '@ui/theme/themeContext';
-import getTokensByMode from '@ui/theme/helpers/getTokensByMode';
+import { ThemeProvider, type ThemeProviderProps } from '@ui/theme';
 
-type AppContextProviderProps = PropsWithChildren<ThemeProviderPropsBase>;
+type AppContextProviderProps = PropsWithChildren<ThemeProviderProps>;
 
-const AppContextProvider: React.FC<AppContextProviderProps> = ({ children }) => {
+const AppContextProvider: React.FC<AppContextProviderProps> = ({ children, container }) => {
   return (
-    <ThemeProvider
-      theme={{
-        lightMode: getTokensByMode('light'),
-        darkMode: getTokensByMode('light'),
-      }}
-    >
+    <ThemeProvider container={container}>
       <UserProvider>{children}</UserProvider>
     </ThemeProvider>
   );

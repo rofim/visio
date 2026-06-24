@@ -5,14 +5,12 @@ import { getFormattedTime } from '../../utils/dateTime';
 import Box from '@mui/material/Box';
 import PageLayout from '@ui/PageLayout';
 import Typography from '@mui/material/Typography';
-import useTheme from '@ui/theme';
 import Fade from '@mui/material/Fade';
 import Alert from '@mui/material/Alert';
 import useWaitingDoctor from '../hooks/useWaitingDoctor';
 
 const WaitingRoom = (): ReactElement => {
   const { t, i18n } = useTranslation();
-  const theme = useTheme();
   const { alertConnectionLost, doctorDelayInMinute, startTime } = useWaitingDoctor();
 
   return (
@@ -33,9 +31,9 @@ const WaitingRoom = (): ReactElement => {
                 severity="warning"
                 className="ml-auto w-full max-w-96"
                 sx={{
-                  color: theme.colors.alertText,
-                  background: theme.colors.warning,
-                  borderRadius: theme.shapes.borderRadiusLarge,
+                  // color: theme.colors.alertText,
+                  // background: theme.colors.warning,
+                  // borderRadius: theme.shapes.borderRadiusLarge,
                   textAlign: 'start',
                 }}
               >
@@ -46,7 +44,7 @@ const WaitingRoom = (): ReactElement => {
             <Typography
               variant="h1"
               sx={{
-                color: theme.colors.textSecondary,
+                // color: theme.colors.textSecondary,
                 fontSize: '2rem',
               }}
             >
@@ -56,8 +54,8 @@ const WaitingRoom = (): ReactElement => {
             <Box
               sx={{
                 p: 7,
-                backgroundColor: theme.colors.background,
-                borderRadius: theme.shapes.borderRadiusLarge,
+                // backgroundColor: theme.colors.background,
+                // borderRadius: theme.shapes.borderRadiusLarge,
               }}
             >
               {!!doctorDelayInMinute && startTime && (
@@ -65,14 +63,14 @@ const WaitingRoom = (): ReactElement => {
                   severity="warning"
                   sx={{
                     backgroundColor: '#fff1cf',
-                    borderRadius: theme.shapes.borderRadiusLarge,
+                    // borderRadius: theme.shapes.borderRadiusLarge,
                     mb: 2,
                   }}
                 >
                   <Typography
                     sx={{
-                      color: theme.colors.warning,
-                      fontWeight: theme.typography.weight['caption-semibold'].value,
+                      // color: theme.colors.warning,
+                      // fontWeight: theme.typography.weight['caption-semibold'].value,
                       textAlign: 'start',
                     }}
                   >
@@ -80,7 +78,7 @@ const WaitingRoom = (): ReactElement => {
                   </Typography>
                   <Typography
                     sx={{
-                      color: theme.colors.warning,
+                      // color: theme.colors.warning,
                       textAlign: 'start',
                     }}
                   >
@@ -103,7 +101,7 @@ const WaitingRoom = (): ReactElement => {
               <Typography
                 variant="h2"
                 sx={{
-                  color: theme.colors.textPrimary,
+                  // color: theme.colors.textPrimary,
                   fontSize: '1.5rem',
                 }}
               >
@@ -112,26 +110,32 @@ const WaitingRoom = (): ReactElement => {
 
               <Typography
                 variant="h6"
-                sx={{
-                  color: theme.colors.textTertiary,
-                }}
+                sx={
+                  {
+                    // color: theme.colors.textTertiary,
+                  }
+                }
               >
                 {t('waitingRoom.redirection')}
               </Typography>
               <Typography
                 variant="h6"
-                sx={{
-                  color: theme.colors.textTertiary,
-                }}
+                sx={
+                  {
+                    // color: theme.colors.textTertiary,
+                  }
+                }
               >
                 {t('waitingRoom.pleaseWait')}
               </Typography>
             </Box>
 
             <Typography
-              sx={{
-                color: theme.colors.textSecondary,
-              }}
+              sx={
+                {
+                  // color: theme.colors.textSecondary,
+                }
+              }
             >
               <LocalPhoneIcon sx={{ fontSize: 20, display: 'inline' }} className="mr-1" />
               {t('waitingRoom.disclaimer')}

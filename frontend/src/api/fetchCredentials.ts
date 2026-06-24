@@ -1,5 +1,6 @@
 import { jwtDecode } from 'jwt-decode';
 import { getStorageItem } from '../utils/storage';
+import { Credential } from '@app-types/session';
 
 /**
  * @typedef CredentialsType
@@ -15,7 +16,7 @@ import { getStorageItem } from '../utils/storage';
  * @returns {Credential} the credentials needed to enter the meeting room
  */
 
-export default (_roomName?: string) => {
+export default (_roomName?: string): Promise<Credential> => {
   const token = getStorageItem('token');
   if (!token) {
     throw new Error('Rofim token is missing from localStorage');
@@ -23,10 +24,7 @@ export default (_roomName?: string) => {
   const rofimSession = jwtDecode<{ apiKey: string; sessionId: string; token: string }>(token);
 
   return Promise.resolve({
-    data: {
-      apiKey: rofimSession.apiKey,
-      sessionId: rofimSession.sessionId,
-      token: rofimSession.token,
-    },
+    sessionKey: rofimSession.sessionId,
+    token: rofimSession.token,
   });
 };

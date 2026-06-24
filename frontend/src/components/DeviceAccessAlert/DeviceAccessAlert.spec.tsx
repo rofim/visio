@@ -1,11 +1,11 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, Mock } from 'vitest';
 import DeviceAccessAlert from './DeviceAccessAlert';
-import * as util from '../../utils/util';
+import * as platform from '@web/platform';
 import { DEVICE_ACCESS_STATUS } from '../../utils/constants';
 
-vi.mock('../../utils/util', async () => {
-  const actual = await vi.importActual<typeof import('../../utils/util')>('../../utils/util');
+vi.mock('@web/platform', async () => {
+  const actual = await vi.importActual<typeof import('@web/platform')>('@web/platform');
   return {
     ...actual,
     isWebKit: vi.fn(),
@@ -13,8 +13,8 @@ vi.mock('../../utils/util', async () => {
 });
 
 describe('DeviceAccessAlert', () => {
-  it('should display the correct message status is PENDING', () => {
-    (util.isWebKit as Mock).mockReturnValue(false);
+  it('should display the correct message and image when access status is PENDING', () => {
+    (platform.isWebKit as Mock).mockReturnValue(false);
     render(<DeviceAccessAlert accessStatus={DEVICE_ACCESS_STATUS.PENDING} />);
 
     // Check that the correct message is displayed
@@ -25,8 +25,8 @@ describe('DeviceAccessAlert', () => {
     ).toBeInTheDocument();
   });
 
-  it('should display the correct message when access status is DENIED', () => {
-    (util.isWebKit as Mock).mockReturnValue(false);
+  it('should display the correct message and image when access status is DENIED', () => {
+    (platform.isWebKit as Mock).mockReturnValue(false);
     render(<DeviceAccessAlert accessStatus={DEVICE_ACCESS_STATUS.REJECTED} />);
 
     // Check that the correct message is displayed
@@ -38,7 +38,7 @@ describe('DeviceAccessAlert', () => {
   });
 
   it('should not display anything when access status is set to null', () => {
-    (util.isWebKit as Mock).mockReturnValue(false);
+    (platform.isWebKit as Mock).mockReturnValue(false);
     render(<DeviceAccessAlert accessStatus={null} />);
 
     // Check that there is no alert displayed

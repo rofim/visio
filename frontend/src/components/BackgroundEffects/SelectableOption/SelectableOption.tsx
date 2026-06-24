@@ -1,5 +1,5 @@
 import { ReactElement, ReactNode } from 'react';
-import useTheme from '@ui/theme';
+import classNames from 'classnames';
 import Box from '@mui/material/Box';
 import Tooltip from '@mui/material/Tooltip';
 import { DEFAULT_SELECTABLE_OPTION_WIDTH } from '../../../utils/constants';
@@ -45,12 +45,9 @@ const SelectableOption = ({
   className,
   ...otherProps
 }: SelectableOptionProps): ReactElement => {
-  const theme = useTheme();
-
   return (
     <Box
       className={className}
-      key={id}
       sx={{
         position: 'relative',
         display: 'inline-block',
@@ -62,20 +59,19 @@ const SelectableOption = ({
         data-testid={`background-${id}`}
         onClick={onClick}
         aria-pressed={isSelected}
+        className={classNames('text-vera-secondary', {
+          'border-[1.5px] border-vera-primary bg-vera-background': isSelected,
+          'border border-vera-border bg-vera-surface': !isSelected,
+        })}
         sx={{
           width: size,
           height: size,
           overflow: 'hidden',
-          borderRadius: theme.shapes.borderRadiusMedium,
-          border: isSelected
-            ? `1.5px solid ${theme.colors.primary}`
-            : `1px solid ${theme.colors.border}`,
+          borderRadius: '8px',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          color: theme.colors.secondary,
-          backgroundColor: isSelected ? theme.colors.background : theme.colors.surface,
           opacity: 1,
         }}
         {...otherProps}
