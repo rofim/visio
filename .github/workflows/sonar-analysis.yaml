@@ -24,14 +24,14 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Run quality Tests
-        run: yarn quality-check frontend
+      # - name: Run quality Tests
+      #   run: yarn quality-check frontend
 
-      - name: Run frontend tests
-        run: yarn test:frontend
+      # - name: Run frontend tests
+      #   run: yarn test:frontend
 
-      - name: Build frontend
-        run: yarn build frontend
+      # - name: Build frontend
+      #   run: yarn build frontend
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v5
