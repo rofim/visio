@@ -73,7 +73,11 @@ class VonageVideoClient extends EventEmitter<VonageVideoClientEvents> {
 
     this.credential = credential;
 
-    const { sessionId, applicationId } = decodeSessionKey({ sessionKey: credential.sessionKey });
+    // const { sessionId, applicationId } = decodeSessionKey({ sessionKey: credential.sessionKey });
+    const { sessionId, applicationId } = {
+      sessionId: '2_MX40NzcwMjgzMX5-MTc4MjM3NDAxMDE4N35HWkg4VENLNWtoUG92Tm0ySTNIYlJqQit-fn4',
+      applicationId: '47702831',
+    };
 
     this.applicationId = applicationId;
     this.sessionId = sessionId;

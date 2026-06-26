@@ -38,7 +38,7 @@ const InnerApp = () => {
           <Routes>
             <Route element={<RedirectToUnsupportedBrowserPage />}>
               <Route
-                path="/"
+                path="/:roomIdentifier"
                 element={
                   <SuspenseBoundary fallback={<WaitingRoomSkeleton />}>
                     <RoomProvider>
@@ -52,7 +52,7 @@ const InnerApp = () => {
               <Route path="/waiting-room" element={<WaitingDoctorRoom />} />
 
               <Route
-                path="/room/:roomName"
+                path="/room/:roomIdentifier"
                 element={
                   <RedirectToWaitingRoom>
                     <SuspenseBoundary fallback={<MeetingRoomSkeleton />}>
