@@ -1,5 +1,5 @@
 {
-  "archiveList.archive.createdAt": "Erstellt: {{createdAt}}",
+  "archiveList.archive.createdAt": "Erstellt: {{createdAt}} test",
   "archiveList.archive.index": "Aufzeichnung {{index}}",
   "archiveList.download.tooltip": "Aufzeichnung {{id}} herunterladen",
   "archiveList.download": "Herunterladen",
