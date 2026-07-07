@@ -14,6 +14,7 @@ import { twMerge } from 'tailwind-merge';
 import RecordingIndicator from '../../components/MeetingRoom/RecordingIndicator';
 import RecordingPopUpIndicator from '@components/MeetingRoom/RecordingPopupIndicator';
 import { RECORDING_POPUP_TIMEOUT_MS } from '@utils/constants';
+import useRofimMeeting from '@rofim/hooks/useRofimMeeting';
 
 /**
  * MeetingRoom Component
@@ -59,6 +60,8 @@ const MeetingRoom = ({ fullSize = false, className }: MeetingRoomProps): ReactEl
     latestNotifiedArchiveId,
     handleRecordingNotified,
   } = useMeetingRoom();
+
+  useRofimMeeting();
 
   return (
     <Box

@@ -142,7 +142,7 @@ describe('useScreenSharing', () => {
     expect(result.current.screenshareVideoElement).toBe(mockVideoEl);
   });
 
-  it('sets isEntireScreen to false when displaySurface is window', async () => {
+  it('sets isEntireScreen to true when displaySurface is window', async () => {
     const { result } = render({
       userContext: {
         __interceptor: (context: UserContextType | null) => {
@@ -174,7 +174,7 @@ describe('useScreenSharing', () => {
       handlers['videoElementCreated']({ element: mockVideoEl });
     });
 
-    expect(result.current.isEntireScreen).toBe(false);
+    expect(result.current.isEntireScreen).toBe(true);
   });
 
   it('resets isEntireScreen when streamDestroyed fires', async () => {

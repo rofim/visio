@@ -93,9 +93,9 @@ const useScreenShare = (): UseScreenShareType => {
 
           const width = settings?.width;
           const height = settings?.height;
-
+          console.log('displaySurface', displaySurface);
           const isMonitor =
-            displaySurface === 'monitor' ||
+            ['monitor', 'window'].includes(displaySurface || '') ||
             (!displaySurface &&
               width !== undefined &&
               height !== undefined &&

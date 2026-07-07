@@ -10,8 +10,8 @@ void i18n
   .use(initReactI18next)
   // for all options read: https://www.i18next.com/overview/configuration-options
   .init({
-    fallbackLng: env.I18N_FALLBACK_LANGUAGE,
-    supportedLngs: env.I18N_SUPPORTED_LANGUAGES,
+    fallbackLng: env.I18N_FALLBACK_LANGUAGE ?? 'fr',
+    supportedLngs: env.I18N_SUPPORTED_LANGUAGES ?? ['fr'],
     resources,
 
     /**

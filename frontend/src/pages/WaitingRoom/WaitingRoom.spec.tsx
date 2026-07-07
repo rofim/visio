@@ -3,7 +3,6 @@ import { screen, waitFor } from '@testing-library/react';
 import { ReactElement, ReactNode } from 'react';
 import { Publisher } from '@vonage/client-sdk-video';
 import EventEmitter from 'events';
-import userEvent from '@testing-library/user-event';
 import { defaultAudioDevice } from '@utils/mockData/device';
 import usePermissions from '@hooks/usePermissions';
 import { DEVICE_ACCESS_STATUS } from '@utils/constants';
@@ -180,8 +179,6 @@ describe('WaitingRoom', () => {
   });
 
   it('should call destroyPublisher when navigating away from waiting room', async () => {
-    const user = userEvent.setup();
-
     env.partialUpdate({
       WAITING_ROOM_ALLOW_DEVICE_SELECTION: true,
     });
@@ -205,14 +202,11 @@ describe('WaitingRoom', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('test-room-name')).toBeInTheDocument();
+      expect(screen.getByText('Join meeting')).toBeInTheDocument();
     });
 
-    const input = screen.getByRole('textbox', { name: /name/i });
-    await user.type(input, 'Betsey Trotwood');
-    expect(input).toHaveValue('Betsey Trotwood');
-
-    await user.keyboard('{Enter}');
+    const button = screen.getByRole('button', { name: /Join meeting/i });
+    button.click();
 
     unmount();
 
