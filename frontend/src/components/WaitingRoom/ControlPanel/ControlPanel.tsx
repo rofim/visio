@@ -105,6 +105,7 @@ const ControlPanel = ({
           justifyContent: 'space-between',
           alignItems: 'center',
           padding: '0 4px',
+          flexWrap: 'wrap',
         }}
       >
         <ButtonBase

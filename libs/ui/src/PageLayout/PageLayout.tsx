@@ -58,14 +58,12 @@ const PageLayout = ({ children, sx, ...props }: PageLayoutProps): React.ReactNod
               alignItems: 'center',
               justifyContent: 'center',
               bgcolor: { xs: theme.colors.surface, md: theme.colors.surface },
-              overflow: 'hidden',
               p: { xs: 3, sm: 5 },
             }}
           >
             {left}
           </Box>
         )}
-
         {right && (
           <Box
             sx={{
