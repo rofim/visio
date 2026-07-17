@@ -37,13 +37,9 @@ const InnerApp = () => {
   return (
     <Box
       sx={{
-        backgroundColor: {
-          xs: theme.colors.surface,
-          md: theme.colors.background,
-        },
+        backgroundColor: theme.colors.surface,
         position: 'relative',
-        overflowX: 'hidden',
-        overflowY: 'auto',
+        overflow: 'auto',
         height: '100dvh',
       }}
     >
