@@ -2,7 +2,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAtom } from 'jotai';
-import { getRofimSession } from '../utils/session';
+import { ActType, getRofimSession } from '../utils/session';
 import rofimApiService, { WaitingRoomStatus } from '../api/rofimApi';
 import { canJoinVisioAtom, doctorDelayAtom, tcStartTimeAtom } from '../atoms/webSocketAtoms';
 import useWebSocket from './useWebSocket';
@@ -21,9 +21,10 @@ const useWaitingDoctor = () => {
   const room = session?.room;
   const patientId = session?.patientId;
   const waitingRoom = session?.waitingRoom;
+  const actType = session?.type;
 
   useEffect(() => {
-    if (patientId && waitingRoom && isOnline) {
+    if (((patientId && actType === ActType.TC) || actType === ActType.TCA) && isOnline) {
       const updateTCStatus = async () => {
         const tc = await rofimApiService.updateTeleconsultationStatus(WaitingRoomStatus.Wait);
         if (tc.doctorDelayInMinute && tc.startTime) {
@@ -46,6 +47,7 @@ const useWaitingDoctor = () => {
     }
     return () => {};
   }, [
+    actType,
     waitingRoom,
     patientId,
     setDoctorDelayInMinute,

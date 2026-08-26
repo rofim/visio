@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAtom } from 'jotai';
-import { getRofimSession, RofimSession } from '../utils/session';
+import { ActType, getRofimSession, RofimSession } from '../utils/session';
 import environment from '../environments';
 import {
   canJoinVisioAtom,
@@ -94,9 +94,7 @@ const useWebSocket = (shouldLogToMatomo: boolean = false) => {
     const rofimSession = getRofimSession();
 
     const shouldInitSocket =
-      rofimSession?.patientId &&
-      rofimSession.waitingRoom &&
-      rofimSession?.type === 'teleconsultation';
+      rofimSession?.patientId && rofimSession.waitingRoom && rofimSession?.type === ActType.TC;
 
     // bypass socket connection
     if (!shouldInitSocket) {

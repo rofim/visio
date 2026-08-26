@@ -11,7 +11,10 @@ export enum WaitingRoomStatus {
   CheckingEquipment = 'checking-equipment',
 }
 
-const updateTeleconsultationStatus = async (type: WaitingRoomStatus) => {
+const updateTeleconsultationStatus = async (
+  type: WaitingRoomStatus,
+  options?: { keepalive?: boolean }
+) => {
   const session = getRofimSession();
   const patientId = session?.patientId;
   const sessionId = session?.sessionId;
@@ -21,6 +24,7 @@ const updateTeleconsultationStatus = async (type: WaitingRoomStatus) => {
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      keepalive: options?.keepalive,
     }
   );
 

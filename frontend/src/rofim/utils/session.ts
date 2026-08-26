@@ -1,13 +1,20 @@
 import { jwtDecode } from 'jwt-decode';
 import { getStorageItem, resetStorage, setStorageItem } from '../../utils/storage';
 
+export enum ActType {
+  TC = 'teleconsultation',
+  TCA = 'tca',
+  RCP = 'rcp',
+  OTHER = 'other',
+}
+
 export type RofimSession = {
   username: string;
   room: string;
   token: string;
   authorizationHeader: string;
   sessionId: string;
-  type: string;
+  type: ActType;
   slug?: string;
   patientId?: string;
   waitingRoom: boolean;
@@ -25,7 +32,7 @@ const parseSession = (rawJwt: string | null) => {
     authorizationHeader: string;
     sessionId: string;
     slug: string;
-    type: string;
+    type: ActType;
   }>(rawJwt);
 };
 
@@ -77,9 +84,12 @@ export const getRofimSession = (): RofimSession | null => {
   const slug = getStorageItem('slug') || undefined;
   const waitingRoom = getStorageItem('waitingRoom') === 'true';
   const parsedSession = parseSession(token);
+  const type = parsedSession?.type || ActType.OTHER;
+
   return parsedSession
     ? {
         ...parsedSession,
+        type,
         patientId,
         slug,
         waitingRoom,

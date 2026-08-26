@@ -3,7 +3,7 @@ import { MouseEvent, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useNetworkStatus from './useNetworkStatus';
 import useWebSocket from './useWebSocket';
-import { getRofimSession } from '../utils/session';
+import { ActType, getRofimSession } from '../utils/session';
 import RofimApiService, { WaitingRoomStatus } from '../api/rofimApi';
 
 const useEquipmentsTestRoom = () => {
@@ -16,9 +16,10 @@ const useEquipmentsTestRoom = () => {
   const room = rofimSession?.room;
   const patientId = rofimSession?.patientId;
   const waitingRoom = rofimSession?.waitingRoom;
+  const actType = rofimSession?.type;
 
   useEffect(() => {
-    if (patientId && isOnline) {
+    if (((patientId && actType === ActType.TC) || actType === ActType.TCA) && isOnline) {
       // Pour laisser le temps au WS de se reconnecter avant d'appeler l'API
       const timeout = setTimeout(() => {
         void RofimApiService.updateTeleconsultationStatus(WaitingRoomStatus.CheckingEquipment);
@@ -26,7 +27,7 @@ const useEquipmentsTestRoom = () => {
       return () => timeout && clearTimeout(timeout);
     }
     return () => {};
-  }, [patientId, isOnline, isSocketConnected]);
+  }, [patientId, isOnline, isSocketConnected, actType]);
 
   const handleJoinClick = async (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();

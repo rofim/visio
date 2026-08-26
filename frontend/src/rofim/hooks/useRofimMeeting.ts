@@ -1,7 +1,7 @@
 /* eslint-disable @cspell/spellchecker */
 import { useEffect } from 'react';
 import RofimApiService, { WaitingRoomStatus } from '../api/rofimApi';
-import { getRofimSession } from '../utils/session';
+import { ActType, getRofimSession } from '../utils/session';
 import useWebSocket from './useWebSocket';
 import useSessionContext from '../../hooks/useSessionContext';
 
@@ -13,7 +13,7 @@ const useRofimMeeting = () => {
   const { subscriberWrappers } = useSessionContext();
 
   useEffect(() => {
-    if (type === 'teleconsultation') {
+    if (type === ActType.TC) {
       if (patientId) {
         // TODO: a refacto quand on aura plus vonageV1
         // Pour laisser le temps au WS de se reconnecter avant d'appeler l'API
@@ -33,6 +33,11 @@ const useRofimMeeting = () => {
 
         return () => clearInterval(interval);
       }
+    } else if (type === ActType.TCA) {
+      const timeout = setTimeout(() => {
+        void RofimApiService.updateTeleconsultationStatus(WaitingRoomStatus.Progress);
+      }, 5000);
+      return () => clearTimeout(timeout);
     }
     return () => {};
   }, [patientId, type, isSocketConnected, subscriberWrappers.length]);

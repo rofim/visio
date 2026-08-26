@@ -1,12 +1,13 @@
 import { PropsWithChildren, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAtom } from 'jotai';
-import { initRofimSession, getRofimSession } from '../utils/session';
+import { initRofimSession, getRofimSession, ActType } from '../utils/session';
 import { isAppInitAtom } from '../atoms/webSocketAtoms';
 import useWebSocket from '../hooks/useWebSocket';
 import useMatomo from '../hooks/useMatomo';
 import useUserContext from '@hooks/useUserContext';
 import { setStorageItem, STORAGE_KEYS } from '@utils/storage';
+import RofimApiService, { WaitingRoomStatus } from '../api/rofimApi';
 
 const RofimInit = ({ children }: PropsWithChildren) => {
   const [isSessionReady, setIsSessionReady] = useState(false);
@@ -51,6 +52,28 @@ const RofimInit = ({ children }: PropsWithChildren) => {
 
   // Step 3 — Init Matomo once isAppInitAtom is true (fired by step 2)
   useMatomo();
+
+  // Step 4 — Once the app is init, notify the backend right before the app closes for TCA
+  useEffect(() => {
+    if (!isAppInit) {
+      return () => {};
+    }
+
+    const rofimSession = getRofimSession();
+    const actType = rofimSession?.type;
+    if (actType !== ActType.TCA) {
+      return () => {};
+    }
+
+    const handleBeforeUnload = () => {
+      void RofimApiService.updateTeleconsultationStatus(WaitingRoomStatus.Disconnected, {
+        keepalive: true,
+      });
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isAppInit]);
 
   // Avoid rendering until session is parsed and socket handshake is done (or bypassed)
   return isSessionReady && isAppInit ? children : null;
