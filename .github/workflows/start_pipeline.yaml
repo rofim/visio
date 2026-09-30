@@ -16,6 +16,7 @@ jobs:
   deploy:
     name: Start AWS pipeline for visio on ${{ inputs.environment || 'staging' }}}
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     # Deployment environment information in GitHub also used by JIRA to update the ticket status
     environment: ${{ github.ref_name == 'develop' && 'staging' || inputs.environment }}
     # Runtime environment variable used in deployment
@@ -30,34 +31,25 @@ jobs:
         run: echo "Pipeline run by ${GITHUB_EVENT_NAME} on ${GITHUB_REF_TYPE} ${{github.ref_name}} to the following environment ${{ github.ref_name == 'develop' && 'staging' || inputs.environment }}"
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Get branch/tag name
         id: branch_tag_name
         run: echo "branch_or_tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
 
-      - name: Map variables
-        uses: kanga333/variable-mapper@master
-        with:
-          key: '${{ env.ENVIRONMENT }}'
-          #preprod must be first because env preprod match prod
-          map: |
-            {
-              "preprod": {
-                "AWS_ROLE_ARN": "arn:aws:iam::547620973306:role/GithubActions"
-              },
-              "prod": {
-                "AWS_ROLE_ARN": "arn:aws:iam::241426737767:role/GithubActions"
-              },
-              ".*": {
-                "AWS_ROLE_ARN": "arn:aws:iam::124653856901:role/GithubActions"
-              }
-            }
-          export_to: env,log,output
-          mode: first_match
+      - name: Select AWS role
+        run: |
+          case "$ENVIRONMENT" in
+            prod) account=241426737767 ;;
+            preprod) account=547620973306 ;;
+            staging) account=124653856901 ;;
+            *) echo "::error::Unknown environment $ENVIRONMENT" && exit 1 ;;
+          esac
+          echo "Assuming arn:aws:iam::$account:role/GithubActions"
+          echo "AWS_ROLE_ARN=arn:aws:iam::$account:role/GithubActions" >> "$GITHUB_ENV"
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ env.AWS_ROLE_ARN }}
           aws-region: eu-west-1
