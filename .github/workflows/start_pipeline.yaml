@@ -49,7 +49,7 @@ jobs:
           echo "AWS_ROLE_ARN=arn:aws:iam::$account:role/GithubActions" >> "$GITHUB_ENV"
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ env.AWS_ROLE_ARN }}
           aws-region: eu-west-1
