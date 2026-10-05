@@ -31,7 +31,7 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@v8
         env:
           GITHUB_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.FRONTEND_SONAR_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
             -Dsonar.projectVersion=${{ github.ref_name }}
