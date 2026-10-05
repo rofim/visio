@@ -36,6 +36,7 @@ jobs:
         run: yarn build frontend
 
       - name: SonarCloud Scan
+        if: ${{ !cancelled() }}
         uses: SonarSource/sonarqube-scan-action@v8
         env:
           GITHUB_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
