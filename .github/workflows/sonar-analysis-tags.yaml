@@ -1,12 +1,9 @@
-name: SonarCloud Analysis
+name: SonarCloud Analysis for tags
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  push:
+    tags:
+      - '*.*.*'
 
 jobs:
   frontend-analysis:
@@ -26,14 +23,8 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Run quality Tests
-        run: yarn quality-check frontend
-
       - name: Run frontend tests
         run: yarn test:frontend coverage
-
-      - name: Build frontend
-        run: yarn build frontend
 
       - name: SonarCloud Scan
         if: ${{ !cancelled() }}
@@ -43,6 +34,5 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.pullrequest.key=${{ github.event.number }}
-            -Dsonar.pullrequest.branch=${{ github.head_ref }}
-            -Dsonar.pullrequest.base=${{ github.base_ref }}
+            -Dsonar.projectVersion=${{ github.ref_name }}
+            -Dsonar.branch.name=master
