@@ -11,5 +11,7 @@
   "waitingRoom.disclaimer": "Se dopo 30 minuti la connessione non è ancora avvenuta, non esiti a contattare il suo ufficio.",
   "waitingRoom.doctorDelayed.title": "Appuntamento in ritardo",
   "waitingRoom.doctorDelayed.message": "Il suo medico la informa che l’appuntamento è in ritardo di {{doctorDelayInMinute}} min (orario stimato: {{startTime}})",
-  "waitingRoom.connectionLost": "Connessione persa. Stiamo tentando di riconnetterti… Non chiudere questa pagina."
+  "waitingRoom.connectionLost": "Connessione persa. Stiamo tentando di riconnetterti… Non chiudere questa pagina.",
+  "sessionExpired.title": "Sessione scaduta",
+  "sessionExpired.message": "La sessione video non è più valida. Riapri la videochiamata da Rofim."
 }

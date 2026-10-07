@@ -27,9 +27,9 @@ const useWaitingDoctor = () => {
     if (((patientId && actType === ActType.TC) || actType === ActType.TCA) && isOnline) {
       const updateTCStatus = async () => {
         const tc = await rofimApiService.updateTeleconsultationStatus(WaitingRoomStatus.Wait);
-        if (tc.doctorDelayInMinute && tc.startTime) {
-          setDoctorDelayInMinute(tc.doctorDelayInMinute as number);
-          setStartTime(new Date(tc.startTime as string).getTime());
+        if (tc?.doctorDelayInMinute && tc.startTime) {
+          setDoctorDelayInMinute(tc.doctorDelayInMinute);
+          setStartTime(new Date(tc.startTime).getTime());
         }
 
         // Redirection vers la room s'il y a déjà un participant (le docteur est le premier participant)

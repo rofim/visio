@@ -78,8 +78,10 @@ export const initRofimSession = () => {
   }
 };
 
+export const getRofimSessionToken = (): string | null => getStorageItem('token');
+
 export const getRofimSession = (): RofimSession | null => {
-  const token = getStorageItem('token');
+  const token = getRofimSessionToken();
   const patientId = getStorageItem('patientId') || undefined;
   const slug = getStorageItem('slug') || undefined;
   const waitingRoom = getStorageItem('waitingRoom') === 'true';
