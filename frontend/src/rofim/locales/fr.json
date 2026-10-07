@@ -11,5 +11,7 @@
   "waitingRoom.disclaimer": "Si au bout de 30 min, la connexion n'a toujours pas eu lieu, n'hésitez pas à contacter son secrétariat",
   "waitingRoom.doctorDelayed.title": "Rendez-vous retardé",
   "waitingRoom.doctorDelayed.message": "Votre médecin vous informe que le rendez-vous est retardé de {{doctorDelayInMinute}} min (heure estimée : {{startTime}})",
-  "waitingRoom.connectionLost": "Connexion perdue. Nous tentons de vous reconnecter… Ne fermez pas cette page."
+  "waitingRoom.connectionLost": "Connexion perdue. Nous tentons de vous reconnecter… Ne fermez pas cette page.",
+  "sessionExpired.title": "Session expirée",
+  "sessionExpired.message": "Votre session visio n'est plus valide. Veuillez rouvrir la visio depuis Rofim."
 }

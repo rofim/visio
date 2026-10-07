@@ -71,7 +71,11 @@ describe('useWaitingDoctor', () => {
     (useWebSocket as Mock).mockReturnValue({ isSocketConnected: true });
     (useNetworkStatus as Mock).mockReturnValue(true);
     (getRofimSession as Mock).mockReturnValue(baseSession);
-    (rofimApiService.updateTeleconsultationStatus as Mock).mockResolvedValue({});
+    (rofimApiService.updateTeleconsultationStatus as Mock).mockResolvedValue({
+      waitingRoomStatus: WaitingRoomStatus.Wait,
+      doctorDelayInMinute: 0,
+      startTime: '2026-08-25T10:00:00.000Z',
+    });
     (rofimApiService.countParticipants as Mock).mockResolvedValue(0);
   });
 
@@ -175,6 +179,7 @@ describe('useWaitingDoctor', () => {
 
     it('stores the doctor delay and start time returned by the backend', async () => {
       (rofimApiService.updateTeleconsultationStatus as Mock).mockResolvedValue({
+        waitingRoomStatus: WaitingRoomStatus.Wait,
         doctorDelayInMinute: 12,
         startTime: '2026-08-25T10:00:00.000Z',
       });
@@ -190,8 +195,24 @@ describe('useWaitingDoctor', () => {
       expect(result.current.startTime).toBe(new Date('2026-08-25T10:00:00.000Z').getTime());
     });
 
-    it('does not touch the delay/start time atoms when the backend omits them', async () => {
-      (rofimApiService.updateTeleconsultationStatus as Mock).mockResolvedValue({});
+    it('does not touch the delay/start time atoms when the doctor is not late', async () => {
+      (rofimApiService.updateTeleconsultationStatus as Mock).mockResolvedValue({
+        waitingRoomStatus: WaitingRoomStatus.Wait,
+        doctorDelayInMinute: 0,
+        startTime: '2026-08-25T10:00:00.000Z',
+      });
+      const { result } = renderUseWaitingDoctor();
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(5000);
+      });
+
+      expect(result.current.doctorDelayInMinute).toBe(0);
+      expect(result.current.startTime).toBe(0);
+    });
+
+    it('does not touch the delay/start time atoms when the backend returns no body (TCA)', async () => {
+      (rofimApiService.updateTeleconsultationStatus as Mock).mockResolvedValue(null);
       const { result } = renderUseWaitingDoctor();
 
       await act(async () => {

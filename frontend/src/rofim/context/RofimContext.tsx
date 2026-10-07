@@ -3,15 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { useAtom } from 'jotai';
 import { initRofimSession, getRofimSession, ActType } from '../utils/session';
 import { isAppInitAtom } from '../atoms/webSocketAtoms';
+import { isSessionInvalidAtom } from '../atoms/sessionAtoms';
 import useWebSocket from '../hooks/useWebSocket';
 import useMatomo from '../hooks/useMatomo';
 import useUserContext from '@hooks/useUserContext';
 import { setStorageItem, STORAGE_KEYS } from '@utils/storage';
 import RofimApiService, { WaitingRoomStatus } from '../api/rofimApi';
+import SessionExpired from '../pages/SessionExpired';
 
 const RofimInit = ({ children }: PropsWithChildren) => {
   const [isSessionReady, setIsSessionReady] = useState(false);
   const [isAppInit] = useAtom(isAppInitAtom);
+  const [isSessionInvalid] = useAtom(isSessionInvalidAtom);
   const { initSocket } = useWebSocket(true);
   const { setUser } = useUserContext();
   const navigate = useNavigate();
@@ -74,6 +77,11 @@ const RofimInit = ({ children }: PropsWithChildren) => {
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [isAppInit]);
+
+  // Rendering this page instead of the children also unmounts every hook that would retry the call
+  if (isSessionInvalid) {
+    return <SessionExpired />;
+  }
 
   // Avoid rendering until session is parsed and socket handshake is done (or bypassed)
   return isSessionReady && isAppInit ? children : null;

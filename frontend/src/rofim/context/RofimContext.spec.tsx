@@ -4,6 +4,7 @@ import { createStore, Provider } from 'jotai';
 import { useNavigate } from 'react-router-dom';
 import RofimInit from './RofimContext';
 import { isAppInitAtom } from '../atoms/webSocketAtoms';
+import { isSessionInvalidAtom } from '../atoms/sessionAtoms';
 import { initRofimSession, getRofimSession, ActType } from '../utils/session';
 import useWebSocket from '../hooks/useWebSocket';
 import useUserContext from '@hooks/useUserContext';
@@ -69,9 +70,10 @@ const baseSession = {
   waitingRoom: false,
 };
 
-const renderRofimInit = (isAppInit = false) => {
+const renderRofimInit = (isAppInit = false, isSessionInvalid = false) => {
   const store = createStore();
   store.set(isAppInitAtom, isAppInit);
+  store.set(isSessionInvalidAtom, isSessionInvalid);
   const utils = render(
     <Provider store={store}>
       <RofimInit>
@@ -136,6 +138,18 @@ describe('RofimInit', () => {
 
     expect(mockSetUser).not.toHaveBeenCalled();
     expect(setStorageItem).not.toHaveBeenCalled();
+  });
+
+  it('replaces the app by the session expired page once the API rejected the session', () => {
+    const { store } = renderRofimInit(true);
+    expect(screen.getByTestId('child')).toBeInTheDocument();
+
+    act(() => {
+      store.set(isSessionInvalidAtom, true);
+    });
+
+    expect(screen.getByTestId('sessionExpired')).toBeInTheDocument();
+    expect(screen.queryByTestId('child')).not.toBeInTheDocument();
   });
 
   it('navigates to the error page when session init fails', () => {

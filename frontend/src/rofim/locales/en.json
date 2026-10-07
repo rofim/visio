@@ -11,5 +11,7 @@
   "waitingRoom.disclaimer": "If after 30 minutes the connection has still not been established, please do not hesitate to contact their office.",
   "waitingRoom.doctorDelayed.title": "Appointment delayed",
   "waitingRoom.doctorDelayed.message": "Your doctor informs you that the appointment is delayed by {{doctorDelayInMinute}} min (estimated time: {{startTime}})",
-  "waitingRoom.connectionLost": "Connection lost. We are trying to reconnect you… Do not close this page."
+  "waitingRoom.connectionLost": "Connection lost. We are trying to reconnect you… Do not close this page.",
+  "sessionExpired.title": "Session expired",
+  "sessionExpired.message": "Your video session is no longer valid. Please reopen the video call from Rofim."
 }
