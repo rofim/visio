@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import useReceivingCaptions from '../../../../../hooks/useReceivingCaptions';
 import { CAPTION_DISPLAY_DURATION_MS } from '../../../../../utils/constants';
 import useTheme from '@ui/theme';
+import getParticipantDisplayName from '@utils/getParticipantDisplayName';
 
 export type UserCaptionProps = {
   subscriber: Subscriber | null;
@@ -77,7 +78,8 @@ const UserCaption = ({
           fontSize: isSmallViewPort ? '1rem' : '1.25rem',
         }}
       >
-        <strong>{subscriber?.stream?.name ?? t('user.you')}: </strong> {displayCaption}
+        <strong>{getParticipantDisplayName(subscriber?.stream) || t('user.you')}: </strong>{' '}
+        {displayCaption}
       </Typography>
     </div>
   );

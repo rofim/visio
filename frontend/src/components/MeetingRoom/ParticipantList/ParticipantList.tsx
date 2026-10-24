@@ -24,6 +24,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import createNameMatcher from '@utils/participantList/createNameMatcher';
 import getFilteredSubscribers from '@utils/participantList/getFilteredSubscribers';
 import shouldShowUser from '@utils/participantList/shouldShowUser';
+import getParticipantDisplayName from '@utils/getParticipantDisplayName';
 
 export type ParticipantListProps = {
   handleClose: () => void;
@@ -173,7 +174,7 @@ const ParticipantList = ({ handleClose, isOpen }: ParticipantListProps): ReactEl
           {filteredSubscriberWrappers.map((subscriberWrapper) => {
             const { subscriber, id } = subscriberWrapper;
             const hasAudio = !!subscriber.stream?.hasAudio;
-            const participantName: string = subscriber?.stream?.name ?? '';
+            const participantName = getParticipantDisplayName(subscriber?.stream);
             const participantStream = subscriber?.stream;
             return (
               <ParticipantListItem

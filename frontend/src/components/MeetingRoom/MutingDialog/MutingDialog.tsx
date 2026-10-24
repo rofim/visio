@@ -7,6 +7,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import Button from '@mui/material/Button';
+import getParticipantDisplayName from '@utils/getParticipantDisplayName';
 
 type MutingDialogTexts = {
   contents: string;
@@ -34,7 +35,9 @@ const MutingDialog = ({ isOpen, setIsOpen, stream }: MutingDialogProps): ReactEl
   const { t } = useTranslation();
   const { forceMute } = useSessionContext();
   const muteParticipantText: MutingDialogTexts = {
-    contents: t('participants.mute.dialog.content', { participantName: stream?.name }),
+    contents: t('participants.mute.dialog.content', {
+      participantName: getParticipantDisplayName(stream),
+    }),
     primaryActionText: t('button.mute'),
     secondaryActionText: t('button.cancel'),
   };

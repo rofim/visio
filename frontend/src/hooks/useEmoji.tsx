@@ -3,6 +3,7 @@ import { Connection } from '@vonage/client-sdk-video';
 import { throttle } from 'lodash';
 import { EMOJI_DISPLAY_DURATION } from '../utils/constants';
 import { SignalEvent, SignalType, SubscriberWrapper } from '../types/session';
+import getParticipantDisplayName from '@utils/getParticipantDisplayName';
 
 type EmojiDataType = {
   emoji: string;
@@ -92,7 +93,7 @@ const useEmoji = ({ signal, getConnectionId }: UseEmojiProps): UseEmoji => {
           subscriberWrapper.subscriber.stream?.connection.connectionId ===
             sendingConnection?.connectionId && !subscriberWrapper.isScreenshare
       );
-      return sendingSubscriberWrapper?.subscriber.stream?.name;
+      return getParticipantDisplayName(sendingSubscriberWrapper?.subscriber.stream);
     },
     [isOwnConnection]
   );
