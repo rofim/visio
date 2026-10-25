@@ -11,12 +11,6 @@ const getSipBridgeName = (data?: string): string | undefined => {
   }
 };
 
-/**
- * Returns the name displayed for a participant: for a SIP bridge carrying a phone user, the name the API stored
- * in the token data of the bridge, since Vonage does not document the stream name of a SIP call, otherwise its
- * stream name.
- * @param {Stream} stream - The stream of the participant.
- * @returns {string} The participant name, empty when unknown.
- */
+/** Vonage does not document the stream name of a SIP call, the API puts the phone user's name in the bridge token */
 export default (stream?: Pick<Stream, 'name' | 'connection'>): string =>
   getSipBridgeName(stream?.connection?.data) ?? stream?.name ?? '';
