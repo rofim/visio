@@ -8,7 +8,8 @@ import AvatarGroup from '@mui/material/AvatarGroup';
 import ButtonBase from '@mui/material/ButtonBase';
 import useTheme from '@ui/theme';
 import { env } from '../../env';
-import getParticipantDisplayName from '@utils/getParticipantDisplayName';
+import getParticipantDisplayName, { getParticipantName } from '@utils/getParticipantDisplayName';
+import getInitials from '@utils/getInitials';
 
 export type HiddenParticipantsTileProps = {
   box: Box;
@@ -72,10 +73,14 @@ const HiddenParticipantsTile = ({
       >
         {hiddenSubscribers.slice(0, 2).map((wrapper) => {
           const { initials, streamId } = wrapper?.subscriber?.stream ?? {};
+          const avatarInitials =
+            initials || getInitials(getParticipantName(wrapper?.subscriber?.stream));
           const name = getParticipantDisplayName(wrapper?.subscriber?.stream);
           const sx = { position: 'relative' };
 
-          return <AvatarInitials key={streamId} initials={initials} username={name} sx={sx} />;
+          return (
+            <AvatarInitials key={streamId} initials={avatarInitials} username={name} sx={sx} />
+          );
         })}
       </AvatarGroup>
     </ButtonBase>

@@ -1,3 +1,4 @@
-import getParticipantDisplayName from './getParticipantDisplayName';
+import getParticipantDisplayName, { getParticipantName } from './getParticipantDisplayName';
 
+export { getParticipantName };
 export default getParticipantDisplayName;
