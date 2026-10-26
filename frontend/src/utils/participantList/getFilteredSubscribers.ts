@@ -1,5 +1,6 @@
 import type { SubscriberWrapper } from '../../types/session';
 import compareSubscriberByName from './compareSubscriberByName';
+import getParticipantDisplayName from '@utils/getParticipantDisplayName';
 
 type NameMatcher = (name: string) => boolean;
 
@@ -15,7 +16,7 @@ const getFilteredSubscribers = ({ subscriberWrappers, nameMatches }: Args): Subs
 
       if (!nameMatches) return true;
 
-      const participantName = subscriberWrapper.subscriber?.stream?.name ?? '';
+      const participantName = getParticipantDisplayName(subscriberWrapper.subscriber?.stream);
       return nameMatches(participantName);
     })
     .sort(compareSubscriberByName);
