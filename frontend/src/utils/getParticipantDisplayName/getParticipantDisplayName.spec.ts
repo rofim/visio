@@ -47,6 +47,12 @@ describe('getParticipantDisplayName', () => {
     expect(getParticipantDisplayName(makeStream('', 'not json'))).toBe('');
   });
 
+  it('ignores a SIP bridge token without a usable name', () => {
+    expect(getParticipantDisplayName(makeStream('+33100000000', sipBridgeData('  ')))).toBe(
+      '+33100000000'
+    );
+  });
+
   it('returns an empty name without stream', () => {
     expect(getParticipantDisplayName(undefined)).toBe('');
   });

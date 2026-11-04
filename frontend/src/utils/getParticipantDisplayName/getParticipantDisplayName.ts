@@ -3,18 +3,19 @@ import i18n from 'i18next';
 
 type ParticipantStream = Pick<Stream, 'name' | 'connection'>;
 
+// Vonage does not document the stream name of a SIP call, the API puts the phone user's name in the bridge token
 const getSipBridgeName = (data?: string): string | undefined => {
   try {
     const tokenData = JSON.parse(data ?? '') as { sip?: unknown; name?: unknown } | null;
-    return tokenData?.sip === true && typeof tokenData.name === 'string'
-      ? tokenData.name
-      : undefined;
+    const name =
+      tokenData?.sip === true && typeof tokenData.name === 'string' ? tokenData.name.trim() : '';
+
+    return name || undefined;
   } catch {
     return undefined;
   }
 };
 
-/** Vonage does not document the stream name of a SIP call, the API puts the phone user's name in the bridge token */
 export const getParticipantName = (stream?: ParticipantStream): string =>
   getSipBridgeName(stream?.connection?.data) ?? stream?.name ?? '';
 

@@ -96,9 +96,8 @@ const Subscriber = ({
   };
 
   const hasVideo = subscriberWrapper.subscriber?.stream?.hasVideo;
-  const initials =
-    subscriberWrapper.subscriber?.stream?.initials ||
-    getInitials(getParticipantName(subscriberWrapper.subscriber?.stream));
+  const participantName = getParticipantName(subscriberWrapper.subscriber?.stream);
+  const initials = subscriberWrapper.subscriber?.stream?.initials || getInitials(participantName);
   const username = getParticipantDisplayName(subscriberWrapper.subscriber?.stream);
   const hasAudio = subscriberWrapper.subscriber.stream?.hasAudio;
   const audioIndicatorStyle: React.CSSProperties = {
@@ -158,7 +157,7 @@ const Subscriber = ({
       {!hasVideo && (
         <AvatarInitials
           initials={initials}
-          username={username}
+          username={participantName}
           height={box?.height}
           width={box?.width}
         />

@@ -78,7 +78,9 @@ const UserCaption = ({
           fontSize: isSmallViewPort ? '1rem' : '1.25rem',
         }}
       >
-        <strong>{getParticipantDisplayName(subscriber?.stream) || t('user.you')}: </strong>{' '}
+        <strong>
+          {subscriber ? getParticipantDisplayName(subscriber.stream) : t('user.you')}:{' '}
+        </strong>{' '}
         {displayCaption}
       </Typography>
     </div>
