@@ -19,10 +19,12 @@ const getSipBridgeName = (data?: string): string | undefined => {
 export const getParticipantName = (stream?: ParticipantStream): string =>
   getSipBridgeName(stream?.connection?.data) ?? stream?.name ?? '';
 
-export default (stream?: ParticipantStream): string => {
+const getParticipantDisplayName = (stream?: ParticipantStream): string => {
   const sipBridgeName = getSipBridgeName(stream?.connection?.data);
 
   return sipBridgeName
     ? i18n.t('participant.byPhone', { name: sipBridgeName, interpolation: { escapeValue: false } })
     : (stream?.name ?? '');
 };
+
+export default getParticipantDisplayName;
