@@ -11,5 +11,6 @@
   "waitingRoom.disclaimer": "Se após 30 minutos a ligação ainda não tiver ocorrido, não hesite em contactar o seu secretariado.",
   "waitingRoom.doctorDelayed.title": "Consulta atrasada",
   "waitingRoom.doctorDelayed.message": "O seu médico informa que a consulta está atrasada {{doctorDelayInMinute}} min (hora prevista: {{startTime}})",
-  "waitingRoom.connectionLost": "Ligação perdida. Estamos a tentar reconectá-lo… Não feche esta página."
+  "waitingRoom.connectionLost": "Ligação perdida. Estamos a tentar reconectá-lo… Não feche esta página.",
+  "participant.byPhone": "{{name}}, por telefone"
 }
