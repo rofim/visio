@@ -15,6 +15,8 @@ import useTheme from '@ui/theme';
 import { ABSOLUTE_DISTANCE_THRESHOLD_REM_VALUE } from '@utils/constants';
 import toRemValue from '@common/helpers/toRemValue';
 import attempt from '@common/execution/attempt';
+import getParticipantDisplayName, { getParticipantName } from '@utils/getParticipantDisplayName';
+import getInitials from '@utils/getInitials';
 
 export type SubscriberProps = {
   subscriberWrapper: SubscriberWrapper;
@@ -94,8 +96,9 @@ const Subscriber = ({
   };
 
   const hasVideo = subscriberWrapper.subscriber?.stream?.hasVideo;
-  const initials = subscriberWrapper.subscriber?.stream?.initials;
-  const username = subscriberWrapper.subscriber?.stream?.name ?? '';
+  const participantName = getParticipantName(subscriberWrapper.subscriber?.stream);
+  const initials = subscriberWrapper.subscriber?.stream?.initials || getInitials(participantName);
+  const username = getParticipantDisplayName(subscriberWrapper.subscriber?.stream);
   const hasAudio = subscriberWrapper.subscriber.stream?.hasAudio;
   const audioIndicatorStyle: React.CSSProperties = {
     borderRadius: theme.shapes.borderRadiusLarge,
@@ -154,7 +157,7 @@ const Subscriber = ({
       {!hasVideo && (
         <AvatarInitials
           initials={initials}
-          username={username}
+          username={participantName}
           height={box?.height}
           width={box?.width}
         />

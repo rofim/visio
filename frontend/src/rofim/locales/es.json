@@ -11,5 +11,6 @@
   "waitingRoom.disclaimer": "Si después de 30 minutos la conexión aún no se ha establecido, no dude en ponerse en contacto con su secretaría.",
   "waitingRoom.doctorDelayed.title": "Cita retrasada",
   "waitingRoom.doctorDelayed.message": "Su médico le informa que la cita se retrasa {{doctorDelayInMinute}} min (hora estimada: {{startTime}})",
-  "waitingRoom.connectionLost": "Conexión perdida. Intentamos reconectarte… No cierres esta página."
+  "waitingRoom.connectionLost": "Conexión perdida. Intentamos reconectarte… No cierres esta página.",
+  "participant.byPhone": "{{name}}, por teléfono"
 }
